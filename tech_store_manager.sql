@@ -2,11 +2,6 @@ CREATE DATABASE tech_store_manager;
 USE tech_store_manager;
 
 -- PRIMARY KEY
-CREATE TABLE firms (
-	id int auto_increment primary key, 
-    firm_name varchar(100)
-);
-
 CREATE TABLE categories (
 	id int auto_increment primary key,
     category_name varchar(100)
@@ -34,17 +29,12 @@ CREATE TABLE roles (
     role_name varchar(100)
 );
 
-CREATE TABLE person_detail (
+CREATE TABLE customer (
 	id int auto_increment primary key,
-    first_name varchar(50),
-    last_name varchar(50),
-    gender boolean,
-    dob date,
-    email varchar(255),
+    name varchar(255),
     phone_number varchar(15),
-    address varchar(255)
+    email varchar(100)
 );
-
 
 
 -- FOREIGN KEY
@@ -55,8 +45,7 @@ CREATE TABLE products (
     purchase_price decimal(10,2),
     sale_price decimal(10,2),
     description varchar(255),
-	id_firm int,
-	foreign key (id_firm) references firms(id)
+	firm varchar(50)
 );
 
 CREATE TABLE child_categories (
@@ -81,8 +70,6 @@ CREATE TABLE product_component (
     foreign key (id_component) references components(id)
 );
 
-
-
 -- WAREHOUSES
 CREATE TABLE product_warehouse (
     id_product int,	
@@ -92,7 +79,7 @@ CREATE TABLE product_warehouse (
 	foreign key (id_product) references products(id)
 );
 
-CREATE TABLE warehouse_to_store (
+CREATE TABLE products_received_wavehouse (
 	id_product int,	
     id_warehouse int, 
 	product_import_date datetime,
@@ -111,8 +98,6 @@ CREATE TABLE warehouse_to_store_shipments (
 	foreign key (id_product) references products(id),
 	foreign key (id_warehouse) references warehouses(id)
 );
-
-
 
 -- STORES
 CREATE TABLE products_store (
@@ -134,34 +119,36 @@ CREATE TABLE products_received_store (
 	foreign key (id_warehouse) references warehouses(id)
 );
 
-
-
 -- PERSON
-CREATE TABLE accounts (
+CREATE TABLE persons (
 	id int auto_increment primary key,
-    username varchar(50),
-    password varchar(255),
-    id_person int,
-    foreign key (id_person) references person_detail(id)
-);
-
-CREATE TABLE person_job_infor (
-	id_person int, 
-    hire_date date, 
+    first_name varchar(50),
+    last_name varchar(50),
+    gender boolean,
+    dob date,
+    email varchar(255),
+    phone_number varchar(15),
+    address varchar(255),
+    hire_date date,
     salary varchar(20),
     id_role int,
     id_store int,
     id_warehouse int,
     status varchar(255),
-    foreign key (id_person) references person_detail(id),
 	foreign key (id_role) references roles(id),
     foreign key (id_store) references stores(id),
 	foreign key (id_warehouse) references warehouses(id)
 );
 
+CREATE TABLE accounts (
+	id int auto_increment primary key,
+    username varchar(50),
+    password varchar(255),
+    id_person int,
+    foreign key (id_person) references persons(id)
+);
 
-
--- -- IMAGE
+-- IMAGE
 CREATE TABLE product_image (
 	id int auto_increment primary key,
     id_product int,
@@ -170,23 +157,23 @@ CREATE TABLE product_image (
 	foreign key (id_product) references products(id)
 );
 
-CREATE TABLE firm_image (
+-- ORDERS
+CREATE TABLE purchase (
 	id int auto_increment primary key,
-    id_firm int,
-    address_image varchar(255),
-    type varchar(50),
-	foreign key (id_firm) references firms(id)
+    id_customer int,
+    id_store int,
+    purchase_date datetime,
+    foreign key (id_customer) references customer(id),
+    foreign key (id_store) references stores(id)
 );
 
-CREATE TABLE person_image (
-	id int auto_increment primary key,
-    id_person int,
-    address_image varchar(255),
-    type varchar(50),
-	foreign key (id_person) references person_detail(id)
+CREATE TABLE purchase_items (
+	purchase_id int,
+    product_id int,
+    quantity int,
+    foreign key (purchase_id) references purchase(id),
+    foreign key (product_id) references products(id)
 );
-
-
 
 -- DATA DEFAULT
 INSERT INTO firms (firm_name) VALUES 
