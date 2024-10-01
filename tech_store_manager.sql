@@ -2,14 +2,18 @@ CREATE DATABASE tech_store_manager;
 USE tech_store_manager;
 
 -- PRIMARY KEY
+CREATE TABLE products (
+	id int auto_increment primary key,
+    product_name varchar(255),
+    purchase_price decimal(10,2),
+    sale_price decimal(10,2),
+	firm varchar(50),
+    img_address varchar(255)
+);
+
 CREATE TABLE categories (
 	id int auto_increment primary key,
     category_name varchar(100)
-);
-
-CREATE TABLE components (
-	id int auto_increment primary key,
-    component_name varchar(50)
 );
 
 CREATE TABLE warehouses (
@@ -24,11 +28,6 @@ CREATE TABLE stores (
     address varchar(255)
 );
 
-CREATE TABLE roles (
-	id int auto_increment primary key,
-    role_name varchar(100)
-);
-
 CREATE TABLE customer (
 	id int auto_increment primary key,
     name varchar(255),
@@ -36,50 +35,25 @@ CREATE TABLE customer (
     email varchar(100)
 );
 
-
 -- FOREIGN KEY
 -- PRODUCT
-CREATE TABLE products (
-	id int auto_increment primary key,
-    product_name varchar(255),
-    purchase_price decimal(10,2),
-    sale_price decimal(10,2),
-    description varchar(255),
-	firm varchar(50)
-);
-
-CREATE TABLE child_categories (
-	id int auto_increment primary key,
+CREATE TABLE product_categories (
+	id_product int,
     id_category int,
-    child_category_name varchar(100),
+    foreign key (id_product) references products(id),
     foreign key (id_category) references categories(id)
-);
-
-CREATE TABLE product_child_category (
-	id_product int,
-    id_child_category int,
-    foreign key (id_product) references products(id),
-    foreign key (id_child_category) references child_categories(id)
-);
-
-CREATE TABLE product_component (
-	id_product int,
-    id_component int,
-    component_description varchar(255),
-    foreign key (id_product) references products(id),
-    foreign key (id_component) references components(id)
 );
 
 -- WAREHOUSES
 CREATE TABLE product_warehouse (
     id_product int,	
-    id_warehouse int, 
+    id_warehouse int,
     quantity int,
 	foreign key (id_warehouse) references warehouses(id),
 	foreign key (id_product) references products(id)
 );
 
-CREATE TABLE products_received_wavehouse (
+CREATE TABLE products_received_warehouse (
 	id_product int,	
     id_warehouse int, 
 	product_import_date datetime,
@@ -131,11 +105,10 @@ CREATE TABLE persons (
     address varchar(255),
     hire_date date,
     salary varchar(20),
-    id_role int,
+    role int,
     id_store int,
     id_warehouse int,
     status varchar(255),
-	foreign key (id_role) references roles(id),
     foreign key (id_store) references stores(id),
 	foreign key (id_warehouse) references warehouses(id)
 );
@@ -146,15 +119,6 @@ CREATE TABLE accounts (
     password varchar(255),
     id_person int,
     foreign key (id_person) references persons(id)
-);
-
--- IMAGE
-CREATE TABLE product_image (
-	id int auto_increment primary key,
-    id_product int,
-    address_image varchar(255),
-    type varchar(50),
-	foreign key (id_product) references products(id)
 );
 
 -- ORDERS
