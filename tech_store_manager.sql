@@ -53,22 +53,22 @@ CREATE TABLE product_warehouse (
 	foreign key (id_product) references products(id)
 );
 
-CREATE TABLE inventory_receipts (
+CREATE TABLE warehouse_receipts (
     receipt_id int auto_increment primary key,
     id_warehouse int, 
     product_import_date datetime,
     foreign key (id_warehouse) references warehouses(id)
 );
 
-CREATE TABLE inventory_receipt_items (
+CREATE TABLE warehouse_receipt_items (
     receipt_id int,
     id_product int,
     number_of_imported_product int,
-    foreign key (receipt_id) references inventory_receipts(receipt_id),
+    foreign key (receipt_id) references warehouse_receipts(receipt_id),
     foreign key (id_product) references products(id)
 );
 
-CREATE TABLE inventory_shipments (
+CREATE TABLE warehouse_shipments (
     shipment_id int auto_increment primary key,
     id_warehouse int,
     id_store int,
@@ -78,11 +78,11 @@ CREATE TABLE inventory_shipments (
     foreign key (id_warehouse) references warehouses(id)
 );
 
-CREATE TABLE inventory_shipment_items (
+CREATE TABLE warehouse_shipment_items (
     shipment_id int,
     id_product int,
     number_of_delivery_product int,
-    foreign key (shipment_id) references inventory_shipments(shipment_id),
+    foreign key (shipment_id) references warehouse_shipments(shipment_id),
     foreign key (id_product) references products(id)
 );
 
@@ -108,7 +108,7 @@ CREATE TABLE received_store_items (
     id_product int, 
     quantity int,
 	foreign key (received_id) references received_store(received_id),
-	foreign key (receipt_id) references inventory_receipts(receipt_id),
+	foreign key (receipt_id) references warehouse_shipments(shipment_id),
     foreign key (id_product) references products(id)
 );
 
@@ -460,19 +460,3 @@ INSERT INTO received_store_items (received_id, receipt_id, id_product, quantity)
 (7, 7, 19, 14), (7, 7, 20, 11), (7, 7, 21, 13),
 (8, 8, 22, 9), (8, 8, 23, 8), (8, 8, 24, 10),
 (9, 9, 25, 12), (9, 9, 26, 10), (9, 9, 27, 14);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
