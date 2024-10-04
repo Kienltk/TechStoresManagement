@@ -7,7 +7,7 @@ CREATE TABLE products (
     product_name varchar(255),
     purchase_price decimal(10,2),
     sale_price decimal(10,2),
-	firm varchar(50),
+	brand varchar(50),
     img_address varchar(255)
 );
 
@@ -159,7 +159,7 @@ CREATE TABLE products_receipt (
 );
 
 -- DATA DEFAULT
-INSERT INTO products (product_name, purchase_price, sale_price, firm, img_address) VALUES
+INSERT INTO products (product_name, purchase_price, sale_price, brand, img_address) VALUES
 ('iPhone 15 Pro', 999.99, 1199.99, 'Apple', 'img/iphone15pro.jpg'),
 ('MacBook Air M2', 899.99, 1099.99, 'Apple', 'img/macbookairm2.jpg'),
 ('Apple Watch Series 9', 399.99, 499.99, 'Apple', 'img/applewatch9.jpg'),
