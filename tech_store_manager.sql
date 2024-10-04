@@ -28,7 +28,7 @@ CREATE TABLE stores (
     address varchar(255)
 );
 
-CREATE TABLE customer (
+CREATE TABLE customers (
 	id int auto_increment primary key,
     name varchar(255),
     phone_number varchar(15),
@@ -53,23 +53,23 @@ CREATE TABLE product_warehouse (
 	foreign key (id_product) references products(id)
 );
 
-CREATE TABLE warehouse_receipts (
-    receipt_id int auto_increment primary key,
+CREATE TABLE import_warehouse (
+    id int auto_increment primary key,
     id_warehouse int, 
     product_import_date datetime,
     foreign key (id_warehouse) references warehouses(id)
 );
 
-CREATE TABLE warehouse_receipt_items (
-    receipt_id int,
+CREATE TABLE import_warehouse_details (
+    id_import int,
     id_product int,
     number_of_imported_product int,
-    foreign key (receipt_id) references warehouse_receipts(receipt_id),
+    foreign key (id_import) references import_warehouse(id),
     foreign key (id_product) references products(id)
 );
 
 CREATE TABLE warehouse_shipments (
-    shipment_id int auto_increment primary key,
+    id int auto_increment primary key,
     id_warehouse int,
     id_store int,
     product_delivery_date datetime,
@@ -78,11 +78,11 @@ CREATE TABLE warehouse_shipments (
     foreign key (id_warehouse) references warehouses(id)
 );
 
-CREATE TABLE warehouse_shipment_items (
-    shipment_id int,
+CREATE TABLE warehouse_shipment_details (
+    id_shipment int,
     id_product int,
     number_of_delivery_product int,
-    foreign key (shipment_id) references warehouse_shipments(shipment_id),
+    foreign key (id_shipment) references warehouse_shipments(id),
     foreign key (id_product) references products(id)
 );
 
@@ -95,20 +95,20 @@ CREATE TABLE products_store (
 	foreign key (id_product) references products(id)
 );
 
-CREATE TABLE received_store (
-    received_id int auto_increment primary key,
+CREATE TABLE import_store (
+    id int auto_increment primary key,
     id_store int,
     received_date datetime,
     foreign key (id_store) references stores(id)
 );
 
-CREATE TABLE received_store_items (
-    received_id int,
-    receipt_id int,
+CREATE TABLE import_store_details (
+    id_import int,
+    id_shipment int,
     id_product int, 
     quantity int,
-	foreign key (received_id) references received_store(received_id),
-	foreign key (receipt_id) references warehouse_shipments(shipment_id),
+	foreign key (id_import) references import_store(id),
+	foreign key (id_shipment) references warehouse_shipments(id),
     foreign key (id_product) references products(id)
 );
 
@@ -141,21 +141,21 @@ CREATE TABLE accounts (
 );
 
 -- ORDERS
-CREATE TABLE purchase (
+CREATE TABLE receipts (
 	id int auto_increment primary key,
     id_customer int,
     id_store int,
     purchase_date datetime,
-    foreign key (id_customer) references customer(id),
+    foreign key (id_customer) references customers(id),
     foreign key (id_store) references stores(id)
 );
 
-CREATE TABLE purchase_items (
-	purchase_id int,
-    product_id int,
+CREATE TABLE products_receipt (
+	id_receipt int,
+    id_product int,
     quantity int,
-    foreign key (purchase_id) references purchase(id),
-    foreign key (product_id) references products(id)
+    foreign key (id_receipt) references receipts(id),
+    foreign key (id_product) references products(id)
 );
 
 -- DATA DEFAULT
@@ -254,7 +254,7 @@ INSERT INTO stores (name, address) VALUES
 ('TechStore Branch 3', '1600 Amphitheatre Parkway, Mountain View, CA 94043');
 
 
-INSERT INTO customer (name, phone_number, email) VALUES
+INSERT INTO customers (name, phone_number, email) VALUES
 ('John Doe', '123-456-7890', 'john.doe@example.com'),
 ('Jane Smith', '987-654-3210', 'jane.smith@example.com'),
 ('Michael Johnson', '456-789-1230', 'michael.johnson@example.com'),
@@ -336,7 +336,7 @@ INSERT INTO persons (first_name, last_name, gender, dob, email, phone_number, ad
 ('Grace', 'Moore', 0, '1997-10-12', 'grace.moore@company.com', '4455667788', '741 Ash St', '2023-03-15', '40000', 4, 2, NULL, 'Active'),
 ('Hannah', 'Taylor', 0, '1998-12-05', 'hannah.taylor@company.com', '5566778899', '159 Beech St', '2023-04-20', '40000', 4, 3, NULL, 'Active');
 
-INSERT INTO purchase (id_customer, id_store, purchase_date) VALUES
+INSERT INTO receipts (id_customer, id_store, purchase_date) VALUES
 (1, 1, '2024-05-10 12:30:00'),
 (2, 2, '2024-05-12 14:00:00'),
 (3, 3, '2024-05-15 16:45:00'),
@@ -351,7 +351,7 @@ INSERT INTO purchase (id_customer, id_store, purchase_date) VALUES
 (2, 3, '2024-06-07 14:00:00'),
 (3, 1, '2024-06-10 16:45:00');
 
-INSERT INTO purchase_items (purchase_id, product_id, quantity) VALUES
+INSERT INTO products_receipt (id_receipt, id_product, quantity) VALUES
 (1, 1, 2),
 (1, 3, 1),
 (2, 2, 3),
@@ -397,7 +397,7 @@ INSERT INTO accounts (username, password, id_person) VALUES
 ('cashierStore2', 'password_cashier2', 9),
 ('hcashierStore3', 'password_cashier3', 10);
 
-INSERT INTO inventory_receipts (id_warehouse, product_import_date) VALUES
+INSERT INTO import_warehouse (id_warehouse, product_import_date) VALUES
 (1, '2024-01-10 10:00:00'),
 (1, '2024-02-15 11:00:00'),
 (1, '2024-03-20 12:00:00'),
@@ -408,7 +408,7 @@ INSERT INTO inventory_receipts (id_warehouse, product_import_date) VALUES
 (3, '2024-02-20 14:30:00'),
 (3, '2024-03-30 16:00:00');
 
-INSERT INTO inventory_receipt_items (receipt_id, id_product, number_of_imported_product) VALUES
+INSERT INTO import_warehouse_details (id_import, id_product, number_of_imported_product) VALUES
 (1, 1, 50), (1, 2, 30), (1, 3, 40),
 (2, 4, 20), (2, 5, 15), (2, 6, 35),
 (3, 7, 25), (3, 8, 50), (3, 9, 45),
@@ -419,7 +419,7 @@ INSERT INTO inventory_receipt_items (receipt_id, id_product, number_of_imported_
 (8, 22, 40), (8, 23, 35), (8, 24, 20),
 (9, 25, 45), (9, 26, 30), (9, 27, 50);
 
-INSERT INTO inventory_shipments (id_warehouse, id_store, product_delivery_date, status) VALUES
+INSERT INTO warehouse_shipments (id_warehouse, id_store, product_delivery_date, status) VALUES
 (1, 1, '2024-01-20 14:00:00', 'Delivered'),
 (1, 2, '2024-02-25 15:00:00', 'Shipped'),
 (1, 3, '2024-03-30 16:30:00', 'Preparing'),
@@ -429,7 +429,7 @@ INSERT INTO inventory_shipments (id_warehouse, id_store, product_delivery_date, 
 (3, 1, '2024-01-30 10:15:00', 'Delivered'),
 (3, 2, '2024-02-18 14:00:00', 'Shipped');
 
-INSERT INTO inventory_shipment_items (shipment_id, id_product, number_of_delivery_product) VALUES
+INSERT INTO warehouse_shipment_details (id_shipment, id_product, number_of_delivery_product) VALUES
 (1, 1, 20), (1, 2, 15), (1, 3, 10),
 (2, 4, 25), (2, 5, 20), (2, 6, 15),
 (3, 7, 30), (3, 8, 35), (3, 9, 20),
@@ -439,7 +439,7 @@ INSERT INTO inventory_shipment_items (shipment_id, id_product, number_of_deliver
 (7, 19, 40), (7, 20, 30), (7, 21, 25),
 (8, 22, 20), (8, 23, 35), (8, 24, 15);
 
-INSERT INTO received_store (id_store, received_date) VALUES
+INSERT INTO import_store (id_store, received_date) VALUES
 (1, '2024-02-01 12:00:00'),
 (1, '2024-03-05 15:00:00'),
 (1, '2024-04-10 10:30:00'),
@@ -450,7 +450,7 @@ INSERT INTO received_store (id_store, received_date) VALUES
 (3, '2024-03-25 17:30:00'),
 (3, '2024-04-30 09:00:00');
 
-INSERT INTO received_store_items (received_id, receipt_id, id_product, quantity) VALUES
+INSERT INTO import_store_details (id_import, id_shipment, id_product, quantity) VALUES
 (1, 1, 1, 10), (1, 1, 2, 5), (1, 1, 3, 8),
 (2, 2, 4, 12), (2, 2, 5, 7), (2, 2, 6, 6),
 (3, 3, 7, 14), (3, 3, 8, 10), (3, 3, 9, 12),
@@ -458,5 +458,4 @@ INSERT INTO received_store_items (received_id, receipt_id, id_product, quantity)
 (5, 5, 13, 8), (5, 5, 14, 15), (5, 5, 15, 10),
 (6, 6, 16, 7), (6, 6, 17, 12), (6, 6, 18, 9),
 (7, 7, 19, 14), (7, 7, 20, 11), (7, 7, 21, 13),
-(8, 8, 22, 9), (8, 8, 23, 8), (8, 8, 24, 10),
-(9, 9, 25, 12), (9, 9, 26, 10), (9, 9, 27, 14);
+(8, 8, 22, 9), (8, 8, 23, 8), (8, 8, 24, 10);
