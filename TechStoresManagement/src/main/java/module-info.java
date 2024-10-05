@@ -1,4 +1,4 @@
-module com.example.techstoresmanagement {
+module techstoresmanagement {
     requires javafx.controls;
     requires javafx.fxml;
 

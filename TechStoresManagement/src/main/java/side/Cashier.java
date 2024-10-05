@@ -19,19 +19,16 @@ public class Cashier extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        // Root layout
         HBox root = new HBox();
         root.setPadding(new Insets(10));
         root.setSpacing(20);
 
-        // Left side: Product table
         TableView<Product> productTable = new TableView<>();
         productTable.setPrefWidth(600);
 
-        // Table columns
-        TableColumn<Product, ImageView> imageColumn = new TableColumn<>("Image");
-        imageColumn.setPrefWidth(100);
-        imageColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getImage()));
+//        TableColumn<Product, ImageView> imageColumn = new TableColumn<>("Image");
+//        imageColumn.setPrefWidth(100);
+//        imageColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getImage()));
 
         TableColumn<Product, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setPrefWidth(150);
@@ -49,7 +46,7 @@ public class Cashier extends Application {
         priceColumn.setPrefWidth(100);
         priceColumn.setCellValueFactory(cellData -> cellData.getValue().priceProperty().asObject());
 
-        productTable.getColumns().addAll(imageColumn, nameColumn, brandColumn, stockColumn, priceColumn);
+        productTable.getColumns().addAll(nameColumn, brandColumn, stockColumn, priceColumn);
 
         // Right side: Order summary
         VBox orderSummary = new VBox();
@@ -74,7 +71,7 @@ public class Cashier extends Application {
         primaryStage.setTitle("Product Order App");
         primaryStage.show();
 
-        CashierModel.loadSampleData(productTable, orderListView, totalLabel);
+        CashierModel.loadData(productTable);
     }
 
 }

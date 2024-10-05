@@ -40,7 +40,6 @@ public class LoginSide extends Application {
         Circle clip = new Circle(centerX, centerY, 75);
         logoView.setClip(clip);
 
-        // Tạo Label để hiển thị thông báo
         Label messageLabel = new Label();
         messageLabel.setStyle("-fx-text-fill: red;");
         messageLabel.setVisible(false); // Ban đầu ẩn thông báo
@@ -50,7 +49,6 @@ public class LoginSide extends Application {
         VBox.setMargin(logoView, new Insets(0, 0, 30, 0));
         VBox.setMargin(loginButton, new Insets(10, 0, 0, 0));
 
-        // Thay đổi thứ tự thêm vào vbox
         vbox.getChildren().addAll(logoView, usernameField, passwordField, messageLabel, loginButton);
         vbox.setId("login-pane");
 

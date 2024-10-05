@@ -16,11 +16,7 @@ import java.util.ArrayList;
 
 public class CashierModel implements ICommon<Product> {
 
-    public static void loadSampleData(TableView<Product> productTable, ListView<String> orderListView, Label totalLabel) {
-        // Sample product images and data
-//        Product product1 = new Product(new ImageView(new Image("file:product1.png")), "Laptop Acer Nitro 5", "Acer", 10, 1000);
-//        Product product2 = new Product(new ImageView(new Image("file:product2.png")), "Macbook Pro", "Apple", 5, 1500);
-
+    public static void loadData(TableView<Product> productTable) {
         ArrayList<Product> products = new CashierModel().getAll();
 
         productTable.getItems().addAll(products);
