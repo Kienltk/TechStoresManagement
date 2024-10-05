@@ -311,7 +311,7 @@ INSERT INTO products_store (id_product, id_store, quantity) VALUES
 (27, 3, 20), (29, 3, 25), (31, 3, 15);
 
 INSERT INTO persons (first_name, last_name, gender, dob, email, phone_number, address, hire_date, salary, role, id_store, id_warehouse, status) VALUES
-('John', 'Doe', 1, '1980-05-15', 'john.doe@company.com', '1234567890', '123 Main St', '2020-01-01', '150000', 1, NULL, NULL, 'Active');
+('John', 'Doe', 1, '1980-05-15', 'john.doe@company.com', '1234567890', '123 side.Main St', '2020-01-01', '150000', 1, NULL, NULL, 'Active');
 
 INSERT INTO persons (first_name, last_name, gender, dob, email, phone_number, address, hire_date, salary, role, id_store, id_warehouse, status) VALUES
 ('Jane', 'Smith', 0, '1985-03-10', 'jane.smith@company.com', '0987654321', '456 Oak St', '2021-03-15', '70000', 2, 1, NULL, 'Active'),
