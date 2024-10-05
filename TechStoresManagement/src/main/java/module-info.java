@@ -14,12 +14,5 @@ module com.example.techstoresmanagement {
     opens model to javafx.fxml;
     exports side to javafx.graphics;
     opens side to javafx.fxml;
-//    exports side to javafx.graphics;
-//    opens side to javafx.fxml;
-//    exports controller to javafx.graphics;
-//    opens controller to javafx.fxml;
-//    exports model to javafx.graphics;
-//    opens model to javafx.fxml;xports com.example.techstoresmanagement to javafx.graphics;
-//    e
-//    opens com.example.techstoresmanagement to javafx.fxml;
+
 }

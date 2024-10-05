@@ -1,4 +1,4 @@
-package com.example.techstoresmanagement;
+package side;
 
 import entity.Product;
 import model.CashierModel;
@@ -7,12 +7,9 @@ import javafx.beans.property.*;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-
-import java.util.ArrayList;
 
 public class Cashier extends Application {
 
