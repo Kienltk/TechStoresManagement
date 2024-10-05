@@ -1,5 +1,6 @@
-package com.example.techstoresmanagement;
+package controller;
 
+import model.LoginModel;
 import javafx.scene.control.*;
 
 public class LoginController {
