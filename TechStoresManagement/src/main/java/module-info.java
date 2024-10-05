@@ -9,5 +9,5 @@ module com.example.techstoresmanagement {
     requires mysql.connector.j;
 
     opens com.example.techstoresmanagement to javafx.fxml;
-    exports com.example.techstoresmanagement;
+    exports com.example.techstoresmanagement to javafx.graphics;
 }
