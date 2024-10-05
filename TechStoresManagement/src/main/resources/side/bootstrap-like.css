@@ -1,0 +1,43 @@
+/* Định dạng toàn bộ giao diện */
+#login-pane {
+    -fx-padding: 20;
+    -fx-alignment: center;
+    -fx-background-color: #4AD4DD;
+}
+
+/* Định dạng tiêu đề */
+
+/* CSS cho TextField và PasswordField */
+.text-field, .password-field {
+    -fx-max-width: 300px;
+    -fx-background-color: transparent;   /* Nền trong suốt */
+    -fx-border-color: white;             /* Viền trắng */
+    -fx-border-width: 2px;
+    -fx-border-radius: 5px;/* Độ dày của viền */
+    -fx-text-fill: white;                /* Màu chữ là trắng */
+    -fx-prompt-text-fill: rgba(255, 255, 255, 0.7); /* Màu gợi ý (placeholder) là trắng mờ */
+    -fx-font-size: 14px;                 /* Kích thước chữ */
+    -fx-padding: 10px;                   /* Đệm trong */
+}
+
+
+/* Định dạng nút đăng nhập */
+#login-button {
+    -fx-max-width: 300px;
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 38, 0, 0, 19),
+    dropshadow(gaussian, rgba(0, 0, 0, 0.22), 12, 0, 0, 15);
+    -fx-text-fill: #2148C0;
+    -fx-padding: 10 20;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold ;
+    -fx-cursor: hand;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+/* Hiệu ứng hover cho nút */
+#login-button:hover {
+    -fx-background-color: #0cffff;
+    -fx-text-fill: #4d2c2c;
+}
