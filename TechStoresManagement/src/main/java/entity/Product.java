@@ -10,14 +10,16 @@ public class Product {
     private final SimpleStringProperty brand;
     private final SimpleIntegerProperty stock;
     private final SimpleDoubleProperty price;
+    private final SimpleStringProperty category; // Thêm thuộc tính category
 
-    public Product(int id, ImageView image, String name, String brand, int stock, double price) {
+    public Product(int id, ImageView image, String name, String brand, int stock, double price, String category) {
         this.id = new SimpleIntegerProperty(id);
         this.image = new SimpleObjectProperty<>(image);
         this.name = new SimpleStringProperty(name);
         this.brand = new SimpleStringProperty(brand);
         this.stock = new SimpleIntegerProperty(stock);
         this.price = new SimpleDoubleProperty(price);
+        this.category = new SimpleStringProperty(category); // Khởi tạo category
     }
 
     public int getId() {
@@ -66,5 +68,13 @@ public class Product {
 
     public SimpleDoubleProperty priceProperty() {
         return price;
+    }
+
+    public String getCategory() { // Thêm phương thức getCategory
+        return category.get();
+    }
+
+    public SimpleStringProperty categoryProperty() { // Thêm property cho category
+        return category;
     }
 }
