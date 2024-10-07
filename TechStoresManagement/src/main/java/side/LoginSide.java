@@ -1,6 +1,5 @@
 package side;
 
-
 import controller.LoginController;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -14,6 +13,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
+import model.LoginModel;
 
 import java.util.Objects;
 
@@ -22,6 +22,7 @@ public class LoginSide extends Application {
     @Override
     public void start(Stage primaryStage) {
         TextField usernameField = new TextField();
+        LoginModel model = new LoginModel();
         usernameField.setPromptText("Username");
 
         PasswordField passwordField = new PasswordField();
@@ -61,16 +62,22 @@ public class LoginSide extends Application {
         primaryStage.setWidth(1366);
         primaryStage.setHeight(768);
         primaryStage.show();
-        new LoginController(usernameField, passwordField, loginButton, messageLabel);
 
+        // Khởi tạo LoginController
+        LoginController loginController = new LoginController(usernameField, passwordField, loginButton, messageLabel);
+
+        // Sự kiện nút đăng nhập
         loginButton.setOnAction(e -> {
-            // Giả sử đăng nhập thành công (bạn có thể thêm logic xác thực ở đây)
-            Session.setLoggedIn(true);
-            primaryStage.close();  // Đóng cửa sổ đăng nhập
-            try {
-                new Cashier().start(new Stage());  // Mở cửa sổ Cashier
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            // Thực hiện đăng nhập và kiểm tra nếu đăng nhập thành công
+            boolean loginSuccess = loginController.handleLogin();
+
+            if (loginSuccess && Session.isLoggedIn()) {
+                primaryStage.close();
+                try {
+                    new Cashier().start(new Stage());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         });
     }

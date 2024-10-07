@@ -20,7 +20,7 @@ public class Cashier extends Application {
         launch(args);
     }
 
-    private ListView<String> orderListView = new ListView<>();
+    private ListView<HBox> orderListView = new ListView<>();
     private Label totalLabel = new Label("Total: 0$");
     private double totalPrice = 0;
     private Map<Integer, Integer> cartItems = new HashMap<>();
@@ -97,14 +97,11 @@ public class Cashier extends Application {
 
                 // Check if we can add the product based on stock
                 if (currentQuantity < stockQuantity) {
-
                     // Increase quantity
                     cartItems.put(productId, currentQuantity + 1);
-
                     // Update total price
                     totalPrice += productPrice;
                     totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));
-
                     // Update the ListView
                     updateOrderListView();
                 } else {
@@ -172,10 +169,11 @@ public class Cashier extends Application {
         contextMenu.getItems().addAll(removeItem, removeAllItem);
 
         removeItem.setOnAction(e -> {
-            String selectedItem = orderListView.getSelectionModel().getSelectedItem();
+            HBox selectedItem = orderListView.getSelectionModel().getSelectedItem();
             if (selectedItem != null) {
                 // Extract product name and quantity from the selected item
-                String productName = selectedItem.split(" \\(x")[0];
+                Label itemNameLabel = (Label) selectedItem.getChildren().get(0);
+                String productName = itemNameLabel.getText();
                 int cartItemsKey = cm.getProductByName(productName).getId();
 
                 int quantity = cartItems.get(cartItemsKey);
@@ -203,10 +201,11 @@ public class Cashier extends Application {
         });
 
         removeAllItem.setOnAction(e -> {
-            String selectedItem = orderListView.getSelectionModel().getSelectedItem();
+            HBox selectedItem = orderListView.getSelectionModel().getSelectedItem();
             if (selectedItem != null) {
                 // Extract product name from the selected item
-                String productName = selectedItem.split(" \\(x")[0];
+                Label itemNameLabel = (Label) selectedItem.getChildren().get(0);
+                String productName = itemNameLabel.getText();
                 int cartItemsKey = cm.getProductByName(productName).getId();
                 int quantity = cartItems.get(cartItemsKey);
 
@@ -246,8 +245,7 @@ public class Cashier extends Application {
 
     private double getProductPrice(String productName) {
         // Assuming you have a method to get the product price based on the name
-        // Modify this to get the actual price of the product
-        for (Product product : cm.getAll()) { // Assuming you have access to the list of products
+        for (Product product : cm.getAll()) {
             if (product.getName().equals(productName)) {
                 return product.getPrice();
             }
@@ -262,9 +260,52 @@ public class Cashier extends Application {
         for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
             String itemName = cm.getOne(entry.getKey()).getName();
             int quantity = entry.getValue();
-            orderListView.getItems().add(itemName + " (x" + quantity + ")");
+
+            // Create HBox for each item in the cart
+            HBox itemBox = new HBox();
+            Label nameLabel = new Label(itemName);
+            Label quantityLabel = new Label("Quantity: " + quantity);
+            Button increaseButton = new Button("+");
+            Button decreaseButton = new Button("-");
+
+            // Increase button action
+            increaseButton.setOnAction(e -> {
+                int stockQuantity = cm.getOne(entry.getKey()).getStock();
+                if (quantity < stockQuantity) {
+                    cartItems.put(entry.getKey(), quantity + 1);
+                    totalPrice += getProductPrice(itemName);
+                    totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));
+                    updateOrderListView();
+                } else {
+                    showStockAlert(itemName);
+                }
+            });
+
+            // Decrease button action
+            decreaseButton.setOnAction(e -> {
+                if (quantity > 1) {
+                    cartItems.put(entry.getKey(), quantity - 1);
+                    totalPrice -= getProductPrice(itemName);
+                    totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));
+                    updateOrderListView();
+                } else {
+                    cartItems.remove(entry.getKey());
+                    totalPrice -= getProductPrice(itemName);
+                    totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));
+                    updateOrderListView();
+                }
+            });
+
+            itemBox.getChildren().addAll(nameLabel, quantityLabel, increaseButton, decreaseButton);
+            orderListView.getItems().add(itemBox);  // Add the itemBox to ListView
         }
     }
 
-
+    private void showStockAlert(String productName) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Stock Alert");
+        alert.setHeaderText(null);
+        alert.setContentText("Cannot increase quantity of " + productName + ". Insufficient stock!");
+        alert.showAndWait();
+    }
 }
