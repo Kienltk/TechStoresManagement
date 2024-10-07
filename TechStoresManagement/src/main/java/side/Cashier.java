@@ -28,6 +28,16 @@ public class Cashier extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        if (!Session.isLoggedIn()) {
+            try {
+                new LoginSide().start(new Stage());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            primaryStage.close();  // Đóng cửa sổ hiện tại
+            return;
+        }
+
         HBox root = new HBox();
         root.setPadding(new Insets(10));
         root.setSpacing(20);
@@ -61,17 +71,17 @@ public class Cashier extends Application {
 
         //Stock column
         TableColumn<Product, Integer> stockColumn = new TableColumn<>("Stock");
-        stockColumn.setPrefWidth(80);
+        stockColumn.setPrefWidth(100);
         stockColumn.setCellValueFactory(cellData -> cellData.getValue().stockProperty().asObject());
 
         //Price column
         TableColumn<Product, Double> priceColumn = new TableColumn<>("Price");
-        priceColumn.setPrefWidth(100);
+        priceColumn.setPrefWidth(130);
         priceColumn.setCellValueFactory(cellData -> cellData.getValue().priceProperty().asObject());
 
         //Action column
         TableColumn<Product, Button> actionColumn = new TableColumn<>("Action");
-        actionColumn.setPrefWidth(100);
+        actionColumn.setPrefWidth(120);
         actionColumn.setCellValueFactory(cellData -> {
             Button addButton = new Button("Add to Cart");
 
@@ -182,7 +192,7 @@ public class Cashier extends Application {
 
                 // $-0.00 case
                 if (totalPrice < 0) {
-                    totalPrice = 0; // Set to 0 if negative
+                    totalPrice = 0;
                 }
 
                 totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));
@@ -226,7 +236,7 @@ public class Cashier extends Application {
         root.getChildren().addAll(productTable, orderSummary);
 
         // Scene and Stage
-        Scene scene = new Scene(root, 800, 400);
+        Scene scene = new Scene(root,  1366, 768);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Product Order App");
         primaryStage.show();
