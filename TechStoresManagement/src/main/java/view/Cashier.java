@@ -1,6 +1,7 @@
 package view;
 
 import entity.Product;
+import javafx.application.Platform;
 import model.CashierModel;
 import javafx.application.Application;
 import javafx.beans.property.*;
@@ -32,25 +33,15 @@ public class Cashier extends Application {
     // Data cho TableView
     private ObservableList<Product> productData = FXCollections.observableArrayList();
 
+    // Thêm thuộc tính productTable
+    private TableView<Product> productTable = new TableView<>();
+
     @Override
     public void start(Stage primaryStage) {
-//        if (!Session.isLoggedIn()) {
-//            try {
-//                new Login().start(new Stage());
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//            primaryStage.close();
-//            return;
-//        }
-
-
         HBox root = new HBox();
         root.setPadding(new Insets(10));
         root.setSpacing(20);
 
-        // Tạo TableView sản phẩm
-        TableView<Product> productTable = new TableView<>();
         productTable.setPrefWidth(630);
 
         // Các cột của TableView
@@ -110,24 +101,25 @@ public class Cashier extends Application {
         TextField searchField = new TextField();
         searchField.setPromptText("Search product...");
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterProductList(productTable, newValue, null));
-// Tạo danh sách các button filter
+
+        // Tạo danh sách các button filter
         String[] filterCategories = cm.getAllCategories().toArray(new String[0]);
         String[] allCategories = new String[filterCategories.length + 1];
         allCategories[0] = "All";
         System.arraycopy(filterCategories, 0, allCategories, 1, filterCategories.length);
 
-// Tạo một HBox để chứa các button filter
+        // Tạo một HBox để chứa các button filter
         HBox filterBox = new HBox(10);
         filterBox.setPadding(new Insets(10));
 
-// Tạo từng button filter và thêm vào HBox
+        // Tạo từng button filter và thêm vào HBox
         for (String category : allCategories) {
             Button filterButton = new Button(category);
             filterButton.setOnAction(e -> filterProductList(productTable, searchField.getText(), category.equals("All") ? null : category));
             filterBox.getChildren().add(filterButton);
         }
 
-// Thay thế ComboBox bằng HBox chứa các button filter
+        // Thay thế ComboBox bằng HBox chứa các button filter
         VBox tableContainer = new VBox(10, searchField, filterBox, productTable);
         // Phần bên phải: Order summary
         VBox orderSummary = new VBox();
@@ -172,11 +164,17 @@ public class Cashier extends Application {
         Scene scene = new Scene(root, 1366, 768);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Product Order App");
-        primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.setWidth(1366);
         primaryStage.setHeight(768);
         primaryStage.show();
+
+        Platform.runLater(() -> {
+            productTable.requestFocus();  // Focus vào bảng sản phẩm khi ứng dụng khởi động
+            searchField.setFocusTraversable(false);  // Tắt khả năng focus tự động của ô tìm kiếm
+            filterBox.getChildren().forEach(node -> node.setFocusTraversable(false)); // Tắt khả năng focus cho các nút filter
+        });
+
 
         // Load dữ liệu vào bảng sản phẩm
         CashierModel.loadData(productTable, 1);
@@ -199,6 +197,8 @@ public class Cashier extends Application {
             Label quantityLabel = new Label("Quantity: " + quantity);
             Button increaseButton = new Button("+");
             Button decreaseButton = new Button("-");
+
+            // Sự kiện cho nút tăng số lượng
             increaseButton.setOnAction(e -> {
                 int stockQuantity = cm.getOne(entry.getKey()).getStock();
                 if (quantity < stockQuantity) {
@@ -206,27 +206,34 @@ public class Cashier extends Application {
                     totalPrice += getProductPrice(itemName);
                     totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));
                     updateOrderListView();
+                    Platform.runLater(() -> increaseButton.requestFocus()); // Giữ focus trên nút tăng
                 } else {
                     showStockAlert(itemName);
                 }
             });
+
+// Sự kiện cho nút giảm số lượng
             decreaseButton.setOnAction(e -> {
                 if (quantity > 1) {
                     cartItems.put(entry.getKey(), quantity - 1);
                     totalPrice -= getProductPrice(itemName);
                     totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));
                     updateOrderListView();
+                    Platform.runLater(() -> decreaseButton.requestFocus()); // Giữ focus trên nút giảm
                 } else {
                     cartItems.remove(entry.getKey());
                     totalPrice -= getProductPrice(itemName);
                     totalLabel.setText("Total: $" + String.format("%.2f", totalPrice));
                     updateOrderListView();
+                    Platform.runLater(() -> decreaseButton.requestFocus()); // Giữ focus trên nút giảm
                 }
             });
+
             itemBox.getChildren().addAll(nameLabel, quantityLabel, increaseButton, decreaseButton);
             orderListView.getItems().add(itemBox);
         }
     }
+
 
     private double getProductPrice(String name) {
         for (Product product : cm.getAll()) {

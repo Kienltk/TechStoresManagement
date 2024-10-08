@@ -7,6 +7,7 @@ module techstoresmanagement {
     requires org.kordamp.bootstrapfx.core;
     requires java.sql;
     requires mysql.connector.j;
+//    requires mysql.connector.j;
 
     exports controller to javafx.graphics;
     opens controller to javafx.fxml;
