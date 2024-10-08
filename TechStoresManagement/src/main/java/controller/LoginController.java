@@ -2,7 +2,7 @@ package controller;
 
 import model.LoginModel;
 import javafx.scene.control.*;
-import side.Session;
+import view.Session;
 
 public class LoginController {
 

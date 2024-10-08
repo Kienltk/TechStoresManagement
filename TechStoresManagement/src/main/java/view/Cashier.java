@@ -1,4 +1,4 @@
-package side;
+package view;
 
 import entity.Product;
 import model.CashierModel;
@@ -36,7 +36,7 @@ public class Cashier extends Application {
     public void start(Stage primaryStage) {
 //        if (!Session.isLoggedIn()) {
 //            try {
-//                new LoginSide().start(new Stage());
+//                new Login().start(new Stage());
 //            } catch (Exception e) {
 //                e.printStackTrace();
 //            }

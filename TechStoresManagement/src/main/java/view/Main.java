@@ -1,9 +1,7 @@
-package side;
-
-import model.CashierModel;
+package view;
 
 public class Main {
     public static void main(String[] args) {
-        LoginSide.main(args);
+        Login.main(args);
     }
 }

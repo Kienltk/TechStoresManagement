@@ -1,4 +1,4 @@
-package side;
+package view;
 
 public class Session {
     private static boolean loggedIn = false;

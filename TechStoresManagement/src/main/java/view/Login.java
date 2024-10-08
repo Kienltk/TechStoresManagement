@@ -1,4 +1,4 @@
-package side;
+package view;
 
 import controller.LoginController;
 import javafx.application.Application;
@@ -17,7 +17,7 @@ import model.LoginModel;
 
 import java.util.Objects;
 
-public class LoginSide extends Application {
+public class Login extends Application {
 
     @Override
     public void start(Stage primaryStage) {
