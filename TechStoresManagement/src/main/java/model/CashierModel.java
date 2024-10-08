@@ -3,13 +3,10 @@ package model;
 import common.ICommon;
 import dao.JDBCConnect;
 import entity.Product;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.control.TableView;
+
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,13 +17,12 @@ import java.util.ArrayList;
 public class CashierModel implements ICommon<Product> {
 
     public static void loadData(TableView<Product> productTable, int storeId) {
-//        ObservableList<Product> products = FXCollections.observableArrayList();
-
         ArrayList<Product> products = new CashierModel().getAllFromStoreId(storeId);
-
         productTable.getItems().addAll(products);
     }
 
+
+    // Helper method to construct Product object from ResultSet
     private Product getProduct(ResultSet rs) throws SQLException {
         Image image = new Image("file:" + rs.getString("img_address"));
         int productId = rs.getInt("id");
@@ -35,75 +31,96 @@ public class CashierModel implements ICommon<Product> {
         int stock = rs.getInt("quantity");
         double price = rs.getDouble("sale_price");
 
-        return new Product(productId, new ImageView(image), productName, brand, stock, price);
+        // Lấy giá trị của thuộc tính category từ bảng product_categories và categories
+        String category = getCategory(productId);
+
+        return new Product(productId, new ImageView(image), productName, brand, stock, price, category);
     }
 
-    private ArrayList<Product> getProducts(ArrayList<Product> list, PreparedStatement ps) throws SQLException {
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            Product product = getProduct(rs);
-            list.add(product);
-        }
-        return list;
-    }
+    private String getCategory(int productId) {
+        String sql = "SELECT c.category_name FROM product_categories pc JOIN categories c ON pc.id_category = c.id WHERE pc.id_product = ?";
 
-    @Override
-    public ArrayList<Product> getAll() {
-        ArrayList<Product> list = new ArrayList<>();
-        try (Connection con = JDBCConnect.getJDBCConnection()) {
-            String sql = "SELECT products.img_address, products.id, products.product_name, products.brand, " +
-                    "products_store.quantity, products.sale_price FROM products " +
-                    "JOIN products_store ON products.id = products_store.id_product " +
-                    "JOIN stores ON products_store.id_store = stores.id " +
-                    "WHERE products_store.id_store = 1;";
-            PreparedStatement ps = con.prepareStatement(sql);
-
-            return getProducts(list, ps);
-        } catch (Exception e) {
+        try (Connection con = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("category_name");
+                }
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    // Generic method to handle result from prepared statements
+    private ArrayList<Product> getProducts(ArrayList<Product> list, PreparedStatement ps) throws SQLException {
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Product product = getProduct(rs);
+                list.add(product);
+            }
+        }
+        return list;
+    }
+    public ArrayList<String> getAllCategories() {
+        ArrayList<String> list = new ArrayList<>();
+        String sql = "SELECT category_name FROM categories";
+
+        try (Connection con = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(rs.getString("category_name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    @Override
+    public ArrayList<Product> getAll() {
+        return getAllFromStoreId(1); // Default to store ID 1 if none provided
     }
 
     @Override
     public Product getOne(long id) {
-        ArrayList<Product> list = new ArrayList<>();
         String sql = "SELECT products.img_address, products.id, products.product_name, products.brand, " +
                 "products_store.quantity, products.sale_price FROM products " +
                 "JOIN products_store ON products.id = products_store.id_product " +
                 "JOIN stores ON products_store.id_store = stores.id " +
-                "WHERE products_store.id_store = 1 " +
-                "AND products.id = ?";
+                "WHERE products_store.id_store = 1 AND products.id = ?";
+
         try (Connection con = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, (int) id);
-
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return getProduct(rs);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-
     @Override
     public boolean add(Product obj) {
+        // Implementation for adding a product (if needed)
         return false;
     }
 
     @Override
     public boolean update(Product obj, int id) {
+        // Implementation for updating a product (if needed)
         return false;
     }
 
     @Override
     public boolean delete(int id) {
+        // Implementation for deleting a product (if needed)
         return false;
     }
 
@@ -112,20 +129,17 @@ public class CashierModel implements ICommon<Product> {
                 "products_store.quantity, products.sale_price FROM products " +
                 "JOIN products_store ON products.id = products_store.id_product " +
                 "JOIN stores ON products_store.id_store = stores.id " +
-                "WHERE products_store.id_store = 1 " +
-                "AND products.product_name = ?";
+                "WHERE products_store.id_store = 1 AND products.product_name = ?";
+
         try (Connection con = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, name);
-
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return getProduct(rs);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
@@ -137,31 +151,27 @@ public class CashierModel implements ICommon<Product> {
                 "products_store.quantity, products.sale_price FROM products " +
                 "JOIN products_store ON products.id = products_store.id_product " +
                 "JOIN stores ON products_store.id_store = stores.id " +
-                "WHERE products_store.id_store = ?;";
+                "WHERE products_store.id_store = ?";
+
         try (Connection con = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setInt(1, 1);
-
+            ps.setInt(1, storeId);
             return getProducts(list, ps);
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-
-
     public boolean handlePurchase(int idProduct, int reducedQuantity) {
-        try (Connection con = JDBCConnect.getJDBCConnection()) {
-            String sql = "UPDATE products_store SET quantity = quantity - ? WHERE id_product = ? AND id_store = 1";
-            PreparedStatement ps = con.prepareStatement(sql);
+        String sql = "UPDATE products_store SET quantity = quantity - ? WHERE id_product = ? AND id_store = 1";
 
+        try (Connection con = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, reducedQuantity);
             ps.setInt(2, idProduct);
             return ps.executeUpdate() > 0;
-
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;

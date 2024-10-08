@@ -1,6 +1,5 @@
 package side;
 
-
 import controller.LoginController;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -14,6 +13,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
+import model.LoginModel;
 
 import java.util.Objects;
 
@@ -22,6 +22,7 @@ public class LoginSide extends Application {
     @Override
     public void start(Stage primaryStage) {
         TextField usernameField = new TextField();
+        LoginModel model = new LoginModel();
         usernameField.setPromptText("Username");
 
         PasswordField passwordField = new PasswordField();
@@ -42,8 +43,8 @@ public class LoginSide extends Application {
 
         Label messageLabel = new Label();
         messageLabel.setStyle("-fx-text-fill: red;");
-        messageLabel.setVisible(false); // Ban đầu ẩn thông báo
-        messageLabel.setManaged(false); // Không chiếm diện tích trong VBox
+        messageLabel.setVisible(false);
+        messageLabel.setManaged(false);
 
         VBox vbox = new VBox(10);
         VBox.setMargin(logoView, new Insets(0, 0, 30, 0));
@@ -53,7 +54,7 @@ public class LoginSide extends Application {
         vbox.setId("login-pane");
 
         Scene scene = new Scene(vbox, 1366, 768);
-        scene.getStylesheets().add(getClass().getResource("bootstrap-like.css").toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("bootstrap-like.css")).toExternalForm());
 
         primaryStage.setTitle("Login App");
         primaryStage.setScene(scene);
@@ -61,7 +62,24 @@ public class LoginSide extends Application {
         primaryStage.setWidth(1366);
         primaryStage.setHeight(768);
         primaryStage.show();
+
+        // Khởi tạo LoginController
         LoginController loginController = new LoginController(usernameField, passwordField, loginButton, messageLabel);
+
+        // Sự kiện nút đăng nhập
+        loginButton.setOnAction(e -> {
+            // Thực hiện đăng nhập và kiểm tra nếu đăng nhập thành công
+            boolean loginSuccess = loginController.handleLogin();
+
+            if (loginSuccess && Session.isLoggedIn()) {
+                primaryStage.close();
+                try {
+                    new Cashier().start(new Stage());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
     }
 
     public static void main(String[] args) {
