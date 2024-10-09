@@ -160,7 +160,7 @@ public class CashierModel implements ICommon<Product> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public boolean handlePurchase(int idProduct, int reducedQuantity) {
