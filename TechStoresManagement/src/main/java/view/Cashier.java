@@ -16,6 +16,8 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.scene.control.Pagination;
+import org.w3c.dom.ls.LSOutput;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,13 +44,14 @@ public class Cashier extends Application {
     private Label totalLabel = new Label("Total:                                                                              $0.00");
     private double totalPrice = 0;
     private Map<Integer, Integer> cartItems = new HashMap<>();
-    CashierModel cm = new CashierModel();
+    private final static int rowsPerPage = 10;
+    static CashierModel cm = new CashierModel();
+    private final TableView<Product> productTable = createTable();
+    private final static int dataSize = cm.getAll().size();
 
-    // Data cho TableView
-    private ObservableList<Product> productData = FXCollections.observableArrayList();
+    private ObservableList<Product> currentProductList = FXCollections.observableArrayList(cm.getAll());
 
     // Thêm thuộc tính productTable
-    private TableView<Product> productTable = new TableView<>();
 
     @Override
     public void start(Stage primaryStage) {
@@ -136,11 +139,10 @@ public class Cashier extends Application {
         searchField.getStyleClass().add("search-field");
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterProductList(productTable, newValue, null));
 
-        // Tạo danh sách các button filter
-        String[] filterCategories = cm.getAllCategories().toArray(new String[0]);
-        String[] allCategories = new String[filterCategories.length + 1];
-        allCategories[0] = "All";
-        System.arraycopy(filterCategories, 0, allCategories, 1, filterCategories.length);
+    private Node createPage(int pageIndex) {
+        int fromIndex = pageIndex * rowsPerPage;
+        int toIndex = Math.min(fromIndex + rowsPerPage, currentProductList.size());
+        productTable.setItems(FXCollections.observableArrayList(currentProductList.subList(fromIndex, toIndex)));
 
         // Tạo một HBox để chứa các button filter
         HBox filterBox = new HBox(17);
