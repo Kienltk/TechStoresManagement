@@ -2,6 +2,7 @@ package view;
 
 import entity.Product;
 import javafx.application.Platform;
+import javafx.scene.Node;
 import model.CashierModel;
 import javafx.application.Application;
 import javafx.beans.property.*;
@@ -13,6 +14,8 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.scene.control.Pagination;
+import org.w3c.dom.ls.LSOutput;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,19 +31,112 @@ public class Cashier extends Application {
     private Label totalLabel = new Label("Total: 0$");
     private double totalPrice = 0;
     private Map<Integer, Integer> cartItems = new HashMap<>();
-    CashierModel cm = new CashierModel();
+    private final static int rowsPerPage = 10;
+    static CashierModel cm = new CashierModel();
+    private final TableView<Product> productTable = createTable();
+    private final static int dataSize = cm.getAll().size();
 
-    // Data cho TableView
-    private ObservableList<Product> productData = FXCollections.observableArrayList();
+    private ObservableList<Product> currentProductList = FXCollections.observableArrayList(cm.getAll());
 
     // Thêm thuộc tính productTable
-    private TableView<Product> productTable = new TableView<>();
 
     @Override
     public void start(Stage primaryStage) {
         HBox root = new HBox();
         root.setPadding(new Insets(10));
         root.setSpacing(20);
+
+        Pagination pagination = new Pagination((int) Math.ceil((double) currentProductList.size() / rowsPerPage), 0);
+        pagination.setPageFactory(this::createPage);
+
+        // Tạo thanh tìm kiếm
+        TextField searchField = new TextField();
+        searchField.setPromptText("Search product...");
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            filterProductList(newValue, null);
+            updatePagination(pagination);
+        });
+
+        // Tạo danh sách các button filter
+        String[] filterCategories = cm.getAllCategories().toArray(new String[0]);
+        String[] allCategories = new String[filterCategories.length + 1];
+        allCategories[0] = "All";
+        System.arraycopy(filterCategories, 0, allCategories, 1, filterCategories.length);
+
+        // Tạo một HBox để chứa các button filter
+        HBox filterBox = new HBox(10);
+        filterBox.setPadding(new Insets(10));
+
+        // Tạo từng button filter và thêm vào HBox
+        for (String category : allCategories) {
+            Button filterButton = new Button(category);
+            filterButton.setOnAction(e -> {
+                filterProductList(searchField.getText(), category.equals("All") ? null : category);
+                updatePagination(pagination);
+            });
+            filterBox.getChildren().add(filterButton);
+        }
+
+        // Thay thế ComboBox bằng HBox chứa các button filter
+        VBox tableContainer = new VBox(10, searchField, filterBox, pagination);
+
+        // Phần bên phải: Order summary
+        VBox orderSummary = new VBox();
+        orderSummary.setPadding(new Insets(10));
+        orderSummary.setSpacing(10);
+
+        Label orderDetailLabel = new Label("Order Detail");
+        orderListView.setPrefHeight(200);
+        Button buyNowButton = new Button("Buy Now");
+
+        buyNowButton.setOnAction(e -> {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Confirmation");
+            alert.setHeaderText("Confirm Purchase");
+            alert.setContentText("Are you sure you want to proceed with the purchase?");
+            alert.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.OK) {
+                    for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
+                        int productId = entry.getKey();
+                        int quantity = entry.getValue();
+                        cm.handlePurchase(productId, quantity);
+                    }
+                    Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                    successAlert.setTitle("Purchase Successful");
+                    successAlert.setContentText("Thank you for your purchase!");
+                    successAlert.showAndWait();
+                    cartItems.clear();
+                    totalPrice = 0;
+                    totalLabel.setText("Total: $0.00");
+                    updateOrderListView();
+                    productTable.getItems().clear();
+                    CashierModel.loadData(productTable, 1);
+                }
+            });
+        });
+
+        orderSummary.getChildren().addAll(orderDetailLabel, orderListView, totalLabel, buyNowButton);
+
+        root.getChildren().addAll(tableContainer, orderSummary);
+
+        // Scene và Stage
+        Scene scene = new Scene(root, 1366, 768);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Product Order App");
+        primaryStage.setResizable(false);
+        primaryStage.setWidth(1366);
+        primaryStage.setHeight(768);
+        primaryStage.show();
+
+        Platform.runLater(() -> {
+            productTable.requestFocus();  // Focus vào bảng sản phẩm khi ứng dụng khởi động
+            searchField.setFocusTraversable(false);  // Tắt khả năng focus tự động của ô tìm kiếm
+            filterBox.getChildren().forEach(node -> node.setFocusTraversable(false)); // Tắt khả năng focus cho các nút filter
+        });
+    }
+
+    private TableView<Product> createTable() {
+        TableView<Product> productTable = new TableView<>();
 
         productTable.setPrefWidth(630);
 
@@ -97,94 +193,29 @@ public class Cashier extends Application {
 
         productTable.getColumns().addAll(idColumn, nameColumn, brandColumn, stockColumn, priceColumn, actionColumn);
 
-        // Tạo thanh tìm kiếm
-        TextField searchField = new TextField();
-        searchField.setPromptText("Search product...");
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> filterProductList(productTable, newValue, null));
+        return productTable;
+    }
 
-        // Tạo danh sách các button filter
-        String[] filterCategories = cm.getAllCategories().toArray(new String[0]);
-        String[] allCategories = new String[filterCategories.length + 1];
-        allCategories[0] = "All";
-        System.arraycopy(filterCategories, 0, allCategories, 1, filterCategories.length);
+    private Node createPage(int pageIndex) {
+        int fromIndex = pageIndex * rowsPerPage;
+        int toIndex = Math.min(fromIndex + rowsPerPage, currentProductList.size());
+        productTable.setItems(FXCollections.observableArrayList(currentProductList.subList(fromIndex, toIndex)));
 
-        // Tạo một HBox để chứa các button filter
-        HBox filterBox = new HBox(10);
-        filterBox.setPadding(new Insets(10));
+        return new BorderPane(productTable);
+    }
 
-        // Tạo từng button filter và thêm vào HBox
-        for (String category : allCategories) {
-            Button filterButton = new Button(category);
-            filterButton.setOnAction(e -> filterProductList(productTable, searchField.getText(), category.equals("All") ? null : category));
-            filterBox.getChildren().add(filterButton);
-        }
-
-        // Thay thế ComboBox bằng HBox chứa các button filter
-        VBox tableContainer = new VBox(10, searchField, filterBox, productTable);
-        // Phần bên phải: Order summary
-        VBox orderSummary = new VBox();
-        orderSummary.setPadding(new Insets(10));
-        orderSummary.setSpacing(10);
-
-        Label orderDetailLabel = new Label("Order Detail");
-        orderListView.setPrefHeight(200);
-        Button buyNowButton = new Button("Buy Now");
-
-        buyNowButton.setOnAction(e -> {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Confirmation");
-            alert.setHeaderText("Confirm Purchase");
-            alert.setContentText("Are you sure you want to proceed with the purchase?");
-            alert.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
-                        int productId = entry.getKey();
-                        int quantity = entry.getValue();
-                        cm.handlePurchase(productId, quantity);
-                    }
-                    Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-                    successAlert.setTitle("Purchase Successful");
-                    successAlert.setContentText("Thank you for your purchase!");
-                    successAlert.showAndWait();
-                    cartItems.clear();
-                    totalPrice = 0;
-                    totalLabel.setText("Total: $0.00");
-                    updateOrderListView();
-                    productTable.getItems().clear();
-                    CashierModel.loadData(productTable, 1);
-                }
-            });
-        });
-
-        orderSummary.getChildren().addAll(orderDetailLabel, orderListView, totalLabel, buyNowButton);
-
-        root.getChildren().addAll(tableContainer, orderSummary);
-
-        // Scene và Stage
-        Scene scene = new Scene(root, 1366, 768);
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Product Order App");
-        primaryStage.setResizable(false);
-        primaryStage.setWidth(1366);
-        primaryStage.setHeight(768);
-        primaryStage.show();
-
-        Platform.runLater(() -> {
-            productTable.requestFocus();  // Focus vào bảng sản phẩm khi ứng dụng khởi động
-            searchField.setFocusTraversable(false);  // Tắt khả năng focus tự động của ô tìm kiếm
-            filterBox.getChildren().forEach(node -> node.setFocusTraversable(false)); // Tắt khả năng focus cho các nút filter
-        });
-
-
-        // Load dữ liệu vào bảng sản phẩm
-        CashierModel.loadData(productTable, 1);
+    private void updatePagination(Pagination pagination) {
+        pagination.setPageCount((int) Math.ceil((double) currentProductList.size() / rowsPerPage));
+        pagination.setCurrentPageIndex(0);
+        pagination.setPageFactory(this::createPage);
     }
 
     // Hàm lọc sản phẩm dựa trên từ khóa tìm kiếm và loại sản phẩm
-    private void filterProductList(TableView<Product> productTable, String searchKeyword, String filterCategory) {
-        ObservableList<Product> filteredList = cm.getAll().stream().filter(product -> (searchKeyword == null || product.getName().toLowerCase().contains(searchKeyword.toLowerCase())) && (filterCategory == null || filterCategory.equals("All") || product.getCategory().equals(filterCategory))).collect(Collectors.toCollection(FXCollections::observableArrayList));
-
-        productTable.setItems(filteredList);
+    private void filterProductList(String searchKeyword, String filterCategory) {
+        currentProductList = cm.getAll().stream()
+                .filter(product -> (searchKeyword == null || product.getName().toLowerCase().contains(searchKeyword.toLowerCase()))
+                        && (filterCategory == null || filterCategory.equals("All") || product.getCategory().equals(filterCategory)))
+                .collect(Collectors.toCollection(FXCollections::observableArrayList));
     }
 
     private void updateOrderListView() {
