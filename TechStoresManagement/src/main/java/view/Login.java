@@ -1,7 +1,6 @@
 package view;
 
 import controller.LoginController;
-import controller.Session;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -23,7 +22,7 @@ public class Login extends Application {
     @Override
     public void start(Stage primaryStage) {
         TextField usernameField = new TextField();
-        new LoginModel();
+        LoginModel model = new LoginModel();
         usernameField.setPromptText("Username");
 
         PasswordField passwordField = new PasswordField();
@@ -67,16 +66,20 @@ public class Login extends Application {
         // Khởi tạo LoginController
         LoginController loginController = new LoginController(usernameField, passwordField, loginButton, messageLabel);
 
+        // Sự kiện nút đăng nhập
         loginButton.setOnAction(e -> {
+            // Thực hiện đăng nhập và kiểm tra nếu đăng nhập thành công
             boolean loginSuccess = loginController.handleLogin();
 
             if (loginSuccess && Session.isLoggedIn()) {
                 primaryStage.close();
+                try {
+                    new Cashier().start(new Stage());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         });
-
-        passwordField.setOnAction(e -> loginButton.fire());
-
     }
 
     public static void main(String[] args) {
