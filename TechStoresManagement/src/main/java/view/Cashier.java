@@ -1,5 +1,6 @@
 package view;
 
+import controller.Session;
 import entity.Product;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -16,11 +17,10 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import javafx.scene.control.Pagination;
-import org.w3c.dom.ls.LSOutput;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Cashier extends Application {
@@ -28,43 +28,44 @@ public class Cashier extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-//    private int storeId;
-//
-//    public Cashier() {
-//    }
-//
-//    public Cashier(int storeId) {
-//        this.storeId = storeId;
-//    }
+    private final int idStore;
+    private final String employeeName;
+
+    public Cashier(int idStore) {
+        // Lấy thông tin từ Session
+        this.idStore = Session.getIdStore();
+        this.employeeName = Session.getEmployeeName();
+    }
+
     private int currentPage = 1;
     private final int itemsPerPage = 10;
     private int totalPages;
-    private Label pageLabel = new Label();
-    private ListView<HBox> orderListView = new ListView<>();
-    private Label totalLabel = new Label("Total:                                                                              $0.00");
+    private final Label pageLabel = new Label();
+    private final ListView<HBox> orderListView = new ListView<>();
+    private final Label totalLabel = new Label("Total:                                                                              $0.00");
     private double totalPrice = 0;
-    private Map<Integer, Integer> cartItems = new HashMap<>();
-    private final static int rowsPerPage = 10;
-    static CashierModel cm = new CashierModel();
-    private final TableView<Product> productTable = createTable();
-    private final static int dataSize = cm.getAll().size();
+    private final Map<Integer, Integer> cartItems = new HashMap<>();
+    CashierModel cm = new CashierModel();
 
-    private ObservableList<Product> currentProductList = FXCollections.observableArrayList(cm.getAll());
+    // Data cho TableView
+    private final ObservableList<Product> productData = FXCollections.observableArrayList();
 
     // Thêm thuộc tính productTable
+    private final TableView<Product> productTable = new TableView<>();
 
     @Override
     public void start(Stage primaryStage) {
-//        if (!Session.isLoggedIn()) {
-//            try {
-//                new Login().start(new Stage());
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//            primaryStage.close();
-//            return;
-//        }
-//        System.out.println("Logged in as Cashier of store: " + storeId);
+        if (!Session.isLoggedIn()) {
+            try {
+                new Login().start(new Stage());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            primaryStage.close();
+            return;
+        }
+        System.out.println("Logged in as: " + employeeName + " at store ID: " + idStore);
+
         HBox root = new HBox();
         root.setPadding(new Insets(10, 50, 10, 50));
         root.setSpacing(20);
@@ -139,10 +140,11 @@ public class Cashier extends Application {
         searchField.getStyleClass().add("search-field");
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterProductList(productTable, newValue, null));
 
-    private Node createPage(int pageIndex) {
-        int fromIndex = pageIndex * rowsPerPage;
-        int toIndex = Math.min(fromIndex + rowsPerPage, currentProductList.size());
-        productTable.setItems(FXCollections.observableArrayList(currentProductList.subList(fromIndex, toIndex)));
+        // Tạo danh sách các button filter
+        String[] filterCategories = cm.getAllCategories().toArray(new String[0]);
+        String[] allCategories = new String[filterCategories.length + 1];
+        allCategories[0] = "All";
+        System.arraycopy(filterCategories, 0, allCategories, 1, filterCategories.length);
 
         // Tạo một HBox để chứa các button filter
         HBox filterBox = new HBox(17);
@@ -277,9 +279,9 @@ public class Cashier extends Application {
 
         // Scene và Stage
         Scene scene = new Scene(root, 1366, 768);
-        scene.getStylesheets().add(getClass().getResource("cashier.css").toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("cashier.css")).toExternalForm());
         primaryStage.setScene(scene);
-        primaryStage.setTitle("Product Order App");
+        primaryStage.setTitle("Cashier App");
         primaryStage.setResizable(false);
         primaryStage.setWidth(1366);
         primaryStage.setHeight(768);
@@ -296,7 +298,7 @@ public class Cashier extends Application {
     }
 
     // Hàm lọc sản phẩm dựa trên từ khóa tìm kiếm và loại sản phẩm
-    private ObservableList<Product> filteredProductData = FXCollections.observableArrayList(); // New filtered list
+    private final ObservableList<Product> filteredProductData = FXCollections.observableArrayList(); // New filtered list
 
     private void loadData() {
         productData.setAll(cm.getAll()); // Load all products into the original data list

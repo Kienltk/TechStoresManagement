@@ -1,8 +1,14 @@
 package controller;
 
+import javafx.stage.Stage;
 import model.LoginModel;
 import javafx.scene.control.*;
-import view.Session;
+import view.Cashier;
+import view.Director;
+import view.StoreManager;
+import view.WarehouseManager;
+
+import java.util.Map;
 
 public class LoginController {
 
@@ -10,6 +16,7 @@ public class LoginController {
     private PasswordField passwordField;
     private Button loginButton;
     private Label messageLabel;
+    private LoginModel loginModel = new LoginModel();
 
     public LoginController(TextField usernameField, PasswordField passwordField, Button loginButton, Label messageLabel) {
         this.usernameField = usernameField;
@@ -28,36 +35,64 @@ public class LoginController {
         String username = usernameField.getText();
         String password = passwordField.getText();
 
-        // Kiểm tra nếu tên đăng nhập hoặc mật khẩu bị bỏ trống
+        messageLabel.setVisible(false);
+        messageLabel.setManaged(false);
+
         if (username.isEmpty() || password.isEmpty()) {
             messageLabel.setText("Please enter both username and password.");
             messageLabel.setStyle("-fx-text-fill: red;");
             messageLabel.setVisible(true);
             messageLabel.setManaged(true);
-            return false; // Đăng nhập không hợp lệ
+            return false;
         }
 
-        // Giả sử LoginModel kiểm tra thông tin đăng nhập
-        LoginModel loginModel = new LoginModel();
         boolean isValidLogin = loginModel.validateLogin(username, password);
 
         if (isValidLogin) {
-            // Đăng nhập thành công
             messageLabel.setText("Login successful!");
             messageLabel.setStyle("-fx-text-fill: green;");
             messageLabel.setVisible(true);
             messageLabel.setManaged(true);
 
-            // Cập nhật trạng thái đăng nhập
+            Map<String, Object> userInfo = loginModel.getRoleAndLocation(username);
+            String role = (String) userInfo.get("role");
+            int idStore = (int) userInfo.get("id_store");
+            int idWarehouse = (int) userInfo.get("id_warehouse");
+            String employeeName = (String) userInfo.get("employee_name");
+
+            // Lưu thông tin vào Session
             Session.setLoggedIn(true);
-            return true; // Đăng nhập hợp lệ
+            Session.setRole(role);
+            Session.setIdStore(idStore);
+            Session.setIdWarehouse(idWarehouse);
+            Session.setEmployeeName(employeeName);
+
+            // Điều hướng dựa trên role
+            switch (role) {
+                case "General Director":
+                    new Director().start(new Stage());
+                    break;
+                case "Store Management":
+                    new StoreManager(idStore).start(new Stage());
+                    break;
+                case "Warehouse Management":
+                    new WarehouseManager(idWarehouse).start(new Stage());
+                    break;
+                case "Cashier":
+                    new Cashier(idStore).start(new Stage());
+                    break;
+                default:
+                    System.out.println("Unknown role");
+            }
+            return true;
         } else {
-            // Đăng nhập thất bại
             messageLabel.setText("Invalid username or password.");
             messageLabel.setStyle("-fx-text-fill: red;");
             messageLabel.setVisible(true);
             messageLabel.setManaged(true);
-            return false; // Đăng nhập không hợp lệ
+            return false;
         }
     }
+
+
 }
