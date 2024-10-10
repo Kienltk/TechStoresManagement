@@ -1,0 +1,72 @@
+.category-button {
+    -fx-background-color: white;
+    -fx-text-fill: #4AD4DD;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 15px;
+    -fx-border-color: #4AD4DD;
+    -fx-border-width: 2px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+.category-button.selected {
+    -fx-background-color: #4AD4DD;  /* Màu nền xanh 4AD4DD khi được chọn */
+    -fx-text-fill: white;           /* Màu chữ trắng khi được chọn */
+    -fx-border-color: #4AD4DD;      /* Đổi viền cùng màu với nền */
+}
+/* Kiểu cho thanh tìm kiếm */
+.search-field {
+    -fx-max-width: 650px;          /* Chiều rộng tối đa của TextField */
+    -fx-background-color: white;  /* Màu nền trắng */
+    -fx-border-color: #4AD4DD;    /* Viền màu xanh 4AD4DD */
+    -fx-border-radius: 12px;      /* Bo tròn viền */
+    -fx-background-radius: 12px;  /* Bo tròn nền */
+    -fx-padding: 8 15;            /* Khoảng cách giữa văn bản và viền */
+    -fx-font-size: 14px;          /* Kích thước font chữ */
+    -fx-text-fill: #007ACC;       /* Màu chữ mặc định */
+    -fx-prompt-text-fill: #A9A9A9; /* Màu chữ của placeholder */
+}
+
+/* Khi nhấn vào thanh tìm kiếm (focus) */
+.search-field:focused {
+    -fx-border-color: #007ACC;    /* Thay đổi viền khi nhấn vào (xanh đậm hơn) */
+    -fx-background-color: #E6F7FF; /* Màu nền nhạt khi nhấn vào */
+}
+.increase-button, .decrease-button {
+    -fx-background-color: white; /* Nền trắng */
+    -fx-border-color: #4AD4DD; /* Viền xanh */
+    -fx-border-radius: 50%; /* Đường viền tròn hoàn toàn */
+    -fx-background-radius: 50%; /* Đường viền nền tròn hoàn toàn */
+    -fx-min-width: 20px; /* Chiều rộng tối thiểu */
+    -fx-min-height: 20px; /* Chiều cao tối thiểu */
+    -fx-pref-width: 20px; /* Chiều rộng ưu tiên */
+    -fx-pref-height: 20px; /* Chiều cao ưu tiên */
+    -fx-text-fill: #4AD4DD; /* Màu chữ xanh */
+    -fx-font-size: 14px; /* Kích thước chữ */
+}
+/* Loại bỏ viền ngoài cho ListView */
+#order-list-view {
+    -fx-border-width: 0; /* Loại bỏ viền ngoài */
+    -fx-background-color: transparent; /* Đặt nền trong suốt */
+}
+
+/* Thêm viền dưới cho mỗi mục trong ListView */
+#order-list-view .list-cell {
+    -fx-border-color: transparent transparent #d3d3d3 transparent; /* Chỉ viền dưới */
+    -fx-border-width: 0 0 1 0; /* Đặt độ dày của viền dưới */
+    -fx-padding: 10px; /* Tạo khoảng cách giữa các mục */
+    -fx-background-color:transparent;
+}
+
+/* Thay đổi màu viền dưới khi di chuột */
+#order-list-view .list-cell:hover {
+    -fx-border-color: transparent transparent #4AD4DD transparent;
+    /* Màu viền dưới khi hover */
+}
+/* Tăng kích thước và độ đậm cho chữ "Order Detail" */
+#order-detail-label {
+    -fx-font-size: 22px; /* Tăng kích thước chữ */
+    -fx-font-weight: bold; /* Làm cho chữ đậm */
+    -fx-text-fill: #4AD4DD; /* Màu chữ xanh */
+    -fx-padding: 0 35px; /* Tạo khoảng cách giữa chữ và nền */
+}
+
