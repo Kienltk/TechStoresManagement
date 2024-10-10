@@ -69,20 +69,11 @@ public class LoginController {
 
             // Điều hướng dựa trên role
             switch (role) {
-                case "General Director":
-                    new Director().start(new Stage());
-                    break;
-                case "Store Management":
-                    new StoreManager().start(new Stage());
-                    break;
-                case "Warehouse Management":
-                    new WarehouseManager().start(new Stage());
-                    break;
-                case "Cashier":
-                    new Cashier().start(new Stage());
-                    break;
-                default:
-                    System.out.println("Unknown role");
+                case "General Director" -> new Director().start(new Stage());
+                case "Store Management" -> new StoreManager().start(new Stage());
+                case "Warehouse Management" -> new WarehouseManager().start(new Stage());
+                case "Cashier" -> new Cashier().start(new Stage());
+                default -> System.out.println("Unknown role");
             }
             return true;
         } else {

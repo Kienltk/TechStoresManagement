@@ -256,6 +256,8 @@ public class Cashier extends Application {
                     totalLabel.setText("Total:                                                                              $0.00");
                     updateOrderListView();
                     productTable.getItems().clear();
+                    updateTableData();
+                    pageLabel.setText("Page " + currentPage + " / " + totalPages);
                 }
             });
         });
