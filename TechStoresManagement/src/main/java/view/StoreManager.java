@@ -14,7 +14,7 @@ public class StoreManager extends Application {
     private int idStore;
     private String employeeName;
 
-    public StoreManager(int idStore) {
+    public StoreManager() {
         // Lấy thông tin từ Session
         this.idStore = Session.getIdStore();
         this.employeeName = Session.getEmployeeName();

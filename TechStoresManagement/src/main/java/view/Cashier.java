@@ -31,8 +31,7 @@ public class Cashier extends Application {
     private final int idStore;
     private final String employeeName;
 
-    public Cashier(int idStore) {
-        // Lấy thông tin từ Session
+    public Cashier() {
         this.idStore = Session.getIdStore();
         this.employeeName = Session.getEmployeeName();
     }

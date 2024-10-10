@@ -15,7 +15,7 @@ public class WarehouseManager extends Application {
     private int idWarehouse;
     private String employeeName;
 
-    public WarehouseManager(int idStore) {
+    public WarehouseManager() {
         // Lấy thông tin từ Session
         this.idWarehouse = Session.getIdStore();
         this.employeeName = Session.getEmployeeName();

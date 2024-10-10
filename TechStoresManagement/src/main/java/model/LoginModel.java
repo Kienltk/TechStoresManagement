@@ -13,7 +13,8 @@ import java.util.Map;
 public class LoginModel {
     public Map<String, Object> getRoleAndLocation(String username) {
         Map<String, Object> userInfo = new HashMap<>();
-        String sql = "SELECT r.role, e.id_store, e.id_warehouse, e.name AS employee_name FROM accounts a " +
+        String sql = "SELECT r.role, e.id_store, e.id_warehouse, e.first_name, e.last_name " +
+                "FROM accounts a " +
                 "JOIN employees e ON a.id_person = e.id " +
                 "JOIN role r ON e.id_role = r.id " +
                 "WHERE a.username = ?";
@@ -28,7 +29,7 @@ public class LoginModel {
                 userInfo.put("role", resultSet.getString("role"));
                 userInfo.put("id_store", resultSet.getInt("id_store"));
                 userInfo.put("id_warehouse", resultSet.getInt("id_warehouse"));
-                userInfo.put("employee_name", resultSet.getString("employee_name"));  // Thêm tên nhân viên
+                userInfo.put("employee_name", resultSet.getString("first_name") + " " + resultSet.getString("last_name"));
             }
         } catch (SQLException e) {
             System.out.println("Database connection error: " + e.getMessage());

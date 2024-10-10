@@ -73,13 +73,13 @@ public class LoginController {
                     new Director().start(new Stage());
                     break;
                 case "Store Management":
-                    new StoreManager(idStore).start(new Stage());
+                    new StoreManager().start(new Stage());
                     break;
                 case "Warehouse Management":
-                    new WarehouseManager(idWarehouse).start(new Stage());
+                    new WarehouseManager().start(new Stage());
                     break;
                 case "Cashier":
-                    new Cashier(idStore).start(new Stage());
+                    new Cashier().start(new Stage());
                     break;
                 default:
                     System.out.println("Unknown role");
