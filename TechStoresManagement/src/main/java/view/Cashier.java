@@ -17,7 +17,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-
+import java.lang.Integer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -124,7 +124,7 @@ public class Cashier extends Application {
                     totalLabel.setText("Total:                                                                              $" +  String.format("%.2f", totalPrice));
                     updateOrderListView();
                 } else {
-                    showStockAlert(cm.getOne(productId).getName());
+                    showStockAlert(cm.getOne(idStore,productId).getName());
                 }
             });
             return new SimpleObjectProperty<>(addButton);
@@ -245,7 +245,7 @@ public class Cashier extends Application {
                     for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
                         int productId = entry.getKey();
                         int quantity = entry.getValue();
-                        cm.handlePurchase(productId, quantity);
+                        cm.handlePurchase(productId, quantity,idStore);
                     }
                     Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
                     successAlert.setTitle("Purchase Successful");
@@ -302,7 +302,7 @@ public class Cashier extends Application {
     private final ObservableList<Product> filteredProductData = FXCollections.observableArrayList(); // New filtered list
 
     private void loadData() {
-        productData.setAll(cm.getAll()); // Load all products into the original data list
+        productData.setAll(cm.getAll(idStore)); // Load all products into the original data list
         filteredProductData.setAll(productData); // Initialize the filtered list with all products
         totalPages = (int) Math.ceil((double) filteredProductData.size() / itemsPerPage); // Calculate total pages based on filtered data
         updateTableData(); // Update the displayed data
@@ -310,7 +310,7 @@ public class Cashier extends Application {
 
     private void filterProductList(TableView<Product> productTable, String searchKeyword, String filterCategory) {
         // Filter the product data based on the search keyword and category
-        filteredProductData.setAll(cm.getAll().stream()
+        filteredProductData.setAll(cm.getAll(idStore).stream()
                 .filter(product -> (searchKeyword == null || product.getName().toLowerCase().contains(searchKeyword.toLowerCase())) &&
                         (filterCategory == null || filterCategory.equals("All") || product.getCategory().equals(filterCategory)))
                 .collect(Collectors.toList()));
@@ -344,9 +344,9 @@ public class Cashier extends Application {
     private void updateOrderListView() {
         orderListView.getItems().clear();
         for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
-            String itemName = cm.getOne(entry.getKey()).getName();
+            String itemName = cm.getOne(entry.getKey(),idStore).getName();
             final int[] quantity = {entry.getValue()};
-            double productPrice = cm.getOne(entry.getKey()).getPrice();
+            double productPrice = cm.getOne(entry.getKey(),idStore).getPrice();
             double totalPriceForItem = productPrice * quantity[0]; // Tính tổng tiền cho sản phẩm
 
             HBox orderItem = new HBox(15); // Thêm khoảng cách giữa các phần tử
@@ -377,7 +377,7 @@ public class Cashier extends Application {
             increaseLabel.setStyle("-fx-text-fill: #4AD4DD;"); // Đổi màu chữ sang xanh
             increaseButton.setGraphic(increaseLabel);
             increaseButton.setOnAction(e -> {
-                int currentStock = cm.getOne(entry.getKey()).getStock();
+                int currentStock = cm.getOne(entry.getKey(),idStore).getStock();
                 if (quantity[0] < currentStock) {
                     quantity[0]++;
                     cartItems.put(entry.getKey(), quantity[0]);
