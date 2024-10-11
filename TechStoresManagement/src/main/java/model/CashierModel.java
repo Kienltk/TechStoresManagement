@@ -85,7 +85,7 @@ public class CashierModel implements ICommon<Product> {
     }
 
     @Override
-    public Product getOne(int idStore ,long id) {
+    public Product getOne(int idStore, long id) {
         String sql = "SELECT products.img_address, products.id, products.product_name, products.brand, " +
                 "products_store.quantity, products.sale_price FROM products " +
                 "JOIN products_store ON products.id = products_store.id_product " +
@@ -94,7 +94,11 @@ public class CashierModel implements ICommon<Product> {
 
         try (Connection con = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, (int) id);
+
+            // Set the parameters correctly
+            ps.setInt(1, idStore);  // First parameter for id_store
+            ps.setLong(2, id);      // Second parameter for products.id
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return getProduct(rs);
@@ -105,6 +109,7 @@ public class CashierModel implements ICommon<Product> {
         }
         return null;
     }
+
 
     @Override
     public boolean add(Product obj) {
@@ -170,6 +175,7 @@ public class CashierModel implements ICommon<Product> {
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, reducedQuantity);
             ps.setInt(2, idProduct);
+            ps.setInt(3, idStore);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
