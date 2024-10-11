@@ -16,8 +16,8 @@ import java.util.ArrayList;
 
 public class CashierModel implements ICommon<Product> {
 
-    public static void loadData(TableView<Product> productTable, int storeId) {
-        ArrayList<Product> products = new CashierModel().getAllFromStoreId(storeId);
+    public static void loadData(TableView<Product> productTable, int idStore) {
+        ArrayList<Product> products = new CashierModel().getAllFromidStore(idStore);
         productTable.getItems().addAll(products);
     }
 
@@ -80,17 +80,17 @@ public class CashierModel implements ICommon<Product> {
         return list;
     }
     @Override
-    public ArrayList<Product> getAll() {
-        return getAllFromStoreId(1); // Default to store ID 1 if none provided
+    public ArrayList<Product> getAll(int idStore) {
+        return getAllFromidStore(idStore); // Default to store ID 1 if none provided
     }
 
     @Override
-    public Product getOne(long id) {
+    public Product getOne(int idStore ,long id) {
         String sql = "SELECT products.img_address, products.id, products.product_name, products.brand, " +
                 "products_store.quantity, products.sale_price FROM products " +
                 "JOIN products_store ON products.id = products_store.id_product " +
                 "JOIN stores ON products_store.id_store = stores.id " +
-                "WHERE products_store.id_store = 1 AND products.id = ?";
+                "WHERE products_store.id_store = ? AND products.id = ?";
 
         try (Connection con = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -124,12 +124,12 @@ public class CashierModel implements ICommon<Product> {
         return false;
     }
 
-    public Product getProductByName(String name) {
+    public Product getProductByName(int idStore , String name) {
         String sql = "SELECT products.img_address, products.id, products.product_name, products.brand, " +
                 "products_store.quantity, products.sale_price FROM products " +
                 "JOIN products_store ON products.id = products_store.id_product " +
                 "JOIN stores ON products_store.id_store = stores.id " +
-                "WHERE products_store.id_store = 1 AND products.product_name = ?";
+                "WHERE products_store.id_store = ? AND products.product_name = ?";
 
         try (Connection con = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -145,7 +145,7 @@ public class CashierModel implements ICommon<Product> {
         return null;
     }
 
-    public ArrayList<Product> getAllFromStoreId(int storeId) {
+    public ArrayList<Product> getAllFromidStore(int idStore) {
         ArrayList<Product> list = new ArrayList<>();
         String sql = "SELECT products.img_address, products.id, products.product_name, products.brand, " +
                 "products_store.quantity, products.sale_price FROM products " +
@@ -155,7 +155,7 @@ public class CashierModel implements ICommon<Product> {
 
         try (Connection con = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, storeId);
+            ps.setInt(1, idStore);
             return getProducts(list, ps);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -163,8 +163,8 @@ public class CashierModel implements ICommon<Product> {
         return new ArrayList<>();
     }
 
-    public boolean handlePurchase(int idProduct, int reducedQuantity) {
-        String sql = "UPDATE products_store SET quantity = quantity - ? WHERE id_product = ? AND id_store = 1";
+    public boolean handlePurchase(int idProduct, int reducedQuantity,int idStore) {
+        String sql = "UPDATE products_store SET quantity = quantity - ? WHERE id_product = ? AND id_store = ?";
 
         try (Connection con = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
