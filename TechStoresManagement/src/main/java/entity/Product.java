@@ -61,6 +61,10 @@ public class Product {
     public SimpleIntegerProperty stockProperty() {
         return stock;
     }
+    public void setStock(int stock) {
+        this.stock.set(stock);
+    }
+
 
     public double getPrice() {
         return price.get();

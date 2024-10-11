@@ -121,10 +121,11 @@ public class Cashier extends Application {
                 if (currentQuantity < stockQuantity) {
                     cartItems.put(productId, currentQuantity + 1);
                     totalPrice += productPrice;
-                    totalLabel.setText("Total:                                                                              $" +  String.format("%.2f", totalPrice));
+                    totalLabel.setText("Total:                                                                              $" + String.format("%.2f", totalPrice));
                     updateOrderListView();
+                    updateTableData();  // Update the product table after adding to cart
                 } else {
-                    showStockAlert(cm.getOne(idStore,productId).getName());
+                    showStockAlert(cm.getOne(idStore, productId).getName());
                 }
             });
             return new SimpleObjectProperty<>(addButton);
@@ -160,8 +161,7 @@ public class Cashier extends Application {
             }
 
             filterButton.setOnAction((e) -> {
-                updateTableData();
-                pageLabel.setText("Page " + currentPage + " / " + totalPages);
+
                 // Loại bỏ class "selected" khỏi tất cả các nút category
                 filterBox.getChildren().forEach(node -> {
                     if (node instanceof Button) {
@@ -174,6 +174,8 @@ public class Cashier extends Application {
 
                 // Thực hiện hành động lọc sản phẩm theo category
                 this.filterProductList(this.productTable, searchField.getText(), category.equals("All") ? null : category);
+                updateTableData();
+                pageLabel.setText("Page " + currentPage + " / " + totalPages);
             });
 
             filterBox.getChildren().add(filterButton);
@@ -240,24 +242,32 @@ public class Cashier extends Application {
             alert.setTitle("Confirmation");
             alert.setHeaderText("Confirm Purchase");
             alert.setContentText("Are you sure you want to proceed with the purchase?");
+
             alert.showAndWait().ifPresent(response -> {
                 if (response == ButtonType.OK) {
                     for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
                         int productId = entry.getKey();
                         int quantity = entry.getValue();
-                        cm.handlePurchase(productId, quantity,idStore);
+                        cm.handlePurchase(productId, quantity, idStore); // Xử lý giao dịch
+                        // Cập nhật số lượng sản phẩm trong bảng sản phẩm
+                        Product product = cm.getOne(idStore, productId); // Lấy sản phẩm theo ID
+                        if (product != null) {
+                            int newStock = product.getStock() - quantity; // Tính số lượng mới
+                            product.setStock(newStock); // Cập nhật số lượng sản phẩm
+                        }
                     }
                     Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
                     successAlert.setTitle("Purchase Successful");
                     successAlert.setContentText("Thank you for your purchase!");
                     successAlert.showAndWait();
+
+                    // Đặt lại giỏ hàng
                     cartItems.clear();
                     totalPrice = 0;
                     totalLabel.setText("Total:                                                                              $0.00");
-                    updateOrderListView();
-                    productTable.getItems().clear();
-                    updateTableData();
-                    pageLabel.setText("Page " + currentPage + " / " + totalPages);
+                    updateOrderListView(); // Cập nhật danh sách đơn hàng
+                    productTable.getItems().clear(); // Xóa các mục trong bảng sản phẩm
+                    loadData(); // Tải lại dữ liệu sản phẩm
                 }
             });
         });
@@ -305,7 +315,19 @@ public class Cashier extends Application {
         productData.setAll(cm.getAll(idStore)); // Load all products into the original data list
         filteredProductData.setAll(productData); // Initialize the filtered list with all products
         totalPages = (int) Math.ceil((double) filteredProductData.size() / itemsPerPage); // Calculate total pages based on filtered data
-        updateTableData(); // Update the displayed data
+        updateTableData();
+        pageLabel.setText("Page " + currentPage + " / " + totalPages);// Update the displayed data
+    }
+    private void updateTableData() {
+        int fromIndex = (currentPage - 1) * itemsPerPage;
+        int toIndex = Math.min(fromIndex + itemsPerPage, filteredProductData.size());
+
+        if (fromIndex >= filteredProductData.size()) {
+            return; // No items to show
+        }
+
+        productTable.setItems(FXCollections.observableArrayList(filteredProductData.subList(fromIndex, toIndex)));
+        pageLabel.setText("Page " + currentPage + " / " + totalPages);
     }
 
     private void filterProductList(TableView<Product> productTable, String searchKeyword, String filterCategory) {
@@ -327,26 +349,16 @@ public class Cashier extends Application {
         // Update the pagination label
         pageLabel.setText("Page " + currentPage + " / " + totalPages);
     }
-    private void updateTableData() {
-        int fromIndex = (currentPage - 1) * itemsPerPage;
-        int toIndex = Math.min(fromIndex + itemsPerPage, filteredProductData.size());
 
-        if (fromIndex >= filteredProductData.size()) {
-            return; // No items to show
-        }
-
-        productTable.setItems(FXCollections.observableArrayList(filteredProductData.subList(fromIndex, toIndex)));
-        pageLabel.setText("Page " + currentPage + " / " + totalPages);
-    }
 
 
 
     private void updateOrderListView() {
         orderListView.getItems().clear();
         for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
-            String itemName = cm.getOne(entry.getKey(),idStore).getName();
+            String itemName = cm.getOne(idStore,entry.getKey()).getName();
             final int[] quantity = {entry.getValue()};
-            double productPrice = cm.getOne(entry.getKey(),idStore).getPrice();
+            double productPrice = cm.getOne(idStore,entry.getKey()).getPrice();
             double totalPriceForItem = productPrice * quantity[0]; // Tính tổng tiền cho sản phẩm
 
             HBox orderItem = new HBox(15); // Thêm khoảng cách giữa các phần tử
@@ -364,9 +376,10 @@ public class Cashier extends Application {
                 if (quantity[0] > 1) {
                     quantity[0]--;
                     cartItems.put(entry.getKey(), quantity[0]);
-                    totalPrice -= productPrice; // Cập nhật tổng giá
+                    totalPrice -= productPrice; // Update total price
                     totalLabel.setText("Total:                                                                              $" + String.format("%.2f", totalPrice));
                     updateOrderListView();
+                    updateTableData();  // Update the product table after decreasing quantity
                 }
             });
 
@@ -377,13 +390,14 @@ public class Cashier extends Application {
             increaseLabel.setStyle("-fx-text-fill: #4AD4DD;"); // Đổi màu chữ sang xanh
             increaseButton.setGraphic(increaseLabel);
             increaseButton.setOnAction(e -> {
-                int currentStock = cm.getOne(entry.getKey(),idStore).getStock();
+                int currentStock = cm.getOne(idStore, entry.getKey()).getStock();
                 if (quantity[0] < currentStock) {
                     quantity[0]++;
                     cartItems.put(entry.getKey(), quantity[0]);
-                    totalPrice += productPrice; // Cập nhật tổng giá
+                    totalPrice += productPrice; // Update total price
                     totalLabel.setText("Total:                                                                              $" + String.format("%.2f", totalPrice));
                     updateOrderListView();
+                    updateTableData();  // Update the product table after increasing quantity
                 } else {
                     showStockAlert(itemName);
                 }
@@ -401,10 +415,11 @@ public class Cashier extends Application {
             Button removeButton = new Button("\u2716"); // Biểu tượng "x"
             removeButton.setStyle("-fx-font-size: 10; -fx-text-fill: red;-fx-background-color: #FFFFFF;-fx-border-color: #4AD4DD;-fx-border-radius: 100px;");
             removeButton.setOnAction(e -> {
-                totalPrice -= totalPriceForItem; // Cập nhật tổng giá
+                totalPrice -= totalPriceForItem; // Update total price
                 cartItems.remove(entry.getKey());
                 totalLabel.setText("Total:                                                                              $" + String.format("%.2f", totalPrice));
-                updateOrderListView(); // Cập nhật danh sách đơn hàng
+                updateOrderListView(); // Update order list
+                updateTableData();  // Update the product table after removing item
             });
 
             Region spacer = new Region();
