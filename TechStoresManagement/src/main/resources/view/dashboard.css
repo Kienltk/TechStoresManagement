@@ -1,0 +1,13 @@
+.sidebar{
+    -fx-background-color:#4AD4DD;
+    -fx-background-radius:0px 50px 0px 0px ;
+}
+.sidebar-btn-text{
+    -fx-background-color: transparent !important;
+    -fx-padding: 10  !important;
+}
+
+.sidebar-btn-text.active {
+    -fx-background-color: white  !important;
+    -fx-background-radius: 5px;
+}
