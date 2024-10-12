@@ -9,18 +9,33 @@ public class Product {
     private final SimpleStringProperty name;
     private final SimpleStringProperty brand;
     private final SimpleIntegerProperty stock;
-    private final SimpleDoubleProperty price;
+    private final SimpleDoubleProperty salePrice;
+    private SimpleDoubleProperty purchasePrice;
     private final SimpleStringProperty category; // Thêm thuộc tính category
 
-    public Product(int id, ImageView image, String name, String brand, int stock, double price, String category) {
+    public Product(int id, ImageView image, String name, String brand, int stock, double salePrice, String category) {
         this.id = new SimpleIntegerProperty(id);
         this.image = new SimpleObjectProperty<>(image);
         this.name = new SimpleStringProperty(name);
         this.brand = new SimpleStringProperty(brand);
         this.stock = new SimpleIntegerProperty(stock);
-        this.price = new SimpleDoubleProperty(price);
+        this.salePrice = new SimpleDoubleProperty(salePrice);
         this.category = new SimpleStringProperty(category); // Khởi tạo category
     }
+
+    public Product(int id, ImageView image, String name, String brand, int stock, double salePrice, double purchasePrice, String category) {
+        this.id = new SimpleIntegerProperty(id);
+        this.image = new SimpleObjectProperty<>(image);
+        this.name = new SimpleStringProperty(name);
+        this.brand = new SimpleStringProperty(brand);
+        this.stock = new SimpleIntegerProperty(stock);
+        this.salePrice = new SimpleDoubleProperty(salePrice);
+        this.purchasePrice = new SimpleDoubleProperty(purchasePrice);
+        this.category = new SimpleStringProperty(category);
+    }
+
+
+
 
     public int getId() {
         return id.get();
@@ -61,17 +76,26 @@ public class Product {
     public SimpleIntegerProperty stockProperty() {
         return stock;
     }
+
     public void setStock(int stock) {
         this.stock.set(stock);
     }
 
 
-    public double getPrice() {
-        return price.get();
+    public double getSalePrice() {
+        return salePrice.get();
     }
 
-    public SimpleDoubleProperty priceProperty() {
-        return price;
+    public double getPurchasePrice() {
+        return purchasePrice.get();
+    }
+
+    public SimpleDoubleProperty purchasePriceProperty() {
+        return purchasePrice;
+    }
+
+    public SimpleDoubleProperty salePriceProperty() {
+        return salePrice;
     }
 
     public String getCategory() { // Thêm phương thức getCategory

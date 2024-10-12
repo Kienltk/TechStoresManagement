@@ -105,7 +105,7 @@ public class Cashier extends Application {
 
         TableColumn<Product, Double> priceColumn = new TableColumn<>("Price");
         priceColumn.setPrefWidth(130);
-        priceColumn.setCellValueFactory(cellData -> cellData.getValue().priceProperty().asObject());
+        priceColumn.setCellValueFactory(cellData -> cellData.getValue().salePriceProperty().asObject());
 
         TableColumn<Product, Button> actionColumn = new TableColumn<>("Action");
         actionColumn.setPrefWidth(90);
@@ -114,7 +114,7 @@ public class Cashier extends Application {
             addButton.setOnAction(e -> {
                 Product product = cellData.getValue();
                 int productId = product.getId();
-                double productPrice = product.getPrice();
+                double productPrice = product.getSalePrice();
                 int stockQuantity = product.getStock();
                 int currentQuantity = cartItems.getOrDefault(productId, 0);
 
@@ -358,7 +358,7 @@ public class Cashier extends Application {
         for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
             String itemName = cm.getOne(idStore,entry.getKey()).getName();
             final int[] quantity = {entry.getValue()};
-            double productPrice = cm.getOne(idStore,entry.getKey()).getPrice();
+            double productPrice = cm.getOne(idStore,entry.getKey()).getSalePrice();
             double totalPriceForItem = productPrice * quantity[0]; // Tính tổng tiền cho sản phẩm
 
             HBox orderItem = new HBox(15); // Thêm khoảng cách giữa các phần tử
