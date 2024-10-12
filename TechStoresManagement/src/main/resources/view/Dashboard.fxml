@@ -104,7 +104,7 @@
                                 <Insets right="10.0" />
                             </HBox.margin>
                         </ImageView>
-                        <Label  fx:id="titleLabel4" style="-fx-text-fill: black;" text="Setting" textFill="#a2bee8">
+                        <Label  fx:id="titleLabel4" style="-fx-text-fill: black;" text="Account" textFill="#a2bee8">
                             <font>
                                 <Font name="Cambria" size="14.0" />
                             </font>

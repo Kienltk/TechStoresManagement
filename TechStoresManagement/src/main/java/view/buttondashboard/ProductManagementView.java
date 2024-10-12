@@ -48,26 +48,21 @@ public class ProductManagementView extends VBox {
             return new SimpleObjectProperty<>(hBox);
         });
 
-
         TableColumn<Product, String> brandColumn = new TableColumn<>("Brand");
         brandColumn.setMinWidth(150);
         brandColumn.setCellValueFactory(cellData -> cellData.getValue().brandProperty());
 
-
         TableColumn<Product, Double> purchasePriceColumn = new TableColumn<>("Purchase Price");
         purchasePriceColumn.setMinWidth(100);
-        purchasePriceColumn.setCellValueFactory(cellData -> cellData.getValue().salePriceProperty().asObject());
-
+        purchasePriceColumn.setCellValueFactory(cellData -> cellData.getValue().purchasePriceProperty().asObject());
 
         TableColumn<Product, Double> salePriceColumn = new TableColumn<>("Sale Price");
         salePriceColumn.setMinWidth(100);
         salePriceColumn.setCellValueFactory(cellData -> cellData.getValue().salePriceProperty().asObject());
 
-
         TableColumn<Product, Integer> stockColumn = new TableColumn<>("Stock");
         stockColumn.setMinWidth(100);
         stockColumn.setCellValueFactory(cellData -> cellData.getValue().stockProperty().asObject());
-
 
         // Option Column with Edit and Delete buttons
         TableColumn<Product, Void> optionColumn = new TableColumn<>("Option");
@@ -95,6 +90,7 @@ public class ProductManagementView extends VBox {
 
         // Add Columns to Table
         productTable.getColumns().addAll(idColumn, nameColumn, brandColumn, purchasePriceColumn, salePriceColumn, stockColumn, optionColumn);
+
         // ObservableList to hold Product data
         DirectorModel dm = new DirectorModel();
         ObservableList<Product> productList = FXCollections.observableArrayList();
@@ -102,5 +98,9 @@ public class ProductManagementView extends VBox {
 
         // Bind the data to the TableView
         productTable.setItems(productList);
+
+        // Thêm các thành phần vào VBox
+        this.getChildren().addAll(titleLabel, newProductButton, searchBar, productTable);
     }
+
 }

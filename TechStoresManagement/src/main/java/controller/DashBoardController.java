@@ -63,7 +63,7 @@ public class DashBoardController {
     public void showSettings() {
         clearActive();
         hBoxSettings.getStyleClass().add("active");
-        SettingView settingView = new SettingView();
+        AccountView settingView = new AccountView();
         mainContent.getChildren().setAll(settingView);
     }
 
