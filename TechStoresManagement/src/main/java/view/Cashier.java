@@ -1,6 +1,8 @@
 package view;
 
+import controller.CashierController;
 import controller.Session;
+import entity.Customer;
 import entity.Product;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -18,10 +20,9 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+
 import java.lang.Integer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Cashier extends Application {
@@ -29,6 +30,7 @@ public class Cashier extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+
     private final int idStore;
     private final String employeeName;
 
@@ -133,7 +135,7 @@ public class Cashier extends Application {
             Product product = cellData.getValue();
             Label nameLabel = new Label(product.getName());
             HBox hBox = new HBox(10);
-            hBox.getChildren().addAll( nameLabel);
+            hBox.getChildren().addAll(nameLabel);
             return new SimpleObjectProperty<>(hBox);
         });
 
@@ -224,7 +226,7 @@ public class Cashier extends Application {
 
         HBox filterSection = new HBox();
         filterSection.setAlignment(Pos.CENTER_LEFT);
-        filterBox.setPadding(new Insets(0,10,5,55));
+        filterBox.setPadding(new Insets(0, 10, 5, 55));
 
 
         // Tạo danh sách các button filter
@@ -298,7 +300,7 @@ public class Cashier extends Application {
         // Phần bên phải: Order summary
 
         VBox orderSummary = new VBox();
-        orderSummary.setPadding(new Insets(10,10,10,10));
+        orderSummary.setPadding(new Insets(10, 10, 10, 10));
         orderSummary.setSpacing(10);
         orderSummary.setStyle("-fx-background-color: #FFFFFF ;");
         orderSummary.setMaxWidth(500);
@@ -321,38 +323,8 @@ public class Cashier extends Application {
         buyNowButton.setStyle("-fx-text-alignment: center; ");
 
         buyNowButton.setOnAction(e -> {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Confirmation");
-            alert.setHeaderText("Confirm Purchase");
-            alert.setContentText("Are you sure you want to proceed with the purchase?");
+            submitOrder(); // Gọi method submitOrder
 
-            alert.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
-                        int productId = entry.getKey();
-                        int quantity = entry.getValue();
-                        cm.handlePurchase(productId, quantity, idStore); // Xử lý giao dịch
-                        // Cập nhật số lượng sản phẩm trong bảng sản phẩm
-                        Product product = cm.getOne(idStore, productId); // Lấy sản phẩm theo ID
-                        if (product != null) {
-                            int newStock = product.getStock() - quantity; // Tính số lượng mới
-                            product.setStock(newStock); // Cập nhật số lượng sản phẩm
-                        }
-                    }
-                    Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-                    successAlert.setTitle("Purchase Successful");
-                    successAlert.setContentText("Thank you for your purchase!");
-                    successAlert.showAndWait();
-
-                    // Đặt lại giỏ hàng
-                    cartItems.clear();
-                    totalSalePrice = 0;
-                    totalLabel.setText("Total:                                                                        $0.00");
-                    updateOrderListView(); // Cập nhật danh sách đơn hàng
-                    productTable.getItems().clear(); // Xóa các mục trong bảng sản phẩm
-                    loadData(); // Tải lại dữ liệu sản phẩm
-                }
-            });
         });
 
 
@@ -365,7 +337,7 @@ public class Cashier extends Application {
         outerVbox.getChildren().add(orderSummary);
         outerVbox.setMaxWidth(500);
         outerVbox.setPrefWidth(500);
-        table.getChildren().addAll(productTable,paginationBox);
+        table.getChildren().addAll(productTable, paginationBox);
         contentSection.getChildren().addAll(table, outerVbox);
 
         // Tạo VBox chính để đặt các phần thành từng lớp
@@ -394,11 +366,107 @@ public class Cashier extends Application {
             filterBox.getChildren().forEach(node -> node.setFocusTraversable(false)); // Tắt khả năng focus cho các nút filter
         });
 
-
-
-        // Load dữ liệu vào bảng sản phẩm
-//        CashierModel.loadData(productTable, 1);
     }
+
+    public void submitOrder() {
+        Stage stage = new Stage();
+        stage.setTitle("Submit Order");
+
+        // Tạo layout cho scene
+        VBox layout = new VBox(10);
+        layout.setPadding(new Insets(20));
+
+        // Tiêu đề
+        Label titleLabel = new Label("Submit Order");
+
+        Label customerLabel = new Label("Customer:");
+        TextField customerPhoneInput = new TextField();
+        customerPhoneInput.setPromptText("Enter customer phone number");
+
+        // Dropdown hiển thị tên khách hàng
+        ComboBox<Customer> customerDropdown = new ComboBox<>();
+        customerDropdown.setPromptText("Select customer");
+
+        // Khi nhập số điện thoại, tìm kiếm khách hàng từ database
+        customerPhoneInput.textProperty().addListener((observable, oldValue, newValue) -> {
+            customerDropdown.getItems().clear();
+            if (!newValue.isEmpty()) {
+                List<Customer> customers = CashierController.searchCustomerByPhone(newValue);
+                if (!customers.isEmpty()) {
+                    customerDropdown.getItems().addAll(customers);
+                }
+            }
+        });
+
+        // Khi chọn khách hàng từ dropdown, thay thế ô nhập bằng số điện thoại của khách hàng
+        customerDropdown.valueProperty().addListener((observable, oldValue, newValue) -> {
+            // Kiểm tra nếu không phải là khách hàng giả và dropdown không rỗng
+            if (newValue != null && newValue.getId() != -1) {
+                customerPhoneInput.setText(newValue.getPhoneNumber());
+            }
+        });
+
+
+
+        // Nút thêm khách hàng mới
+        Button addCustomerButton = new Button("Add Customer");
+        addCustomerButton.setOnAction(e -> CashierController.showAddCustomerScreen());
+
+        // Tổng tiền đơn hàng
+        Label totalPriceLabel = new Label("Total: $" + String.format("%.2f", totalSalePrice));
+
+        // Tiền khách trả
+        Label paymentLabel = new Label("Customer payment:");
+        TextField paymentInput = new TextField();
+        paymentInput.setPromptText("Enter customer payment");
+
+        // Label cảnh báo nếu tiền trả ít hơn tổng tiền
+        Label warningLabel = new Label();
+        warningLabel.setTextFill(Color.RED);
+
+        // Kiểm tra khi nhập tiền khách trả
+        paymentInput.textProperty().addListener((observable, oldValue, newValue) -> {
+            double total = totalSalePrice;
+            try {
+                double payment = Double.parseDouble(newValue);
+                if (payment < total) {
+                    warningLabel.setText("Insufficient amount.");
+                } else {
+                    warningLabel.setText("");
+                }
+            } catch (NumberFormatException ex) {
+                warningLabel.setText("Invalid payment amount.");
+            }
+        });
+
+        // Nút xác nhận thanh toán
+        Button submitButton = new Button("Submit");
+        submitButton.setOnAction(e -> {
+            double total = totalSalePrice;
+            try {
+                double payment = Double.parseDouble(paymentInput.getText());
+                if (payment >= total) {
+                    CashierController.processOrder(customerPhoneInput.getText(), cartItems, total);
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Payment successful!");
+                    alert.showAndWait();
+                    stage.close(); // Đóng cửa sổ sau khi hoàn tất
+                } else {
+                    warningLabel.setText("Insufficient amount.");
+                }
+            } catch (NumberFormatException ex) {
+                warningLabel.setText("Invalid payment amount.");
+            }
+        });
+
+        // Thêm các thành phần vào layout
+        layout.getChildren().addAll(titleLabel, customerLabel, customerPhoneInput, customerDropdown, addCustomerButton, totalPriceLabel, paymentLabel, paymentInput, warningLabel, submitButton);
+
+        Scene scene = new Scene(layout, 400, 400);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+
     private void showProductDetails(Product product) {
         // Tạo một cửa sổ mới (dialog box)
         Stage dialog = new Stage();
@@ -536,6 +604,7 @@ public class Cashier extends Application {
         updateTableData();
         pageLabel.setText("Page " + currentPage + " / " + totalPages);// Update the displayed data
     }
+
     private void updateTableData() {
         int fromIndex = (currentPage - 1) * itemsPerPage;
         int toIndex = Math.min(fromIndex + itemsPerPage, filteredProductData.size());
@@ -568,15 +637,12 @@ public class Cashier extends Application {
         pageLabel.setText("Page " + currentPage + " / " + totalPages);
     }
 
-
-
-
     private void updateOrderListView() {
         orderListView.getItems().clear();
         for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
-            String itemName = cm.getOne(idStore,entry.getKey()).getName();
+            String itemName = cm.getOne(idStore, entry.getKey()).getName();
             final int[] quantity = {entry.getValue()};
-            double productPrice = cm.getOne(idStore,entry.getKey()).getSalePrice();
+            double productPrice = cm.getOne(idStore, entry.getKey()).getSalePrice();
             double totalPriceForItem = productPrice * quantity[0]; // Tính tổng tiền cho sản phẩm
 
             HBox orderItem = new HBox(15); // Thêm khoảng cách giữa các phần tử
@@ -644,7 +710,7 @@ public class Cashier extends Application {
             HBox.setHgrow(spacer, Priority.ALWAYS); // Đẩy các phần tử tiếp theo sang phải
 
             // Thêm các thành phần vào HBox
-            orderItem.getChildren().addAll(itemNameLabel, spacer, decreaseButton, quantityLabel, increaseButton, totalPriceLabel,removeButton);
+            orderItem.getChildren().addAll(itemNameLabel, spacer, decreaseButton, quantityLabel, increaseButton, totalPriceLabel, removeButton);
             orderListView.getItems().add(orderItem);
 
             orderItem.setOnMouseClicked(event -> {
@@ -660,8 +726,6 @@ public class Cashier extends Application {
             });
         }
     }
-
-
 
     private void showStockAlert(String productName) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
