@@ -5,6 +5,7 @@ import entity.Product;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import model.CashierModel;
 import javafx.application.Application;
@@ -42,7 +43,7 @@ public class Cashier extends Application {
     private final Label pageLabel = new Label();
     private final ListView<HBox> orderListView = new ListView<>();
     private final Label totalLabel = new Label("Total:                                                                              $0.00");
-    private double totalPrice = 0;
+    private double totalSalePrice = 0;
     private final Map<Integer, Integer> cartItems = new HashMap<>();
     CashierModel cm = new CashierModel();
 
@@ -65,16 +66,58 @@ public class Cashier extends Application {
         }
         System.out.println("Logged in as: " + employeeName + " at store ID: " + idStore);
 
-        HBox root = new HBox();
+
+        BorderPane root = new BorderPane();
         root.setPadding(new Insets(10, 50, 10, 50));
-        root.setSpacing(20);
+
+        // Tạo phần trên cùng chứa Search và Employee Box
+        HBox topSection = new HBox(10); // HBox chứa Search và Employee Box
+        topSection.setAlignment(Pos.CENTER_RIGHT); // Căn giữa và phải
+        topSection.setPadding(new Insets(10, 10, 10, 10));
+
+        // Tạo VBox cho tên nhân viên và nút Log Out
+        VBox employeeBox = new VBox(5);
+        employeeBox.setAlignment(Pos.TOP_RIGHT); // Canh phải cho cả VBox
+        employeeBox.setPadding(new Insets(10, 10, 10, 10));
+
+        // Tạo label hiển thị tên nhân viên
+        Label employeeNameLabel = new Label(employeeName);
+        employeeNameLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #4AD4DD;");
+
+        // Tạo nút Log Out, ban đầu ẩn
+        Button logoutButton = new Button("Log Out");
+        logoutButton.setVisible(false); // Ẩn nút Log Out lúc đầu
+        logoutButton.setStyle("-fx-background-color: #2ee59c; -fx-text-fill: white;");
+
+        // Sự kiện khi nhấn vào tên nhân viên để hiển thị nút Log Out
+        employeeNameLabel.setOnMouseClicked(event -> logoutButton.setVisible(!logoutButton.isVisible()));
+
+        // Sự kiện khi nhấn vào nút Log Out
+        logoutButton.setOnAction(event -> {
+            Session.logout(); // Gọi phương thức đăng xuất
+            primaryStage.close(); // Đóng cửa sổ hiện tại
+            try {
+                new Login().start(new Stage()); // Mở lại màn hình đăng nhập
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        // Thêm tên nhân viên và nút Log Out vào VBox employeeBox
+        employeeBox.getChildren().addAll(employeeNameLabel, logoutButton);
+
+        HBox contentSection = new HBox(10);
+        contentSection.setPadding(new Insets(10, 10, 10, 10));
+        contentSection.setAlignment(Pos.CENTER_LEFT);
+
+        HBox table = new HBox();
 
 
-        productTable.setPrefWidth(750);
+        productTable.setPrefWidth(800);
         productTable.setStyle("-fx-background-color: #FFFFFF");
         productTable.setFixedCellSize(52);
-        productTable.setPrefHeight(550);
-        productTable.setMaxHeight(550);
+        productTable.setPrefHeight(600);
+        productTable.setMaxHeight(600);
 
         HBox.setHgrow(productTable, Priority.ALWAYS);
         productTable.setMaxWidth(Double.MAX_VALUE);
@@ -88,10 +131,9 @@ public class Cashier extends Application {
         nameColumn.setPrefWidth(230);
         nameColumn.setCellValueFactory(cellData -> {
             Product product = cellData.getValue();
-            ImageView imageView = product.getImage();
             Label nameLabel = new Label(product.getName());
             HBox hBox = new HBox(10);
-            hBox.getChildren().addAll(imageView, nameLabel);
+            hBox.getChildren().addAll( nameLabel);
             return new SimpleObjectProperty<>(hBox);
         });
 
@@ -103,42 +145,87 @@ public class Cashier extends Application {
         stockColumn.setPrefWidth(100);
         stockColumn.setCellValueFactory(cellData -> cellData.getValue().stockProperty().asObject());
 
-        TableColumn<Product, Double> priceColumn = new TableColumn<>("Price");
-        priceColumn.setPrefWidth(130);
-        priceColumn.setCellValueFactory(cellData -> cellData.getValue().priceProperty().asObject());
+        TableColumn<Product, Double> salePriceColumn = new TableColumn<>("salePrice");
+        salePriceColumn.setPrefWidth(130);
+        salePriceColumn.setCellValueFactory(cellData -> cellData.getValue().salePriceProperty().asObject());
 
-        TableColumn<Product, Button> actionColumn = new TableColumn<>("Action");
-        actionColumn.setPrefWidth(90);
+        TableColumn<Product, HBox> actionColumn = new TableColumn<>("Action");
+        actionColumn.setPrefWidth(120);
         actionColumn.setCellValueFactory(cellData -> {
-            Button addButton = new Button("Add to Cart");
+            Product product = cellData.getValue();
+            HBox actionBox = new HBox(5);  // HBox để chứa các nút
+            Button addButton = new Button("Add");
+            Button viewDetailsButton = new Button("View");
+
             addButton.setOnAction(e -> {
-                Product product = cellData.getValue();
                 int productId = product.getId();
-                double productPrice = product.getPrice();
+                double productSalePrice = product.getSalePrice();
                 int stockQuantity = product.getStock();
                 int currentQuantity = cartItems.getOrDefault(productId, 0);
 
                 if (currentQuantity < stockQuantity) {
                     cartItems.put(productId, currentQuantity + 1);
-                    totalPrice += productPrice;
-                    totalLabel.setText("Total:                                                                              $" + String.format("%.2f", totalPrice));
+                    totalSalePrice += productSalePrice;
+                    totalLabel.setText("Total:                                                                              $" + String.format("%.2f", totalSalePrice));
                     updateOrderListView();
-                    updateTableData();  // Update the product table after adding to cart
+                    updateTableData();  // Cập nhật bảng sản phẩm sau khi thêm vào giỏ
                 } else {
-                    showStockAlert(cm.getOne(idStore, productId).getName());
+                    showStockAlert(product.getName());
                 }
             });
-            return new SimpleObjectProperty<>(addButton);
+
+            // Xử lý sự kiện khi nhấn nút "View Details"
+            viewDetailsButton.setOnAction(e -> {
+                showProductDetails(product);  // Hiển thị chi tiết sản phẩm
+            });
+
+            actionBox.getChildren().addAll(addButton, viewDetailsButton);
+            return new SimpleObjectProperty<>(actionBox);
         });
 
-        productTable.getColumns().addAll(idColumn, nameColumn, brandColumn, stockColumn, priceColumn, actionColumn);
+
+        productTable.getColumns().addAll(idColumn, nameColumn, brandColumn, stockColumn, salePriceColumn, actionColumn);
         // Load dữ liệu vào bảng sản phẩm và khởi tạo phân trang
         loadData();
+
+        // Tạo một HBox để chứa các button filter
+        HBox filterBox = new HBox(17);
         // Tạo thanh tìm kiếm
+        VBox searchBox = new VBox();
+        searchBox.setPadding(new Insets(0, 500, 0, 10));
         TextField searchField = new TextField();
         searchField.setPromptText("Search product...");
         searchField.getStyleClass().add("search-field");
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> filterProductList(productTable, newValue, null));
+        searchField.setPrefWidth(600);
+        searchField.setPrefHeight(30);
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            // Khi search, chuyển filter về "All"
+            filterBox.getChildren().forEach(node -> {
+                if (node instanceof Button) {
+                    node.getStyleClass().remove("selected");
+                }
+            });
+
+            // Chọn lại button "All"
+            for (Node node : filterBox.getChildren()) {
+                if (node instanceof Button && ((Button) node).getText().equals("All")) {
+                    node.getStyleClass().add("selected");
+                }
+            }
+
+            // Thực hiện tìm kiếm với từ khóa và filter "All"
+            filterProductList(productTable, newValue, null); // null tương đương với "All"
+            updateTableData();
+            pageLabel.setText("Page " + currentPage + " / " + totalPages);
+        });
+        searchBox.getChildren().addAll(searchField);
+        // Thêm searchField và employeeBox vào HBox topSection
+        topSection.getChildren().addAll(searchBox, employeeBox);
+
+        HBox filterSection = new HBox();
+        filterSection.setAlignment(Pos.CENTER_LEFT);
+        filterBox.setPadding(new Insets(0,10,5,55));
+
 
         // Tạo danh sách các button filter
         String[] filterCategories = cm.getAllCategories().toArray(new String[0]);
@@ -146,9 +233,6 @@ public class Cashier extends Application {
         allCategories[0] = "All";
         System.arraycopy(filterCategories, 0, allCategories, 1, filterCategories.length);
 
-        // Tạo một HBox để chứa các button filter
-        HBox filterBox = new HBox(17);
-        filterBox.setPadding(new Insets(20,10,5,30));
 
         // Tạo từng button filter và thêm vào HBox
         for (String category : allCategories) {
@@ -180,13 +264,13 @@ public class Cashier extends Application {
 
             filterBox.getChildren().add(filterButton);
         }
+        filterSection.getChildren().addAll(filterBox);
 
         // Thay thế ComboBox bằng HBox chứa các button filter
         Button prevButton = new Button("<-");
         prevButton.getStyleClass().add("category-button");
         Button nextButton = new Button("->");
         nextButton.getStyleClass().add("category-button");
-        Label pageLabel = new Label("Page " + currentPage + " / " + totalPages);
         pageLabel.setStyle("-fx-text-fill: #4AD4DD;-fx-font-weight: bold; -fx-font-size: 14; ");
 
         prevButton.setOnAction(e -> {
@@ -209,7 +293,6 @@ public class Cashier extends Application {
         // HBox chứa các nút phân trang và nhãn số trang
         HBox paginationBox = new HBox(10, prevButton, pageLabel, nextButton);
         paginationBox.setAlignment(Pos.CENTER);
-        VBox tableContainer = new VBox(10, searchField, filterBox, productTable, paginationBox);
 
 
         // Phần bên phải: Order summary
@@ -218,7 +301,7 @@ public class Cashier extends Application {
         orderSummary.setPadding(new Insets(10,10,10,10));
         orderSummary.setSpacing(10);
         orderSummary.setStyle("-fx-background-color: #FFFFFF ;");
-        orderSummary.setMaxWidth(600);
+        orderSummary.setMaxWidth(500);
         VBox.setVgrow(orderListView, Priority.ALWAYS);
 
         totalLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16;");
@@ -263,7 +346,7 @@ public class Cashier extends Application {
 
                     // Đặt lại giỏ hàng
                     cartItems.clear();
-                    totalPrice = 0;
+                    totalSalePrice = 0;
                     totalLabel.setText("Total:                                                                              $0.00");
                     updateOrderListView(); // Cập nhật danh sách đơn hàng
                     productTable.getItems().clear(); // Xóa các mục trong bảng sản phẩm
@@ -278,15 +361,22 @@ public class Cashier extends Application {
 // Thêm các thành phần vào orderSummary
         orderSummary.getChildren().addAll(orderDetailLabel, orderListView, totalLabel, buyNowContainer);
         VBox outerVbox = new VBox();
-        outerVbox.setPadding(new Insets(100, 0, 0, 0));  // Set the desired margin from top
+        outerVbox.setPadding(new Insets(0, 0, 0, 0));  // Set the desired margin from top
         outerVbox.getChildren().add(orderSummary);
         outerVbox.setMaxWidth(500);
         outerVbox.setPrefWidth(500);
+        table.getChildren().addAll(productTable,paginationBox);
+        contentSection.getChildren().addAll(table, outerVbox);
 
-        root.getChildren().addAll(tableContainer, outerVbox);
+        // Tạo VBox chính để đặt các phần thành từng lớp
+        VBox mainContent = new VBox(10); // VBox chính để xếp các phần theo chiều dọc
+        mainContent.getChildren().addAll(topSection, filterSection, contentSection);
 
-        orderListView.setPrefHeight(550); // Chiều cao tối đa cho danh sách đơn hàng
-        orderListView.setMaxHeight(550);
+        // Đặt mainContent vào trung tâm của BorderPane
+        root.setCenter(mainContent);
+
+        orderListView.setPrefHeight(600); // Chiều cao tối đa cho danh sách đơn hàng
+        orderListView.setMaxHeight(600);
 
         // Scene và Stage
         Scene scene = new Scene(root, 1366, 768);
@@ -304,8 +394,43 @@ public class Cashier extends Application {
             filterBox.getChildren().forEach(node -> node.setFocusTraversable(false)); // Tắt khả năng focus cho các nút filter
         });
 
+
+
         // Load dữ liệu vào bảng sản phẩm
 //        CashierModel.loadData(productTable, 1);
+    }
+    private void showProductDetails(Product product) {
+        // Tạo một cửa sổ mới (dialog box)
+        Stage dialog = new Stage();
+        dialog.setTitle("Product Details");
+
+        // Tạo một VBox để chứa các thành phần
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(20));
+        vbox.setAlignment(Pos.CENTER);
+
+// Tạo ImageView để hiển thị ảnh sản phẩm
+        Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream("images/"+ product.getImage())));  // Giả sử Product có phương thức getImage trả về đường dẫn ảnh
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(200);  // Đặt chiều rộng của ảnh
+        imageView.setPreserveRatio(true);  // Giữ tỉ lệ ảnh
+
+// Tạo các label để hiển thị thông tin sản phẩm
+        Label nameLabel = new Label("Name: " + product.getName());
+        Label brandLabel = new Label("Brand: " + product.getBrand());
+        Label stockLabel = new Label("Stock: " + product.getStock());
+        Label priceLabel = new Label("Price: $" + String.format("%.2f", product.getSalePrice()));
+
+// Thêm các thành phần vào VBox
+        vbox.getChildren().addAll(imageView, nameLabel, brandLabel, stockLabel, priceLabel);
+
+
+        // Tạo Scene và hiển thị cửa sổ
+        Scene scene = new Scene(vbox);
+        dialog.setScene(scene);
+        dialog.setWidth(300);
+        dialog.setHeight(400);
+        dialog.show();
     }
 
     // Hàm lọc sản phẩm dựa trên từ khóa tìm kiếm và loại sản phẩm
@@ -358,7 +483,7 @@ public class Cashier extends Application {
         for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
             String itemName = cm.getOne(idStore,entry.getKey()).getName();
             final int[] quantity = {entry.getValue()};
-            double productPrice = cm.getOne(idStore,entry.getKey()).getPrice();
+            double productPrice = cm.getOne(idStore,entry.getKey()).getSalePrice();
             double totalPriceForItem = productPrice * quantity[0]; // Tính tổng tiền cho sản phẩm
 
             HBox orderItem = new HBox(15); // Thêm khoảng cách giữa các phần tử
@@ -376,8 +501,8 @@ public class Cashier extends Application {
                 if (quantity[0] > 1) {
                     quantity[0]--;
                     cartItems.put(entry.getKey(), quantity[0]);
-                    totalPrice -= productPrice; // Update total price
-                    totalLabel.setText("Total:                                                                              $" + String.format("%.2f", totalPrice));
+                    totalSalePrice -= productPrice; // Update total price
+                    totalLabel.setText("Total:                                                                              $" + String.format("%.2f", totalSalePrice));
                     updateOrderListView();
                     updateTableData();  // Update the product table after decreasing quantity
                 }
@@ -394,8 +519,8 @@ public class Cashier extends Application {
                 if (quantity[0] < currentStock) {
                     quantity[0]++;
                     cartItems.put(entry.getKey(), quantity[0]);
-                    totalPrice += productPrice; // Update total price
-                    totalLabel.setText("Total:                                                                              $" + String.format("%.2f", totalPrice));
+                    totalSalePrice += productPrice; // Update total price
+                    totalLabel.setText("Total:                                                                              $" + String.format("%.2f", totalSalePrice));
                     updateOrderListView();
                     updateTableData();  // Update the product table after increasing quantity
                 } else {
@@ -415,9 +540,9 @@ public class Cashier extends Application {
             Button removeButton = new Button("\u2716"); // Biểu tượng "x"
             removeButton.setStyle("-fx-font-size: 10; -fx-text-fill: red;-fx-background-color: #FFFFFF;-fx-border-color: #4AD4DD;-fx-border-radius: 100px;");
             removeButton.setOnAction(e -> {
-                totalPrice -= totalPriceForItem; // Update total price
+                totalSalePrice -= totalPriceForItem; // Update total price
                 cartItems.remove(entry.getKey());
-                totalLabel.setText("Total:                                                                              $" + String.format("%.2f", totalPrice));
+                totalLabel.setText("Total:                                                                              $" + String.format("%.2f", totalSalePrice));
                 updateOrderListView(); // Update order list
                 updateTableData();  // Update the product table after removing item
             });

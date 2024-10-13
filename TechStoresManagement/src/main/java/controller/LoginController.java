@@ -68,14 +68,17 @@ public class LoginController {
             Session.setEmployeeName(employeeName);
 
             // Điều hướng dựa trên role
-            switch (role) {
+            try { switch (role) {
                 case "General Director" -> new Director().start(new Stage());
                 case "Store Management" -> new StoreManager().start(new Stage());
                 case "Warehouse Management" -> new WarehouseManager().start(new Stage());
                 case "Cashier" -> new Cashier().start(new Stage());
                 default -> System.out.println("Unknown role");
             }
+
+            } catch (Exception e) { e.printStackTrace(); }
             return true;
+
         } else {
             messageLabel.setText("Invalid username or password.");
             messageLabel.setStyle("-fx-text-fill: red;");
@@ -84,6 +87,7 @@ public class LoginController {
             return false;
         }
     }
+
 
 
 }

@@ -31,7 +31,7 @@ public class Login extends Application {
 
         Button loginButton = new Button("LOGIN");
         loginButton.setId("login-button");
-        Image logo = new Image(Objects.requireNonNull(getClass().getResourceAsStream("logo.png")));
+        Image logo = new Image(Objects.requireNonNull(getClass().getResourceAsStream("images/logo.png")));
         ImageView logoView = new ImageView(logo);
         logoView.setFitWidth(150);
         logoView.setFitHeight(150);

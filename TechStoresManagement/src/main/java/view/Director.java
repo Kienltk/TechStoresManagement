@@ -2,14 +2,15 @@ package view;
 
 import controller.Session;
 import javafx.application.Application;
-import javafx.geometry.Insets;
+import javafx.fxml.FXMLLoader;
+
 import javafx.scene.Scene;
-import javafx.scene.layout.HBox;
+
 import javafx.stage.Stage;
 
 public class Director extends Application {
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage)throws Exception {
         if (!Session.isLoggedIn()) {
             try {
                 new Login().start(new Stage());
@@ -19,17 +20,11 @@ public class Director extends Application {
             primaryStage.close();
             return;
         }
-        HBox root = new HBox();
-        root.setPadding(new Insets(10, 50, 10, 50));
-        root.setSpacing(20);
-
-        Scene scene = new Scene(root, 1366, 768);
-        scene.getStylesheets().add(getClass().getResource("cashier.css").toExternalForm());
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("General Director App");
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Dashboard.fxml"));
+        Scene scene = new Scene(loader.load());
         primaryStage.setResizable(false);
-        primaryStage.setWidth(1366);
-        primaryStage.setHeight(768);
+        primaryStage.setTitle("Dashboard");
+        primaryStage.setScene(scene);
         primaryStage.show();
     }
 }

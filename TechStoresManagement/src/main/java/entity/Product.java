@@ -5,23 +5,54 @@ import javafx.scene.image.ImageView;
 
 public class Product {
     private final SimpleIntegerProperty id;
-    private final SimpleObjectProperty<ImageView> image;
+    private final SimpleStringProperty image;
     private final SimpleStringProperty name;
     private final SimpleStringProperty brand;
     private final SimpleIntegerProperty stock;
-    private final SimpleDoubleProperty price;
-    private final SimpleStringProperty category; // Thêm thuộc tính category
+    private final SimpleDoubleProperty salePrice;
+    private  SimpleDoubleProperty purchasePrice;
+    private final SimpleStringProperty category;
 
-    public Product(int id, ImageView image, String name, String brand, int stock, double price, String category) {
+
+
+
+
+    // Thêm thuộc tính category
+
+    public Product(int id, String image, String name, String brand, int stock, double salePrice, double purchasePrice ,String category) {
         this.id = new SimpleIntegerProperty(id);
-        this.image = new SimpleObjectProperty<>(image);
+        this.image = new SimpleStringProperty(image);
         this.name = new SimpleStringProperty(name);
         this.brand = new SimpleStringProperty(brand);
         this.stock = new SimpleIntegerProperty(stock);
-        this.price = new SimpleDoubleProperty(price);
+        this.salePrice = new SimpleDoubleProperty(salePrice);
+        this.purchasePrice = new SimpleDoubleProperty(purchasePrice);
         this.category = new SimpleStringProperty(category); // Khởi tạo category
     }
+    public Product(int id, String image, String name, String brand, int stock, double salePrice, String category) {
+        this.id = new SimpleIntegerProperty(id);
+        this.image = new SimpleStringProperty(image);
+        this.name = new SimpleStringProperty(name);
+        this.brand = new SimpleStringProperty(brand);
+        this.stock = new SimpleIntegerProperty(stock);
+        this.salePrice = new SimpleDoubleProperty(salePrice);
+        this.category = new SimpleStringProperty(category); // Khởi tạo category
+    }
+    public double getSalePrice() {
+        return salePrice.get();
+    }
 
+    public SimpleDoubleProperty salePriceProperty() {
+        return salePrice;
+    }
+
+    public double getPurchasePrice() {
+        return purchasePrice.get();
+    }
+
+    public SimpleDoubleProperty purchasePriceProperty() {
+        return purchasePrice;
+    }
     public int getId() {
         return id.get();
     }
@@ -30,11 +61,11 @@ public class Product {
         return id;
     }
 
-    public ImageView getImage() {
+    public String getImage() {
         return image.get();
     }
 
-    public SimpleObjectProperty<ImageView> imageProperty() {
+    public SimpleStringProperty imageProperty() {
         return image;
     }
 
@@ -66,13 +97,6 @@ public class Product {
     }
 
 
-    public double getPrice() {
-        return price.get();
-    }
-
-    public SimpleDoubleProperty priceProperty() {
-        return price;
-    }
 
     public String getCategory() { // Thêm phương thức getCategory
         return category.get();

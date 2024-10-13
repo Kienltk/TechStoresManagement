@@ -46,4 +46,7 @@ public class Session {
     public static void setEmployeeName(String employeeName) {
         Session.employeeName = employeeName;
     }
+
+    public static void logout() {
+    }
 }

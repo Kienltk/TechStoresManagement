@@ -24,7 +24,7 @@ public class CashierModel implements ICommon<Product> {
 
     // Helper method to construct Product object from ResultSet
     private Product getProduct(ResultSet rs) throws SQLException {
-        Image image = new Image("file:" + rs.getString("img_address"));
+        String image = rs.getString("img_address");
         int productId = rs.getInt("id");
         String productName = rs.getString("product_name");
         String brand = rs.getString("brand");
@@ -34,7 +34,7 @@ public class CashierModel implements ICommon<Product> {
         // Lấy giá trị của thuộc tính category từ bảng product_categories và categories
         String category = getCategory(productId);
 
-        return new Product(productId, new ImageView(image), productName, brand, stock, price, category);
+        return new Product(productId, image, productName, brand, stock, price, category);
     }
 
     private String getCategory(int productId) {
