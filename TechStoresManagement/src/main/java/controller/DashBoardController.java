@@ -22,7 +22,7 @@ public class DashBoardController {
     @FXML
     private HBox hBoxStoreManagement; // HBox cho Store Management
     @FXML
-    private HBox hBoxSettings; // HBox cho Settings
+    private HBox hBoxAccount; // HBox cho Settings
 
     // Phương thức để xóa trạng thái active từ tất cả các tab
     private void clearActive() {
@@ -30,7 +30,7 @@ public class DashBoardController {
         hBoxEmployeeManagement.getStyleClass().remove("active");
         hBoxProductManagement.getStyleClass().remove("active");
         hBoxStoreManagement.getStyleClass().remove("active");
-        hBoxSettings.getStyleClass().remove("active");
+        hBoxAccount.getStyleClass().remove("active");
     }
 
     // Phương thức hiển thị tab General
@@ -66,11 +66,11 @@ public class DashBoardController {
         mainContent.getChildren().setAll(storeManagementView);
     }
 
-    public void showSettings() {
+    public void showAccount() {
         clearActive();
-        hBoxSettings.getStyleClass().add("active");
-        AccountView settingView = new AccountView();
-        mainContent.getChildren().setAll(settingView);
+        hBoxAccount.getStyleClass().add("active");
+        AccountView AccountView = new AccountView();
+        mainContent.getChildren().setAll(AccountView);
     }
 
     // Phương thức khởi tạo (initialize) sẽ được gọi khi controller được tạo
