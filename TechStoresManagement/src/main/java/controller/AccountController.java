@@ -97,7 +97,7 @@ public class AccountController {
         String password = passwordField.getText();
         String name = nameField.getText();
 
-        String insertSQL = "INSERT INTO accounts (username, password, id_person) VALUES (?, ?, (SELECT id FROM employees WHERE CONCAT(first_name, ' ', last_name) = ? AND id_role = (SELECT id FROM role WHERE role = ?)))";
+        String insertSQL = "INSERT INTO accounts (username, password, id_person) VALUES (?, ?, (SELECT id FROM employees WHERE CONCAT(first_name, ' ', last_name) = ?))";
 
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/tech_store_manager", "root", "12345678");
              PreparedStatement pstmt = conn.prepareStatement(insertSQL)) {
@@ -106,7 +106,7 @@ public class AccountController {
             pstmt.setString(2, password);
             pstmt.setString(3, name);
             pstmt.executeUpdate();
-            loadAccounts(""); // Cập nhật danh sách sau khi thêm tài khoản
+            loadAccounts("");
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -130,7 +130,7 @@ public class AccountController {
                 return;
             }
 
-            String updateSQL = "UPDATE accounts SET username = ?, password = ?, id_person = (SELECT id FROM employees WHERE CONCAT(first_name, ' ', last_name) = ? AND id_role = (SELECT id FROM role WHERE role = ?)) WHERE id = ?";
+            String updateSQL = "UPDATE accounts SET username = ?, password = ?, id_person = (SELECT id FROM employees WHERE CONCAT(first_name, ' ', last_name) = ?) WHERE id = ?";
 
             try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/tech_store_manager", "root", "12345678");
                  PreparedStatement pstmt = conn.prepareStatement(updateSQL)) {
@@ -138,7 +138,7 @@ public class AccountController {
                 pstmt.setString(1, username);
                 pstmt.setString(2, password);
                 pstmt.setString(3, name);
-                pstmt.setInt(5, selectedAccount.getId());
+                pstmt.setInt(4, selectedAccount.getId());
 
                 int rowsAffected = pstmt.executeUpdate();
                 if (rowsAffected > 0) {
