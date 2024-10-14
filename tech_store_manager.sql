@@ -176,6 +176,7 @@ CREATE TABLE employees (
 	foreign key (id_warehouse) references warehouses(id)
 );
 
+
 CREATE TABLE accounts (
 	id int auto_increment primary key,
 	username varchar(50),
