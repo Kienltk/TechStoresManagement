@@ -6,15 +6,15 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.171" fx:controller="controller.AccountController">
+<AnchorPane prefHeight="768.0" prefWidth="1089.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.AccountController">
     <children>
-        <TableView fx:id="accountTable" layoutX="10.0" layoutY="41.0" prefHeight="303.0" prefWidth="729.0" AnchorPane.bottomAnchor="76.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="28.0" AnchorPane.topAnchor="41.0">
+        <TableView fx:id="accountTable" layoutX="10.0" layoutY="45.0" prefHeight="299.0" prefWidth="747.0" AnchorPane.bottomAnchor="76.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="45.0">
             <columns>
-                <TableColumn fx:id="accountIdColumn" prefWidth="100" text="Account ID" />
-                <TableColumn fx:id="nameColumn" prefWidth="150" text="Name" />
-                <TableColumn fx:id="roleColumn" prefWidth="100" text="Role" />
-                <TableColumn fx:id="usernameColumn" prefWidth="150" text="Username" />
-                <TableColumn fx:id="passwordColumn" prefWidth="150" text="Password" />
+                <TableColumn fx:id="accountIdColumn" prefWidth="116.0" text="Account ID" />
+                <TableColumn fx:id="nameColumn" prefWidth="238.0" text="Name" />
+                <TableColumn fx:id="usernameColumn" prefWidth="211.0" text="Username" />
+                <TableColumn fx:id="passwordColumn" prefWidth="256.0" text="Password" />
+                <TableColumn fx:id="passwordColumn1" prefWidth="247.0" text="Action" />
             </columns>
         </TableView>
 
@@ -23,10 +23,10 @@
         <TextField fx:id="nameField" promptText="Name" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="390.0" />
 
         <!-- Ô tìm kiếm đã bỏ nút -->
-        <TextField fx:id="searchField" onKeyReleased="#handleSearch" promptText="Search by Username or Role" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0" />
+        <TextField fx:id="searchField" layoutX="10.0" layoutY="7.0" onKeyReleased="#handleSearch" prefHeight="31.0" prefWidth="352.0" promptText="Search by Username or Role" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="727.0" AnchorPane.topAnchor="7.0" />
 
-        <Button onAction="#handleAddAccount" text="Add Account" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" />
-        <Button onAction="#handleEditAccount" text="Edit Account" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="120.0" />
-        <Button onAction="#handleDeleteAccount" text="Delete Account" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="230.0" />
+        <Button layoutX="387.0" layoutY="7.0" onAction="#handleAddAccount" text="Create Account" AnchorPane.bottomAnchor="730.0" AnchorPane.leftAnchor="387.0" />
+        <Button layoutX="119.0" layoutY="379.0" onAction="#handleEditAccount" text="Edit " AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="119.0" />
+        <Button onAction="#handleDeleteAccount" text="Delete" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="230.0" />
     </children>
 </AnchorPane>
