@@ -5,16 +5,17 @@ import javafx.scene.image.ImageView;
 
 public class Product {
     private final SimpleIntegerProperty id;
-    private final SimpleStringProperty image;
+    private SimpleStringProperty image;
     private final SimpleStringProperty name;
     private final SimpleStringProperty brand;
-    private final SimpleIntegerProperty stock;
+    private SimpleIntegerProperty stock;
     private final SimpleDoubleProperty salePrice;
-    private  SimpleDoubleProperty purchasePrice;
-    private final SimpleStringProperty category;
+    private SimpleDoubleProperty purchasePrice;
+    private SimpleStringProperty category;
 
 
-    public Product(int id, String image, String name, String brand, int stock, double salePrice, double purchasePrice ,String category) {
+    // Constructor with all fields
+    public Product(int id, String image, String name, String brand, int stock, double salePrice, double purchasePrice, String category) {
         this.id = new SimpleIntegerProperty(id);
         this.image = new SimpleStringProperty(image);
         this.name = new SimpleStringProperty(name);
@@ -22,27 +23,22 @@ public class Product {
         this.stock = new SimpleIntegerProperty(stock);
         this.salePrice = new SimpleDoubleProperty(salePrice);
         this.purchasePrice = new SimpleDoubleProperty(purchasePrice);
-        this.category = new SimpleStringProperty(category); // Khởi tạo category
-    }
-    public Product(int id, String image, String name, String brand, int stock, double salePrice, String category) {
-        this.id = new SimpleIntegerProperty(id);
-        this.image = new SimpleStringProperty(image);
-        this.name = new SimpleStringProperty(name);
-        this.brand = new SimpleStringProperty(brand);
-        this.stock = new SimpleIntegerProperty(stock);
-        this.salePrice = new SimpleDoubleProperty(salePrice);
-        this.category = new SimpleStringProperty(category); // Khởi tạo category
+        this.category = new SimpleStringProperty(category);
     }
 
+    // Constructor without purchasePrice
+    public Product(int id, String image, String name, String brand, int stock, double salePrice, String category) {
+        this(id, image, name, brand, stock, salePrice, 0.0, category); // Default purchasePrice to 0
+    }
+
+    // Constructor with stock = 0 and no purchasePrice
     public Product(int id, String image, String name, String brand, double salePrice, String category) {
-        this.id = new SimpleIntegerProperty(id);
-        this.image = new SimpleStringProperty(image);
-        this.name = new SimpleStringProperty(name);
-        this.brand = new SimpleStringProperty(brand);
-        this.salePrice = new SimpleDoubleProperty(salePrice);
-        this.category = new SimpleStringProperty(category);  // Khởi tạo category
-        this.stock = new SimpleIntegerProperty(0); // Mặc định stock là 0
-        this.purchasePrice = new SimpleDoubleProperty(0); // Mặc định purchasePrice là 0
+        this(id, image, name, brand, 0, salePrice, 0.0, category); // Default stock and purchasePrice to 0
+    }
+
+    // Constructor without image and category, for minimal product creation
+    public Product(int id, String name, String brand, double purchasePrice, double salePrice) {
+        this(id, "", name, brand, 0, salePrice, purchasePrice, ""); // Default image and category to empty strings
     }
 
     public double getSalePrice() {
@@ -60,6 +56,7 @@ public class Product {
     public SimpleDoubleProperty purchasePriceProperty() {
         return purchasePrice;
     }
+
     public int getId() {
         return id.get();
     }
@@ -99,10 +96,10 @@ public class Product {
     public SimpleIntegerProperty stockProperty() {
         return stock;
     }
+
     public void setStock(int stock) {
         this.stock.set(stock);
     }
-
 
 
     public String getCategory() { // Thêm phương thức getCategory
