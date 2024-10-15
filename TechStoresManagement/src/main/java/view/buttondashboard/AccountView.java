@@ -76,6 +76,7 @@ public class AccountView extends VBox {
 
                     editButton.setOnAction(event -> {
                         Account account = getTableView().getItems().get(getIndex());
+                        System.out.println(account);
                         showEditPopup(account);
                     });
 
@@ -130,8 +131,9 @@ public class AccountView extends VBox {
         editStage.initModality(Modality.APPLICATION_MODAL);
         editStage.setTitle("Edit Account");
 
-        Label nameLabel = new Label("Name:");
-        TextField nameField = new TextField(account.getName());
+        // Tạo Label và TextField cho tên đầy đủ
+        Label nameLabel = new Label("Full Name:");
+        TextField nameField = new TextField(account.getName()); // Chứa tên hiện tại của tài khoản
 
         Label usernameLabel = new Label("Username:");
         TextField usernameField = new TextField(account.getUsername());
@@ -140,27 +142,59 @@ public class AccountView extends VBox {
         PasswordField passwordField = new PasswordField();
         passwordField.setText(account.getPassword());
 
+        // Nút Save
         Button saveButton = new Button("Save");
         saveButton.setOnAction(event -> {
-            account.setName(nameField.getText());
-            account.setUsername(usernameField.getText());
-            account.setPassword(passwordField.getText());
+            String fullName = nameField.getText();  // Lấy tên đầy đủ từ TextField
+            String newUsername = usernameField.getText();
+            String newPassword = passwordField.getText();
 
-            // Cập nhật thông tin tài khoản trong database
             AccountModel accountModel = new AccountModel();
-            boolean success = accountModel.updateAccount(account);
+            String role = account.getRole();  // Lấy tên role từ đối tượng account
 
-            if (success) {
-                // Đóng cửa sổ sau khi lưu thành công
-                editStage.close();
-                ((TableView<Account>) getChildren().get(3)).refresh();
+            // Kiểm tra điều kiện 1: Name cùng role và chưa có tài khoản
+            boolean isNameValid = true; // Giả định là hợp lệ
+            if (!fullName.equals(account.getName())) { // Chỉ kiểm tra nếu tên đã thay đổi
+                isNameValid = accountModel.isNameValid(fullName, role);
+            }
+
+            // Kiểm tra điều kiện 2: Username không trùng
+            boolean isUsernameUnique = true; // Giả định là duy nhất
+            if (!newUsername.equals(account.getUsername())) { // Chỉ kiểm tra nếu username đã thay đổi
+                isUsernameUnique = accountModel.isUsernameUnique(newUsername);
+            }
+
+            if (!isNameValid) {
+                Alert nameAlert = new Alert(Alert.AlertType.ERROR);
+                nameAlert.setTitle("Invalid Name");
+                nameAlert.setHeaderText("Name already exists or doesn't match the role");
+                nameAlert.setContentText("Please enter a valid name that matches the role and hasn't been used for another account.");
+                nameAlert.showAndWait();
+            } else if (!isUsernameUnique) {
+                Alert usernameAlert = new Alert(Alert.AlertType.ERROR);
+                usernameAlert.setTitle("Invalid Username");
+                usernameAlert.setHeaderText("Username already exists");
+                usernameAlert.setContentText("Please enter a unique username.");
+                usernameAlert.showAndWait();
             } else {
+                // Nếu tất cả điều kiện hợp lệ, cập nhật tài khoản
+                account.setName(fullName);
+                account.setUsername(newUsername);
+                account.setPassword(newPassword);
 
-                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                errorAlert.setTitle("Error");
-                errorAlert.setHeaderText("Update Failed");
-                errorAlert.setContentText("There was an error while updating the account.");
-                errorAlert.showAndWait();
+                boolean success = accountModel.updateAccount(account);
+
+                if (success) {
+                    // Đóng cửa sổ sau khi lưu thành công
+                    editStage.close();
+                    ((TableView<Account>) getChildren().get(3)).refresh();
+                } else {
+                    Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                    errorAlert.setTitle("Error");
+                    errorAlert.setHeaderText("Update Failed");
+                    errorAlert.setContentText("There was an error while updating the account.");
+                    errorAlert.showAndWait();
+                }
             }
         });
 
@@ -175,6 +209,8 @@ public class AccountView extends VBox {
         editStage.setScene(scene);
         editStage.showAndWait();
     }
+
+
 
     // Hàm xác nhận xóa tài khoản
     private void confirmDelete(Account account) {

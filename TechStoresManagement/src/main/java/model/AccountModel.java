@@ -9,7 +9,7 @@ import java.sql.*;
 
 public class AccountModel {
 
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/tech_store_manager";
+    private static final String DB_URL = "jdbc:mysql://localhost:3307/tech_store_manager";
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "12345678";
 
@@ -42,7 +42,8 @@ public class AccountModel {
                             rs.getInt("account_id"),
                             rs.getString("name"),
                             rs.getString("username"),
-                            rs.getString("password")
+                            rs.getString("password"),
+                            rs.getString("role")
                     );
                     accountList.add(account);
                 }
@@ -53,6 +54,44 @@ public class AccountModel {
 
         return accountList;
     }
+
+    public boolean isNameValid(String fullName, String role) {
+        String query = "SELECT COUNT(*) FROM employees e " +
+                "LEFT JOIN accounts a ON e.id = a.id_person " +
+                "JOIN role r ON e.id_role = r.id " +  // Thêm bảng role để kiểm tra tên role
+                "WHERE CONCAT(e.first_name, ' ', e.last_name) = ? " +  // Ghép first_name và last_name để so sánh với tên đầy đủ
+                "AND r.role = ? AND a.id IS NULL";  // Kiểm tra role bằng chuỗi ký tự
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, fullName);  // Truyền tên đầy đủ vào câu truy vấn
+            stmt.setString(2, role);  // Truyền tên role vào câu truy vấn
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) == 1;  // Trả về true nếu chưa có tài khoản
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+
+    public boolean isUsernameUnique(String username) {
+        String query = "SELECT COUNT(*) FROM accounts WHERE username = ?";
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) == 0;  // Trả về true nếu username là duy nhất
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
 
     // Phương thức thêm tài khoản mới
     public void addAccount(String username, String password, String name) {
@@ -74,24 +113,21 @@ public class AccountModel {
 
     // Phương thức chỉnh sửa tài khoản
     public boolean updateAccount(Account account) {
-        String query = "UPDATE accounts SET name = ?, username = ?, password = ? " +
-                "WHERE id = ? AND employee_role = ? AND NOT EXISTS (" +
-                "SELECT 1 FROM accounts WHERE username = ? AND id != ?)";
+        String query = "UPDATE accounts SET id_person = (SELECT id FROM employees WHERE CONCAT(first_name, ' ', last_name) = ?), " +
+                "username = ?, password = ? WHERE id = ?";
 
-        try (Connection conn = JDBCConnect.getJDBCConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-            // Set parameters for the query
-            stmt.setString(1, account.getName());
-            stmt.setString(2, account.getUsername());
-            stmt.setString(3, account.getPassword());
-            stmt.setInt(4, account.getId());
-            stmt.setString(5, account.getRole());  // Assuming the account object has the role
-            stmt.setString(6, account.getUsername());
-            stmt.setInt(7, account.getId());
+            pstmt.setString(1, account.getName());
+            pstmt.setString(2, account.getUsername());
+            pstmt.setString(3, account.getPassword());
+            pstmt.setInt(4, account.getId());
 
-            int affectedRows = stmt.executeUpdate();
-            return affectedRows > 0;  // Return true if the update was successful
+            int affectedRows = pstmt.executeUpdate();
+
+            return affectedRows > 0;
+
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
