@@ -11,6 +11,7 @@ module techstoresmanagement {
 
     exports controller to javafx.graphics;
     opens controller to javafx.fxml;
+    exports view.buttondashboard;
     exports model to javafx.graphics;
     opens model to javafx.fxml;
     exports view to javafx.graphics;
