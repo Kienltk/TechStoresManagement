@@ -541,7 +541,7 @@ VALUES ('Michael', 'Brown', 1, '1990-04-10', 'michael.brown@company.com', '32165
        ('James', 'Lee', 1, '1989-02-05', 'james.lee@company.com', '1357924680', '456 Cedar St', '2023-09-12', 65000.00,
         3, 2, NULL, 'Active'),
        ('Isabella', 'Hernandez', 0, '1996-12-30', 'isabella.hernandez@company.com', '2468135790', '789 Birch St',
-        '2023-10-10', 65000.00, 3, 3, NULL, 'Active')
+        '2023-10-10', 65000.00, 3, 3, NULL, 'Active');
     INSERT
 INTO accounts (username, password, id_person)
 VALUES
