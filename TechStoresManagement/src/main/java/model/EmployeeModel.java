@@ -4,10 +4,13 @@ import dao.JDBCConnect;
 import entity.Employee;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class EmployeeModel {
 
@@ -65,12 +68,43 @@ public class EmployeeModel {
         }
     }
 
-    // Delete employee and associated accounts
-    public void deleteEmployee(int employeeId) {
-        executeUpdate("DELETE FROM accounts WHERE id_person = ?", employeeId);
-        executeUpdate("DELETE FROM employees WHERE id = ?", employeeId);
+    // Phương thức kiểm tra xem nhân viên có tài khoản hay không
+    public List<String> getAccountsByEmployeeId(int employeeId) {
+        List<String> accounts = new ArrayList<>();
+        String query = "SELECT username FROM accounts WHERE id_person = ?";
+        try (Connection connection = JDBCConnect.getJDBCConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, employeeId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    accounts.add(resultSet.getString("username"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching accounts", e);
+        }
+        return accounts;
     }
-
+    // Phương thức xóa nhân viên
+    public void deleteEmployee(int employeeId) {
+        List<String> accounts = getAccountsByEmployeeId(employeeId);
+        if (!accounts.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Delete employee");
+            alert.setHeaderText("This employee has an account");
+            alert.setContentText("Account : " + accounts.get(0) + ". Do you want to delete both ?");
+            ButtonType deleteButtonType = new ButtonType("Delete");
+            ButtonType skipButtonType = new ButtonType("Skip");
+            alert.getButtonTypes().setAll(deleteButtonType, skipButtonType);
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == deleteButtonType) {
+                executeUpdate("DELETE FROM accounts WHERE id_person = ?", employeeId);
+                executeUpdate("DELETE FROM employees WHERE id = ?", employeeId);
+            }
+        } else {
+            executeUpdate("DELETE FROM employees WHERE id = ?", employeeId);
+        }
+    }
     public void updateEmployee(Employee employee) {
         String query = "UPDATE employees SET first_name = ?, last_name = ?, gender = ?, dob = ?, email = ?, " +
                 "phone_number = ?, address = ?, hire_date = ?, salary = ?, id_role = ?, " +
@@ -138,6 +172,23 @@ public class EmployeeModel {
             throw new RuntimeException("Error fetching roles", e);
         }
         return roles;
+    }
+    public String getRoleName(int roleId) {
+        try (Connection connection = JDBCConnect.getJDBCConnection();
+             PreparedStatement statement = connection.prepareStatement("SELECT role FROM role WHERE id = ?")) {
+
+            statement.setInt(1, roleId);
+
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getString("role");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching role name", e);
+        }
+
+        return null;
     }
     public int getRoleIdFromName(String roleName) {
         String query = "SELECT id FROM role WHERE role = ?";

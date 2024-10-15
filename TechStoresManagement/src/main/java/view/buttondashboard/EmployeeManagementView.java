@@ -1,6 +1,7 @@
 package view.buttondashboard;
 
 import entity.Employee;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -54,11 +55,11 @@ public class EmployeeManagementView extends VBox {
             addEmployeeForm.setVgap(10);
 
             // Add fields for adding a new employee
-            addEmployeeForm.add(new Label("Họ tên:"), 0, 0);
+            addEmployeeForm.add(new Label("First Name:"), 0, 0);
             TextField firstNameField = new TextField();
             addEmployeeForm.add(firstNameField, 1, 0);
 
-            addEmployeeForm.add(new Label("Tên:"), 0, 1);
+            addEmployeeForm.add(new Label("Last Name:"), 0, 1);
             TextField lastNameField = new TextField();
             addEmployeeForm.add(lastNameField, 1, 1);
 
@@ -66,38 +67,38 @@ public class EmployeeManagementView extends VBox {
             TextField emailField = new TextField();
             addEmployeeForm.add(emailField, 1, 2);
 
-            addEmployeeForm.add(new Label("Số điện thoại:"), 0, 3);
+            addEmployeeForm.add(new Label("Phone:"), 0, 3);
             TextField phoneNumberField = new TextField();
             addEmployeeForm.add(phoneNumberField, 1, 3);
 
-            addEmployeeForm.add(new Label("Địa chỉ:"), 0, 4);
+            addEmployeeForm.add(new Label("Address:"), 0, 4);
             TextField addressField = new TextField();
             addEmployeeForm.add(addressField, 1, 4);
 
-            addEmployeeForm.add(new Label("Ngày sinh:"), 0, 5);
+            addEmployeeForm.add(new Label("Date of Bỉrth:"), 0, 5);
             DatePicker dobDatePicker = new DatePicker();
             addEmployeeForm.add(dobDatePicker, 1, 5);
 
-            addEmployeeForm.add(new Label("Lương:"), 0, 6);
+            addEmployeeForm.add(new Label("Salary:"), 0, 6);
             TextField salaryField = new TextField();
             addEmployeeForm.add(salaryField, 1, 6);
 
-            addEmployeeForm.add(new Label("Chức vụ:"), 0, 7);
+            addEmployeeForm.add(new Label("Role:"), 0, 7);
             ObservableList<String> roles = FXCollections.observableArrayList(employeeModel.getAllRoles());
             ComboBox<String> roleComboBox = new ComboBox<>(roles);
             addEmployeeForm.add(roleComboBox, 1, 7);
 
-            addEmployeeForm.add(new Label("Nơi làm việc:"), 0, 8);
+            addEmployeeForm.add(new Label("Work Place:"), 0, 8);
             ObservableList<List<String>> workplaces = FXCollections.observableArrayList(employeeModel.getAllStores(), employeeModel.getAllWarehouses());
             ComboBox<List<String>> workplaceComboBox = new ComboBox<>(workplaces);
             addEmployeeForm.add(workplaceComboBox, 1, 8);
 
-            addEmployeeForm.add(new Label("Trạng thái:"), 0, 9);
+            addEmployeeForm.add(new Label("Status:"), 0, 9);
             TextField statusField = new TextField();
             addEmployeeForm.add(statusField, 1, 9);
 
             // Add a save button to save the new employee
-            Button saveButton = new Button("Lưu");
+            Button saveButton = new Button("Save");
             saveButton.setOnAction(event -> {
                 // Create a new employee
                 Employee newEmployee = new Employee();
@@ -166,19 +167,30 @@ public class EmployeeManagementView extends VBox {
             }
         });
         // Table Columns
-        TableColumn<Employee, String> firstNameColumn = new TableColumn<>("First Name");
-        firstNameColumn.setMinWidth(70);
-        firstNameColumn.setPrefWidth(100);
-        firstNameColumn.setCellValueFactory(cellData -> cellData.getValue().firstNameProperty());
+        TableColumn<Employee, String> idColumn = new TableColumn<>("ID");
+        idColumn.setMinWidth(30);
+        idColumn.setPrefWidth(40);
+        idColumn.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().getId())));
+        TableColumn<Employee, String> fullNameColumn = new TableColumn<>("Full Name");
+        fullNameColumn.setMinWidth(70);
+        fullNameColumn.setPrefWidth(100);
+        fullNameColumn.setCellValueFactory(cellData -> {
+            Employee employee = cellData.getValue();
+            return new SimpleStringProperty(employee.getFirstName() + " " + employee.getLastName());
+        });
 
-        TableColumn<Employee, String> lastNameColumn = new TableColumn<>("Last Name");
-        lastNameColumn.setMinWidth(70);
-        lastNameColumn.setPrefWidth(100);
-        lastNameColumn.setCellValueFactory(cellData -> cellData.getValue().lastNameProperty());
+        TableColumn<Employee, String> roleColumn = new TableColumn<>("Role");
+        roleColumn.setMinWidth(70);
+        roleColumn.setPrefWidth(140);
+        roleColumn.setCellValueFactory(cellData -> {
+            int roleId = cellData.getValue().getIdRole();
+            String roleName = employeeModel.getRoleName(roleId);
+            return new SimpleStringProperty(roleName);
+        });
 
         TableColumn<Employee, String> emailColumn = new TableColumn<>("Email");
         emailColumn.setMinWidth(100);
-        emailColumn.setPrefWidth(250);
+        emailColumn.setPrefWidth(220);
         emailColumn.setCellValueFactory(cellData -> cellData.getValue().emailProperty());
 
         TableColumn<Employee, String> phoneNumberColumn = new TableColumn<>("Phone Number");
@@ -188,7 +200,7 @@ public class EmployeeManagementView extends VBox {
 
         TableColumn<Employee, String> workplaceColumn = new TableColumn<>("Workplace");
         workplaceColumn.setMinWidth(70);
-        workplaceColumn.setPrefWidth(180);
+        workplaceColumn.setPrefWidth(140);
         workplaceColumn.setCellValueFactory(cellData -> cellData.getValue().workplaceProperty());
 
         TableColumn<Employee, String> statusColumn = new TableColumn<>("Status");
@@ -344,7 +356,7 @@ public class EmployeeManagementView extends VBox {
                     deleteButton.setOnAction(e -> {
                         Employee employee = getTableView().getItems().get(getIndex());
                         employeeModel.deleteEmployee(employee.getId());
-                        getTableView().getItems().remove(employee);
+                        employeeTable.setItems(FXCollections.observableArrayList(employeeModel.getAllEmployees()));
                     });
 
                     viewButton.setOnAction(e -> {
@@ -356,7 +368,7 @@ public class EmployeeManagementView extends VBox {
         });
 
         // Add Columns to Table
-        employeeTable.getColumns().addAll(firstNameColumn, lastNameColumn, emailColumn, phoneNumberColumn, workplaceColumn, statusColumn, optionColumn);
+        employeeTable.getColumns().addAll(idColumn,fullNameColumn,  emailColumn, phoneNumberColumn,roleColumn, workplaceColumn, statusColumn, optionColumn);
 
         // Set the table's width to fit all columns
         employeeTable.setPrefWidth(1000); // adjust this value to fit your needs
