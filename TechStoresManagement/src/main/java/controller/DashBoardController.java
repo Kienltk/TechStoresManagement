@@ -1,11 +1,14 @@
 package controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import view.Login;
 import view.buttondashboard.*;
+
+import java.util.Collection;
 
 public class DashBoardController {
 
@@ -84,10 +87,13 @@ public void showWareHouse(){
         mainContent.getChildren().setAll(warehouseManagement);
 }
     // Các phương thức hiển thị tab khác tương tự
+
+
     public void showEmployeeManagement() {
         clearActive();
         hBoxEmployeeManagement.getStyleClass().add("active");
         EmployeeManagementView employeeManagementView = new EmployeeManagementView();
+
         mainContent.getChildren().setAll(employeeManagementView);
     }
 
