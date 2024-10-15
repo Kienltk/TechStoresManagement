@@ -7,10 +7,11 @@ import javafx.beans.property.StringProperty;
 
 public class Account {
 
-    private final IntegerProperty id;
-    private final StringProperty name;
-    private final StringProperty username;
-    private final StringProperty password;
+    private  IntegerProperty id;
+    private  StringProperty name;
+    private  StringProperty username;
+    private  StringProperty password;
+    private  StringProperty role;
 
     public Account(int id, String name, String username, String password) {
         this.id = new SimpleIntegerProperty(id);
@@ -19,9 +20,27 @@ public class Account {
         this.password = new SimpleStringProperty(password);
     }
 
+    public Account(int id, String name, String username, String password, String role) {
+        this.id = new SimpleIntegerProperty(id);
+        this.name = new SimpleStringProperty(name);
+        this.username = new SimpleStringProperty(username);
+        this.password = new SimpleStringProperty(password);
+        this.role = new SimpleStringProperty(role);
+    }
+
+
+
     // Getters và setters cho các thuộc tính
     public int getId() {
         return id.get();
+    }
+
+    public String getRole() {
+        return role.get();
+    }
+
+    public StringProperty roleProperty() {
+        return role;
     }
 
     public void setId(int id) {
