@@ -32,10 +32,11 @@ public class DashBoardController {
     private HBox hboxWareHouse;
     @FXML
     private HBox hboxImport;
+    @FXML
+    private HBox hboxHistory;
 
 
 
-    // Phương thức để xóa trạng thái active từ tất cả các tab
     private void clearActive() {
         hBoxGeneral.getStyleClass().remove("active");
         hBoxEmployeeManagement.getStyleClass().remove("active");
@@ -45,6 +46,7 @@ public class DashBoardController {
         hboxLogout.getStyleClass().remove("active");
         hboxImport.getStyleClass().remove("active");
         hboxWareHouse.getStyleClass().remove("active");
+        hboxHistory.getStyleClass().remove("active");
     }
 
     public void showLogout() {
@@ -67,6 +69,12 @@ public class DashBoardController {
     }
 
 
+    public void showHistory() {
+        clearActive();
+        hboxHistory.getStyleClass().add("active");
+        HistoryView historyView = new HistoryView();
+        mainContent.getChildren().setAll(historyView);
+    }
 
     public void showGeneral() {
         clearActive();
@@ -74,18 +82,21 @@ public class DashBoardController {
         GeneralView generalView = new GeneralView();
         mainContent.getChildren().setAll(generalView);
     }
-    public void showImportProduct(){
+
+    public void showImportProduct() {
         clearActive();
         hboxImport.getStyleClass().add("active");
         ImportProductView importView = new ImportProductView();
         mainContent.getChildren().setAll(importView);
     }
-public void showWareHouse(){
+
+    public void showWareHouse() {
         clearActive();
         hboxWareHouse.getStyleClass().add("active");
         WarehouseManagementView warehouseManagement = new WarehouseManagementView();
         mainContent.getChildren().setAll(warehouseManagement);
-}
+    }
+
     // Các phương thức hiển thị tab khác tương tự
 
 
