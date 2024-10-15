@@ -45,11 +45,13 @@ public class DirectorModel implements ICommon<Product> {
 
     @Override
     public ArrayList<Product> getAll(int idStore) {
+        return null;
+    }
+
+    public ArrayList<Product> getAll() {
         ArrayList<Product> list = new ArrayList<>();
-        String sql = "SELECT products.id, product_name, purchase_price, sale_price, brand, img_address " +
-                "FROM products " +
-                "JOIN product_warehouse ON products.id = product_warehouse.id_product " +
-                "GROUP BY products.id;";
+        String sql = "SELECT *" +
+                "FROM products ";
         try (Connection con = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             return getProducts(list, ps);
@@ -66,61 +68,15 @@ public class DirectorModel implements ICommon<Product> {
 
     @Override
     public boolean add(Product obj) {
-        String productSql = "INSERT INTO products (product_name, purchase_price, sale_price, brand) " +
+        String sql = "INSERT INTO products (product_name, purchase_price, sale_price, brand) " +
                 "VALUES (?, ?, ?, ?);";
-        String warehouseSql = "INSERT INTO product_warehouse (id_product, id_warehouse, quantity) " +
-                "VALUES (?, ?, ?);";
 
-        Connection con = null;
-        try {
-            // Get database connection
-            con = JDBCConnect.getJDBCConnection();
-            // Start transaction
-            con.setAutoCommit(false);
-
-            // Insert into products table
-            try (PreparedStatement psProduct = con.prepareStatement(productSql, Statement.RETURN_GENERATED_KEYS)) {
-                productParam(psProduct, obj);
-                psProduct.executeUpdate();
-
-                // Retrieve the generated product id (if auto-incremented)
-                try (ResultSet rs = psProduct.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        int productId = rs.getInt(1); // Auto-generated product ID
-
-                        // Insert into product_warehouse table
-                        try (PreparedStatement psWarehouse = con.prepareStatement(warehouseSql)) {
-                            psWarehouse.setInt(1, productId); // Use the generated product ID
-                            psWarehouse.setInt(2, 1);         // id_warehouse = 1
-                            psWarehouse.setInt(3, 0);         // quantity = 0
-                            psWarehouse.executeUpdate();
-                        }
-                    }
-                }
-            }
-
-            // Commit transaction
-            con.commit();
-            return true;
-        } catch (Exception e) {
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+            productParam(ps, obj);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
             e.printStackTrace();
-            try {
-                // Rollback if any error occurs
-                if (con != null) {
-                    con.rollback();
-                }
-            } catch (SQLException rollbackEx) {
-                rollbackEx.printStackTrace();
-            }
-        } finally {
-            if (con != null) {
-                try {
-                    con.setAutoCommit(true); // Reset to default behavior
-                    con.close();             // Close connection
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
         return false;
     }
@@ -128,11 +84,16 @@ public class DirectorModel implements ICommon<Product> {
 
     @Override
     public boolean update(Product obj, int id) {
-        String sql = "UPDATE products SET product_name = ?, purchase_price = ?, sale_price = ?" +
-                "brand = ?";
-        try (Connection con = JDBCConnect.getJDBCConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        return false;
+    }
+
+    public boolean update(Product obj) {
+        String sql = "UPDATE products SET product_name = ?, purchase_price = ?, sale_price = ?, " +
+                "brand = ? WHERE id = ?";
+        try (Connection connection = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             productParam(ps, obj);
+            ps.setInt(5, obj.getId());
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -142,56 +103,18 @@ public class DirectorModel implements ICommon<Product> {
 
     @Override
     public boolean delete(int productId) {
-        String deleteWarehouseSql = "DELETE FROM product_warehouse WHERE id_product = ?;";
         String deleteProductSql = "DELETE FROM products WHERE id = ?;";
         String resetAutoIncrement = "ALTER TABLE products AUTO_INCREMENT = 1;";
 
-        Connection con = null;
-        try {
-            // Get database connection
-            con = JDBCConnect.getJDBCConnection();
-            // Start transaction
-            con.setAutoCommit(false);
-
-            // First delete from the product_warehouse table
-            try (PreparedStatement psWarehouse = con.prepareStatement(deleteWarehouseSql)) {
-                psWarehouse.setInt(1, productId);
-                psWarehouse.executeUpdate();
-            }
-
-            // Then delete from the products table
-            try (PreparedStatement psProduct = con.prepareStatement(deleteProductSql)) {
-                psProduct.setInt(1, productId);
-                psProduct.executeUpdate();
-            }
-
-            // Reset Auto Increment
-            try (PreparedStatement psAutoIncrement = con.prepareStatement(resetAutoIncrement)) {
-                psAutoIncrement.executeUpdate();
-            }
-
-            // Commit transaction
-            con.commit();
+        try (Connection connection = JDBCConnect.getJDBCConnection();
+        PreparedStatement ps1 = connection.prepareStatement(deleteProductSql);
+        PreparedStatement ps2 = connection.prepareStatement(resetAutoIncrement)) {
+            ps1.setInt(1, productId);
+            ps1.executeUpdate();
+            ps2.executeUpdate();
             return true;
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
-            try {
-                // Rollback if any error occurs
-                if (con != null) {
-                    con.rollback();
-                }
-            } catch (SQLException rollbackEx) {
-                rollbackEx.printStackTrace();
-            }
-        } finally {
-            if (con != null) {
-                try {
-                    con.setAutoCommit(true); // Reset to default behavior
-                    con.close();             // Close connection
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
         return false;
     }
@@ -209,5 +132,48 @@ public class DirectorModel implements ICommon<Product> {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    public boolean ifDependencies(int id) {
+        // TRUE = Still have dependencies
+        // FALSE = No dependencies
+        String sqlWarehouse = "SELECT COUNT(*) AS count FROM product_warehouse WHERE id_product =?;";
+        String sqlStore = "SELECT COUNT(*) AS count FROM products_store WHERE id_product =?";
+        try (Connection con = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps1 = con.prepareStatement(sqlWarehouse);
+             PreparedStatement ps2 = con.prepareStatement(sqlStore)){
+            int count = 0;
+            ps1.setInt(1, id);
+            ps2.setInt(1, id);
+            ResultSet rs1 = ps1.executeQuery();
+            ResultSet rs2 = ps2.executeQuery();
+            if (rs1.next()) {
+                count += rs1.getInt("count");
+            }
+            if (rs2.next()) {
+                count += rs2.getInt("count");
+            }
+            return count > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean ifUniqueProductName (String productName) {
+        String sql = "SELECT COUNT(*) AS count FROM products WHERE product_name =?;";
+        try (Connection con = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = con.prepareStatement(sql)){
+            int count = 0;
+            ps.setString(1, productName);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                count += rs.getInt("count");
+            }
+            return count == 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

@@ -75,11 +75,11 @@ public class ProductManagementView extends VBox {
 // Option Column with Edit and Delete buttons
         TableColumn<Product, Void> optionColumn = new TableColumn<>("Option");
         optionColumn.setCellFactory(col -> new TableCell<>() {
-            final Button detailButton = new Button("Detail");
+            final Button editButton = new Button("Edit");
             final Button deleteButton = new Button("Delete");
 
             {
-                detailButton.setStyle("-fx-background-color: yellow;");
+                editButton.setStyle("-fx-background-color: yellow;");
                 deleteButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
             }
 
@@ -90,43 +90,52 @@ public class ProductManagementView extends VBox {
                     setGraphic(null);
                 } else {
                     // Handle the detail button click event
-                    detailButton.setOnAction(event -> {
+                    editButton.setOnAction(event -> {
                         Product selectedProduct = getTableView().getItems().get(getIndex());
-                        showProductDetails(selectedProduct); // Method to show product details
+                        showProductEditor(selectedProduct); // Method to show product details
                     });
 
                     // Handle the delete button click event
                     deleteButton.setOnAction(event -> {
                         Product selectedProduct = getTableView().getItems().get(getIndex());
 
-                        // Confirmation alert
-                        Alert confirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
-                        confirmationAlert.setTitle("Delete Product");
-                        confirmationAlert.setHeaderText("Are you sure you want to delete this product?");
-                        confirmationAlert.setContentText("Product: " + selectedProduct.getName());
+                        if (!dm.ifDependencies(selectedProduct.getId())) {
+                            // Confirmation alert
+                            Alert confirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
+                            confirmationAlert.setTitle("Delete Product");
+                            confirmationAlert.setHeaderText("Are you sure you want to delete this product?");
+                            confirmationAlert.setContentText("Product: " + selectedProduct.getName());
 
-                        // Show the confirmation dialog and capture the response
-                        confirmationAlert.showAndWait().ifPresent(response -> {
-                            if (response == ButtonType.OK) {
-                                // If confirmed, remove the product from the database
-                                boolean deleted = dm.delete(selectedProduct.getId());
+                            // Show the confirmation dialog and capture the response
+                            confirmationAlert.showAndWait().ifPresent(response -> {
+                                if (response == ButtonType.OK) {
+                                    // If confirmed, remove the product from the database
+                                    boolean deleted = dm.delete(selectedProduct.getId());
 
-                                if (deleted) {
-                                    // Remove the product from the table
-                                    productList.remove(selectedProduct);
-                                } else {
-                                    // If delete failed, show an error alert
-                                    Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                                    errorAlert.setTitle("Error");
-                                    errorAlert.setHeaderText("Failed to delete the product.");
-                                    errorAlert.setContentText("Please try again.");
-                                    errorAlert.showAndWait();
+                                    if (deleted) {
+                                        // Remove the product from the table
+                                        productList.remove(selectedProduct);
+                                    } else {
+                                        // If delete failed, show an error alert
+                                        Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                                        errorAlert.setTitle("Error");
+                                        errorAlert.setHeaderText("Failed to delete the product.");
+                                        errorAlert.setContentText("Please try again.");
+                                        errorAlert.showAndWait();
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        } else {
+                            // Show an alert if there are dependencies
+                            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                            errorAlert.setTitle("Error");
+                            errorAlert.setHeaderText("Cannot delete the product.");
+                            errorAlert.setContentText("This product still has dependencies. Please delete them first.");
+                            errorAlert.showAndWait();
+                        }
                     });
 
-                    HBox optionBox = new HBox(detailButton, deleteButton);
+                    HBox optionBox = new HBox(editButton, deleteButton);
                     optionBox.setSpacing(10);
                     setGraphic(optionBox);
                 }
@@ -137,7 +146,7 @@ public class ProductManagementView extends VBox {
         productTable.getColumns().addAll(idColumn, nameColumn, brandColumn, purchasePriceColumn, salePriceColumn, optionColumn);
 
         // ObservableList to hold Product data
-        productList.setAll(dm.getAll(1));
+        productList.setAll(dm.getAll());
 
         // Bind the data to the TableView
         productTable.setItems(productList);
@@ -171,9 +180,34 @@ public class ProductManagementView extends VBox {
         saveButton.setOnAction(event -> {
             int id = dm.getFinalId();
             String name = nameField.getText();
+            if (name.isEmpty()) {
+                alertEmptyName();
+                return;
+            }
+            if (!dm.ifUniqueProductName(name)) {
+                alertUniqueProductName();
+                return;
+            }
             String brand = brandField.getText();
-            double purchasePrice = Double.parseDouble(purchasePriceField.getText());
-            double salePrice = Double.parseDouble(salePriceField.getText());
+            if (brand.isEmpty()) {
+                alertEmptyBrand();
+                return;
+            }
+            double purchasePrice;
+            try {
+                purchasePrice = Double.parseDouble(purchasePriceField.getText());
+
+            } catch (NumberFormatException e) {
+                alertInvalidPurchasePrice();
+                return;
+            }
+            double salePrice;
+            try {
+                salePrice = Double.parseDouble(salePriceField.getText());
+            } catch (NumberFormatException e) {
+                alertInvalidSalePrice();
+                return;
+            }
 
             // Create a new product (assuming Product constructor takes these parameters)
             Product newProduct = new Product(id, name, brand, purchasePrice, salePrice);  // Assuming stock is initially 0
@@ -182,7 +216,7 @@ public class ProductManagementView extends VBox {
             dm.add(newProduct);
 
             // Refresh the table data
-            productList.setAll(dm.getAll(1));
+            productList.setAll(dm.getAll());
 
             // Close the form after saving
             newProductStage.close();
@@ -208,45 +242,29 @@ public class ProductManagementView extends VBox {
         formLayout.add(new Label("Sale Price:"), 0, 3);
         formLayout.add(salePriceField, 1, 3);
 
-        // Layout for buttons
-        HBox buttonLayout = new HBox(10, saveButton, cancelButton);
-        buttonLayout.setAlignment(Pos.CENTER);
-
-        // Main layout
-        VBox mainLayout = new VBox(10, formLayout, buttonLayout);
-        mainLayout.setPadding(new Insets(20));
-
-        // Set the scene and show the form
-        Scene newProductScene = new Scene(mainLayout, 300, 250);
-        newProductStage.setScene(newProductScene);
-        newProductStage.initModality(Modality.APPLICATION_MODAL); // Block the parent window
-        newProductStage.showAndWait();
+        setupMainLayoutAndScene(saveButton, cancelButton, newProductStage, formLayout);
     }
 
-    private void showProductDetails(Product product) {
-        Stage detailStage = new Stage();
-        detailStage.setTitle("Product Details");
+    private void showProductEditor(Product product) {
+        Stage editStage = new Stage();
+        editStage.setTitle("Product Details");
 
-        // Create layout for showing product details
+        // Create layout for showing product editor
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(10));
         grid.setHgap(10);
         grid.setVgap(10);
 
-        // Product details labels and fields
+        // Product Editor labels and fields
         Label nameLabel = new Label("Name:");
         Label brandLabel = new Label("Brand:");
         Label purchasePriceLabel = new Label("Purchase Price:");
         Label salePriceLabel = new Label("Sale Price:");
 
         TextField nameField = new TextField(product.getName());
-        nameField.setEditable(false);
         TextField brandField = new TextField(product.getBrand());
-        brandField.setEditable(false);
         TextField purchasePriceField = new TextField(String.valueOf(product.getPurchasePrice()));
-        purchasePriceField.setEditable(false);
         TextField salePriceField = new TextField(String.valueOf(product.getSalePrice()));
-        salePriceField.setEditable(false);
 
         // Add components to the grid layout
         grid.add(nameLabel, 0, 0);
@@ -258,10 +276,63 @@ public class ProductManagementView extends VBox {
         grid.add(salePriceLabel, 0, 3);
         grid.add(salePriceField, 1, 3);
 
-        // Close button
-        Button closeButton = new Button("Close");
-        closeButton.setOnAction(event -> detailStage.close());
-        HBox buttonLayout = new HBox(10, closeButton);
+        // Save button to apply changes
+        Button saveButton = new Button("Save");
+        saveButton.setOnAction(event -> {
+            // Validate and update product information
+            String name;
+            name = nameField.getText();
+            if (name.isEmpty()) {
+                alertEmptyName();
+                return;
+            }
+            if (!dm.ifUniqueProductName(name)) {
+                alertUniqueProductName();
+                return;
+            }
+            String brand;
+            brand = brandField.getText();
+            if (brand.isEmpty()) {
+                alertEmptyBrand();
+                return;
+            }
+            double purchasePrice;
+            try {
+                purchasePrice = Double.parseDouble(purchasePriceField.getText());
+            } catch (NumberFormatException e) {
+                alertInvalidPurchasePrice();
+                return;
+            }
+            double salePrice;
+            try {
+                salePrice = Double.parseDouble(salePriceField.getText());
+            } catch (NumberFormatException e) {
+                alertInvalidSalePrice();
+                return;
+            }
+
+            // Update Product
+            Product updatedProduct = new Product(product.getId(), name, brand, purchasePrice, salePrice);
+            dm.update(updatedProduct);
+
+            // Refresh the table data
+            productList.setAll(dm.getAll());
+
+            // Close
+            editStage.close();
+        });
+
+        // Cancel button
+        Button cancelButton = new Button("Cancel");
+        cancelButton.setOnAction(event -> editStage.close());
+
+        setupMainLayoutAndScene(saveButton, cancelButton, editStage, grid);
+    }
+
+    // Same Layout
+    private void setupMainLayoutAndScene(Button saveButton, Button cancelButton, Stage stage, GridPane grid) {
+        // Button layout
+        HBox buttonLayout = new HBox(10, saveButton, cancelButton);
         buttonLayout.setAlignment(Pos.CENTER);
 
         // Main layout
@@ -269,10 +340,47 @@ public class ProductManagementView extends VBox {
         mainLayout.setPadding(new Insets(20));
 
         // Set the scene and show the pop-up
-        Scene detailScene = new Scene(mainLayout, 300, 250);
-        detailStage.setScene(detailScene);
-        detailStage.initModality(Modality.APPLICATION_MODAL); // Block the parent window
-        detailStage.showAndWait();
+        Scene editScene = new Scene(mainLayout, 300, 250);
+        stage.setScene(editScene);
+        stage.initModality(Modality.APPLICATION_MODAL); // Block the parent window
+        stage.showAndWait();
+    }
+
+
+    // ALERT
+    private void alertEmptyName() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Product Name cannot be empty.");
+        alert.showAndWait();
+    }
+
+    private void alertUniqueProductName() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Product Name already exists.");
+        alert.showAndWait();
+    }
+
+    private void alertEmptyBrand() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Brand cannot be empty.");
+        alert.showAndWait();
+    }
+
+    private void alertInvalidPurchasePrice() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Invalid Purchase Price.");
+        alert.showAndWait();
+    }
+
+    private void alertInvalidSalePrice() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Invalid Sale Price.");
+        alert.showAndWait();
     }
 
 }
