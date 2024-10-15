@@ -86,4 +86,15 @@ public class Account {
     public StringProperty passwordProperty() {
         return password;
     }
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "id=" + id +
+                ", name=" + name +
+                ", username=" + username +
+                ", password=" + password +
+                ", role=" + role +
+                '}';
+    }
 }
