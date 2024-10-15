@@ -4,6 +4,7 @@ import dao.JDBCConnect;
 import entity.Account;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import utils.PasswordUtil;
 
 import java.sql.*;
 
@@ -51,6 +52,30 @@ public class AccountModel {
         return accountList;
     }
 
+
+    public boolean isValidName(String firstName, String lastName) {
+        String query = "SELECT COUNT(*) FROM employees e " +
+                "LEFT JOIN accounts a ON e.id = a.id_person " +
+                "WHERE e.first_name = ? " +  // Kiểm tra first_name
+                "AND e.last_name = ? " +     // Kiểm tra last_name
+                "AND a.id IS NULL";          // Kiểm tra rằng nhân viên chưa có tài khoản
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, firstName);  // Truyền firstName vào câu truy vấn
+            stmt.setString(2, lastName);    // Truyền lastName vào câu truy vấn
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) == 1;  // Trả về true nếu chưa có tài khoản
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;  // Trả về false nếu không tìm thấy
+    }
     public boolean isNameValid(String fullName, String role) {
         String query = "SELECT COUNT(*) FROM employees e " +
                 "LEFT JOIN accounts a ON e.id = a.id_person " +
@@ -90,22 +115,29 @@ public class AccountModel {
 
 
     // Phương thức thêm tài khoản mới
-    public void addAccount(String username, String password, String name) {
+    public boolean addAccount(Account account) {
         String insertSQL = "INSERT INTO accounts (username, password, id_person) " +
                 "VALUES (?, ?, (SELECT id FROM employees WHERE CONCAT(first_name, ' ', last_name) = ?))";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement pstmt = conn.prepareStatement(insertSQL)) {
 
-            pstmt.setString(1, username);
-            pstmt.setString(2, password);
-            pstmt.setString(3, name);
+            pstmt.setString(1, account.getUsername());
+            // Băm mật khẩu trước khi lưu
+            String hashedPassword = PasswordUtil.hashPassword(account.getPassword());
+            pstmt.setString(2, hashedPassword);
+            pstmt.setString(3, account.getName());
 
-            pstmt.executeUpdate();
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
+
+
+
 
     // Phương thức chỉnh sửa tài khoản
     public boolean updateAccount(Account account) {
@@ -117,11 +149,12 @@ public class AccountModel {
 
             pstmt.setString(1, account.getName());
             pstmt.setString(2, account.getUsername());
-            pstmt.setString(3, account.getPassword());
+            // Băm mật khẩu trước khi lưu
+            String hashedPassword = PasswordUtil.hashPassword(account.getPassword());
+            pstmt.setString(3, hashedPassword);
             pstmt.setInt(4, account.getId());
 
             int affectedRows = pstmt.executeUpdate();
-
             return affectedRows > 0;
 
         } catch (SQLException e) {
@@ -129,6 +162,7 @@ public class AccountModel {
             return false;
         }
     }
+
 
     // Phương thức xóa tài khoản
     public boolean deleteAccount(int id) {

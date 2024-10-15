@@ -23,8 +23,8 @@ public class AccountView extends VBox {
         // New Account Button
         Button newAccountButton = new Button("New Account");
         newAccountButton.setStyle("-fx-background-color: #00C2FF; -fx-text-fill: white;");
+        newAccountButton.setOnAction(event -> showNewAccountPopup());
 
-        // Search Bar
         TextField searchField = new TextField();
         searchField.setPromptText("Search Account");
 
@@ -209,6 +209,84 @@ public class AccountView extends VBox {
         editStage.setScene(scene);
         editStage.showAndWait();
     }
+
+
+    // Hàm hiển thị pop-up thêm tài khoản mới
+// Hàm hiển thị pop-up thêm tài khoản mới
+    private void showNewAccountPopup() {
+        Stage newAccountStage = new Stage();
+        newAccountStage.initModality(Modality.APPLICATION_MODAL);
+        newAccountStage.setTitle("New Account");
+
+        // Tạo Label và TextField cho các trường thông tin tài khoản
+        Label nameLabel = new Label("Full Name:");
+        TextField nameField = new TextField();
+
+        Label usernameLabel = new Label("Username:");
+        TextField usernameField = new TextField();
+
+        Label passwordLabel = new Label("Password:");
+        PasswordField passwordField = new PasswordField();
+
+        // Nút Save
+        Button saveButton = new Button("Save");
+        saveButton.setOnAction(event -> {
+            String fullName = nameField.getText();
+            String username = usernameField.getText();
+            String password = passwordField.getText();
+
+            // Kiểm tra xem các trường thông tin đã được điền đầy đủ chưa
+            if (fullName.isEmpty() || username.isEmpty() || password.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Missing Information");
+                alert.setHeaderText("Please fill in all fields.");
+                alert.showAndWait();
+            } else {
+                // Kiểm tra xem username có trùng không
+                AccountModel accountModel = new AccountModel();
+                boolean isUsernameUnique = accountModel.isUsernameUnique(username);
+
+                if (!isUsernameUnique) {
+                    Alert usernameAlert = new Alert(Alert.AlertType.ERROR);
+                    usernameAlert.setTitle("Invalid Username");
+                    usernameAlert.setHeaderText("Username already exists");
+                    usernameAlert.setContentText("Please enter a unique username.");
+                    usernameAlert.showAndWait();
+                } else {
+                    // Tạo đối tượng Account mới
+                    Account newAccount = new Account(0, fullName, username, password); // Sử dụng ID là 0 hoặc có thể sửa theo logic của bạn
+
+                    // Gọi AccountModel để thêm tài khoản vào database
+                    boolean success = accountModel.addAccount(newAccount);
+
+                    if (success) {
+                        accountList.setAll(accountModel.loadAccounts("")); // Cập nhật danh sách tài khoản
+                        newAccountStage.close();
+                        ((TableView<Account>) getChildren().get(3)).refresh();
+                    } else {
+                        Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                        errorAlert.setTitle("Error");
+                        errorAlert.setHeaderText("Failed to add account.");
+                        errorAlert.setContentText("There was an error while adding the account.");
+                        errorAlert.showAndWait();
+                    }
+                }
+            }
+        });
+
+        Button cancelButton = new Button("Cancel");
+        cancelButton.setOnAction(event -> newAccountStage.close());
+
+        VBox layout = new VBox(10, nameLabel, nameField, usernameLabel, usernameField, passwordLabel, passwordField, new HBox(10, saveButton, cancelButton));
+        layout.setAlignment(Pos.CENTER);
+        layout.setStyle("-fx-padding: 20;");
+
+        Scene scene = new Scene(layout, 300, 300);
+        newAccountStage.setScene(scene);
+        newAccountStage.showAndWait();
+    }
+
+
 
 
 
