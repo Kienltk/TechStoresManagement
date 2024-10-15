@@ -20,6 +20,13 @@ public class Account {
         this.password = new SimpleStringProperty(password);
     }
 
+    public Account(IntegerProperty id, StringProperty name, StringProperty username, StringProperty password) {
+        this.id = id;
+        this.name = name;
+        this.username = username;
+        this.password = password;
+    }
+
     public Account(int id, String name, String username, String password, String role) {
         this.id = new SimpleIntegerProperty(id);
         this.name = new SimpleStringProperty(name);
