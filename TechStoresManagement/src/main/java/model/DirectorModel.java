@@ -68,12 +68,13 @@ public class DirectorModel implements ICommon<Product> {
 
     @Override
     public boolean add(Product obj) {
-        String sql = "INSERT INTO products (product_name, purchase_price, sale_price, brand) " +
-                "VALUES (?, ?, ?, ?);";
+        String sql = "INSERT INTO products (product_name, purchase_price, sale_price, brand, img_address) " +
+                "VALUES (?, ?, ?, ?, ?);";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
             productParam(ps, obj);
+            ps.setString(5, obj.getImage());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

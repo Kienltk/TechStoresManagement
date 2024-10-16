@@ -36,9 +36,9 @@ public class Product {
         this(id, image, name, brand, 0, salePrice, 0.0, category); // Default stock and purchasePrice to 0
     }
 
-    // Constructor without image and category, for minimal product creation
-    public Product(int id, String name, String brand, double purchasePrice, double salePrice) {
-        this(id, "", name, brand, 0, salePrice, purchasePrice, ""); // Default image and category to empty strings
+    // Constructor without and category, for minimal product creation
+    public Product(int id, String image, String name, String brand, double purchasePrice, double salePrice) {
+        this(id, image, name, brand, 0, salePrice, purchasePrice, ""); // Default image and category to empty strings
     }
 
     public double getSalePrice() {

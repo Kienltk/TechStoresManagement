@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import model.DirectorModel;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -29,17 +30,11 @@ public class ProductManagementView extends VBox {
 
     ObservableList<Product> productList = FXCollections.observableArrayList();
     DirectorModel dm = new DirectorModel();
-    Label messag = new Label();
     HashMap<String, Label> messageLabel = new HashMap<>();
 
 
 
     public ProductManagementView() {
-        // Error messages for CRUD
-        messageLabel.put("name", new Label());
-        messageLabel.put("brand", new Label());
-        messageLabel.put("purchasePrice", new Label());
-        messageLabel.put("salePrice", new Label());
 
         // Title Label
         Label titleLabel = new Label("Product Management");
@@ -72,7 +67,6 @@ public class ProductManagementView extends VBox {
         nameColumn.setPrefWidth(230);
         nameColumn.setCellValueFactory(cellData -> {
             Product product = cellData.getValue();
-//            ImageView imageView = product.getImage();
             Label nameLabel = new Label(product.getName());
             HBox hBox = new HBox(10);
             hBox.getChildren().addAll(nameLabel);
@@ -91,7 +85,7 @@ public class ProductManagementView extends VBox {
         salePriceColumn.setMinWidth(100);
         salePriceColumn.setCellValueFactory(cellData -> cellData.getValue().salePriceProperty().asObject());
 
-// Option Column with Edit and Delete buttons
+        // Option Column with Edit and Delete buttons
         TableColumn<Product, Void> optionColumn = new TableColumn<>("Option");
         optionColumn.setCellFactory(col -> new TableCell<>() {
             final Button editButton = new Button("Edit");
@@ -195,35 +189,71 @@ public class ProductManagementView extends VBox {
         Button saveButton = new Button("Save");
         Button cancelButton = new Button("Cancel");
 
+        // Error messages for CRUD
+        messageLabel.put("name", new Label());
+        messageLabel.put("brand", new Label());
+        messageLabel.put("purchasePrice", new Label());
+        messageLabel.put("salePrice", new Label());
+        messageLabel.forEach((key, value) -> {
+            value.setVisible(false);
+            value.setManaged(false);
+        });
+
+        // Clear the message label
+        newProductStage.setOnCloseRequest(event -> {
+            messageLabel.clear();
+        });
+
         // Create an ImageView for displaying the uploaded image
         ImageView imageView = new ImageView();
         imageView.setFitWidth(100); // Set the desired width
         imageView.setFitHeight(100); // Set the desired height
         imageView.setPreserveRatio(true); // Preserve aspect ratio
 
+
         // Create a button for uploading an image
         Button uploadButton = new Button("Upload Image");
+        final File[] tempImageFile = new File[1];
+        final Image[] uploadedImage = new Image[1];
+
         uploadButton.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif"));
             File file = fileChooser.showOpenDialog(newProductStage);
             if (file != null) {
-                Image image = new Image(file.toURI().toString());
-                imageView.setImage(image); // Set the uploaded image to the ImageView
+                try {
+                    // Load the image into the ImageView
+                    Image image = new Image(new FileInputStream(file));
+                    imageView.setImage(image);
+
+                    // Store the uploaded image reference
+                    uploadedImage[0] = image;
+
+                    // Destination
+                    String targetDirectory = "src/main/resources/view/images";
+                    File targetDir = new File(targetDirectory);
+
+                    // Rename uploaded file
+                    String tempFileName = "img_temp" + file.getName().substring(file.getName().lastIndexOf("."));
+                    Path tempPath = new File(targetDir, tempFileName).toPath();
+
+                    // Copy the file to the destination
+                    Files.copy(file.toPath(), tempPath, StandardCopyOption.REPLACE_EXISTING);
+
+                    // Store the temporary file reference
+                    tempImageFile[0] = new File(tempPath.toString());
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
 
         // Save button action
         saveButton.setOnAction(event -> {
             boolean flag = true; //TRUE = no error
-            messag.setVisible(false);
-            messag.setManaged(false);
             int id = dm.getFinalId();
             String name = nameField.getText();
-            messageLabel.forEach((key, value) -> {
-                value.setVisible(false);
-                value.setManaged(false);
-            });
 
             if (name.isEmpty()) {
                 messageLabel.get("name").setText(alertEmptyName());
@@ -258,13 +288,28 @@ public class ProductManagementView extends VBox {
                 showMessage(messageLabel.get("salePrice"));
                 flag = false;
             }
+            String imgAddress = name + ".jpg";
             if (!flag) return;
 
             // Create a new product (assuming Product constructor takes these parameters)
-            Product newProduct = new Product(id, name, brand, purchasePrice, salePrice);  // Assuming stock is initially 0
+            Product newProduct = new Product(id, imgAddress, name, brand, purchasePrice, salePrice);  // Assuming stock is initially 0
 
             // Add the new product to the model (implement dm.addProduct() in your DirectorModel)
             dm.add(newProduct);
+
+            // If there is a temporary image file, rename it to the actual product image
+            if (tempImageFile[0] != null) {
+                try {
+                    // Define the final destination for the product image
+                    String finalImageName = newProduct.getName() + ".jpg";
+                    Path finalImagePath = new File("src/main/resources/view/images", finalImageName).toPath();
+
+                    // Move the temporary image to the final destination
+                    Files.copy(tempImageFile[0].toPath(), finalImagePath, StandardCopyOption.REPLACE_EXISTING);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
 
             // Refresh the table data
             productList.setAll(dm.getAll());
@@ -274,7 +319,9 @@ public class ProductManagementView extends VBox {
         });
 
         // Cancel button action
-        cancelButton.setOnAction(event -> newProductStage.close());
+        cancelButton.setOnAction(event -> {
+            newProductStage.close();
+        });
 
         // Layout for the form using HBox
         HBox formLayout = new HBox(20); // Spacing between elements
@@ -293,6 +340,7 @@ public class ProductManagementView extends VBox {
                 new Label("Sale Price:"), salePriceField, messageLabel.get("salePrice"),
                 new HBox(10, saveButton, cancelButton) // Buttons in a horizontal box
         );
+
 
         // Create a VBox for the image upload section
         VBox imageUploadSection = new VBox(10);
@@ -318,12 +366,23 @@ public class ProductManagementView extends VBox {
         grid.setHgap(10);
         grid.setVgap(10);
 
-        // Product Editor labels and fields
-        Label nameLabel = new Label("Name:");
-        Label brandLabel = new Label("Brand:");
-        Label purchasePriceLabel = new Label("Purchase Price:");
-        Label salePriceLabel = new Label("Sale Price:");
+        // Error messages for CRUD
+        messageLabel.put("name", new Label());
+        messageLabel.put("brand", new Label());
+        messageLabel.put("purchasePrice", new Label());
+        messageLabel.put("salePrice", new Label());
+        messageLabel.forEach((key, value) -> {
+            value.setVisible(false);
+            value.setManaged(false);
+        });
 
+        // Clear the message label
+        editStage.setOnCloseRequest(event -> {
+            messageLabel.clear();
+
+        });
+
+        // Create input fields and labels
         TextField nameField = new TextField(product.getName());
         TextField brandField = new TextField(product.getBrand());
         TextField purchasePriceField = new TextField(String.valueOf(product.getPurchasePrice()));
@@ -337,32 +396,50 @@ public class ProductManagementView extends VBox {
 
         // Create an ImageView for displaying the uploaded image
         ImageView imageView = new ImageView();
-        if (getClass().getResourceAsStream("/view/images/" + product.getImage()) != null) {
-            imageView = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/view/images/" + product.getImage()))));
-        } else {
+        Image originalImage;
 
+        if ((getClass().getResourceAsStream("/view/images/" + product.getImage()) != null)) {
+            originalImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/view/images/" + product.getImage())));
+            imageView.setImage(originalImage);
+        } else {
+            originalImage = null;
         }
         imageView.setFitWidth(200);
         imageView.setFitHeight(200);
 
         // Create a button for uploading an image
         Button uploadButton = new Button("Upload Image");
-        ImageView finalImageView = imageView;
+        final File[] tempImageFile = new File[1];
+        final Image[] uploadedImage = new Image[1];
+
+
         uploadButton.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif"));
             File file = fileChooser.showOpenDialog(editStage);
             if (file != null) {
                 try {
+                    // Load the image into the ImageView
+                    Image image = new Image(new FileInputStream(file));
+                    imageView.setImage(image);
+
+                    // Store the uploaded image reference
+                    uploadedImage[0] = image;
+
                     // Destination
-                    Path destinationPath = Path.of("resources/view/images/" + product.getImage());
+                    String targetDirectory = "src/main/resources/view/images";
+                    File targetDir = new File(targetDirectory);
+
+                    // Rename uploaded file
+                    String tempFileName = "img_temp" + file.getName().substring(file.getName().lastIndexOf("."));
+                    Path tempPath = new File(targetDir, tempFileName).toPath();
 
                     // Copy the file to the destination
-                    Files.copy(file.toPath(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(file.toPath(), tempPath, StandardCopyOption.REPLACE_EXISTING);
 
-                    // Load the image into the ImageView
-                    Image image = new Image(destinationPath.toUri().toString());
-                    finalImageView.setImage(image);
+                    // Store the temporary file reference
+                    tempImageFile[0] = new File(tempPath.toString());
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -372,41 +449,62 @@ public class ProductManagementView extends VBox {
         // Save button to apply changes
         Button saveButton = new Button("Save");
         saveButton.setOnAction(event -> {
-            // Validate and update product information
-            String name;
-            name = nameField.getText();
+            boolean flag = true; //TRUE = no error
+
+            // Validate Inputs
+            String name = nameField.getText();
             if (name.isEmpty()) {
-                alertEmptyName();
-                return;
+                messageLabel.get("name").setText(alertEmptyName());
+                showMessage(messageLabel.get("name"));
+                flag = false;
             }
             if (!dm.ifUniqueProductName(name) && (!name.equals(oldName))) {
-                alertUniqueProductName();
-                return;
+                messageLabel.get("name").setText(alertUniqueProductName());
+                showMessage(messageLabel.get("name"));
+                flag = false;
             }
-            String brand;
-            brand = brandField.getText();
+            String brand = brandField.getText();
             if (brand.isEmpty()) {
-                alertEmptyBrand();
-                return;
+                messageLabel.get("brand").setText(alertEmptyBrand());
+                showMessage(messageLabel.get("brand"));
+                flag = false;
             }
-            double purchasePrice;
+            double purchasePrice = 0;
             try {
                 purchasePrice = Double.parseDouble(purchasePriceField.getText());
+
             } catch (NumberFormatException e) {
-                alertInvalidPurchasePrice();
-                return;
+                messageLabel.get("purchasePrice").setText(alertInvalidPurchasePrice());
+                showMessage(messageLabel.get("purchasePrice"));
+                flag = false;
             }
-            double salePrice;
+            double salePrice = 0;
             try {
                 salePrice = Double.parseDouble(salePriceField.getText());
             } catch (NumberFormatException e) {
-                alertInvalidSalePrice();
-                return;
+                messageLabel.get("salePrice").setText(alertInvalidSalePrice());
+                showMessage(messageLabel.get("salePrice"));
+                flag = false;
             }
+            if (!flag) return;
 
             // Update Product
-            Product updatedProduct = new Product(product.getId(), name, brand, purchasePrice, salePrice);
+            Product updatedProduct = new Product(product.getId(), "", name, brand, purchasePrice, salePrice);
             dm.update(updatedProduct);
+
+            // If there is a temporary image file, rename it to the actual product image
+            if (tempImageFile[0] != null && tempImageFile[0].exists()) {
+                try {
+                    // Define the final destination for the product image
+                    String finalImageName = product.getImage();
+                    Path finalImagePath = new File("src/main/resources/view/images", finalImageName).toPath();
+
+                    // Move the temporary image to the final destination
+                    Files.move(tempImageFile[0].toPath(), finalImagePath, StandardCopyOption.REPLACE_EXISTING);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
 
             // Refresh the table data
             productList.setAll(dm.getAll());
@@ -423,6 +521,7 @@ public class ProductManagementView extends VBox {
             brandField.setText(oldBrand);
             purchasePriceField.setText(String.valueOf(oldPurchasePrice));
             salePriceField.setText(String.valueOf(oldSalePrice));
+            imageView.setImage(originalImage);
         });
 
         // Cancel button
@@ -444,7 +543,7 @@ public class ProductManagementView extends VBox {
                 new Label("Brand:"), brandField, messageLabel.get("brand"),
                 new Label("Purchase Price:"), purchasePriceField, messageLabel.get("purchasePrice"),
                 new Label("Sale Price:"), salePriceField, messageLabel.get("salePrice"),
-                new HBox(10, saveButton, cancelButton) // Buttons in a horizontal box
+                new HBox(10, saveButton, resetButton, cancelButton) // Buttons in a horizontal box
         );
 
         // Create a VBox for the image upload section
@@ -460,37 +559,6 @@ public class ProductManagementView extends VBox {
         editStage.setScene(scene);
         editStage.show();
     }
-
-    // Same Layout - Add product
-    private void setupMainLayoutAndScene(Button saveButton, Button cancelButton, Stage stage, GridPane grid) {
-        // Button layout
-        HBox buttonLayout = new HBox(10, saveButton, cancelButton);
-        buttonLayout.setAlignment(Pos.CENTER);
-
-        mainLayout(grid, stage, buttonLayout);
-    }
-
-    // Same Layout - Edit product
-    private void setupMainLayoutAndScene(Button saveButton, Button resetButton, Button cancelButton, Stage stage, GridPane grid) {
-        // Button layout
-        HBox buttonLayout = new HBox(10, saveButton, resetButton, cancelButton);
-        buttonLayout.setAlignment(Pos.CENTER);
-
-        mainLayout(grid, stage, buttonLayout);
-    }
-
-    private void mainLayout(GridPane grid, Stage stage, HBox buttonLayout) {
-        // Main layout
-        VBox mainLayout = new VBox(10, grid, buttonLayout);
-        mainLayout.setPadding(new Insets(20));
-
-        // Set the scene and show the pop-up
-        Scene scene = new Scene(mainLayout, 300, 250);
-        stage.setScene(scene);
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.showAndWait();
-    }
-
 
     // ALERT MESSAGES
     private String alertEmptyName() {
