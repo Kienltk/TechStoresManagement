@@ -101,12 +101,25 @@ public class Product {
         this.stock.set(stock);
     }
 
-
     public String getCategory() { // Thêm phương thức getCategory
         return category.get();
     }
 
     public SimpleStringProperty categoryProperty() { // Thêm property cho category
         return category;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", image=" + image +
+                ", name=" + name +
+                ", brand=" + brand +
+                ", stock=" + stock +
+                ", salePrice=" + salePrice +
+                ", purchasePrice=" + purchasePrice +
+                ", category=" + category +
+                '}';
     }
 }

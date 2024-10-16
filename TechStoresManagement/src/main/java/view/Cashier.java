@@ -594,6 +594,7 @@ public class Cashier extends Application {
 
 // Add the image to the left
         ImageView imageView = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("images/" + product.getImage()))));
+        System.out.println(Objects.requireNonNull(getClass().getResourceAsStream("images/" + product.getImage())));
         imageView.setFitWidth(200);
         imageView.setFitHeight(200);
         hbox.getChildren().add(imageView);
