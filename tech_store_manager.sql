@@ -41,12 +41,6 @@ CREATE TABLE customers
     phone_number varchar(15)
 );
 
-CREATE TABLE financial
-(
-    id        int auto_increment primary key,
-    financial varchar(50)
-);
-
 -- FOREIGN KEY
 -- PRODUCT
 CREATE TABLE product_categories
@@ -58,7 +52,7 @@ CREATE TABLE product_categories
 );
 
 -- WAREHOUSES
-CREATE TABLE product_warehouse
+CREATE TABLE products_warehouse
 (
     id_product   int,
     id_warehouse int,
@@ -71,36 +65,20 @@ CREATE TABLE import_warehouse
 (
     id                  int auto_increment primary key,
     id_warehouse        int,
+    name varchar(50),
+    total               decimal(12,2),
+    status varchar(50),
     product_import_date datetime,
     foreign key (id_warehouse) references warehouses (id)
 );
 
 CREATE TABLE import_warehouse_details
 (
-    id_import                  int,
-    id_product                 int,
-    number_of_imported_product int,
+    id_import int,
+    id_product int,
+    quantity int,
+    total decimal(12,2),
     foreign key (id_import) references import_warehouse (id),
-    foreign key (id_product) references products (id)
-);
-
-CREATE TABLE warehouse_shipments
-(
-    id                    int auto_increment primary key,
-    id_warehouse          int,
-    id_store              int,
-    product_delivery_date datetime,
-    status                varchar(50),
-    foreign key (id_store) references stores (id),
-    foreign key (id_warehouse) references warehouses (id)
-);
-
-CREATE TABLE warehouse_shipment_details
-(
-    id_shipment                int,
-    id_product                 int,
-    number_of_delivery_product int,
-    foreign key (id_shipment) references warehouse_shipments (id),
     foreign key (id_product) references products (id)
 );
 
@@ -110,11 +88,12 @@ CREATE TABLE store_financial
     id             int auto_increment primary key,
     id_store       int,
     date           date,
-    financial_type int,
-    total          decimal(12, 2),
-    foreign key (financial_type) references financial (id),
+    turnover       decimal(12,2),
+    capital        decimal(12, 2),
+    profit         decimal(12, 2),
     foreign key (id_store) references stores (id)
 );
+
 
 CREATE TABLE products_store
 (
@@ -129,44 +108,21 @@ CREATE TABLE import_store
 (
     id            int auto_increment primary key,
     id_store      int,
+    id_warehouse int,
     total         decimal(10, 2),
     received_date datetime,
+    status varchar(50),
+    foreign key (id_warehouse) references warehouses (id),
     foreign key (id_store) references stores (id)
 );
 
 CREATE TABLE import_store_details
 (
     id_import   int,
-    id_shipment int,
     id_product  int,
     quantity    int,
     total       decimal(10, 2),
     foreign key (id_import) references import_store (id),
-    foreign key (id_shipment) references warehouse_shipments (id),
-    foreign key (id_product) references products (id)
-);
-
--- ORDERS
-CREATE TABLE receipts
-(
-    id            int auto_increment primary key,
-    id_customer   int,
-    id_store      int,
-    total         decimal(10, 2),
-    profit        decimal(10, 2),
-    purchase_date datetime,
-    foreign key (id_customer) references customers (id),
-    foreign key (id_store) references stores (id)
-);
-
-CREATE TABLE products_receipt
-(
-    id_receipt  int,
-    id_product  int,
-    quantity    int,
-    total_amout decimal(10, 2),
-    profit      decimal(10, 2),
-    foreign key (id_receipt) references receipts (id),
     foreign key (id_product) references products (id)
 );
 
@@ -208,15 +164,42 @@ CREATE TABLE accounts
     foreign key (id_person) references employees (id)
 );
 
+-- ORDERS
+CREATE TABLE receipts
+(
+    id            int auto_increment primary key,
+    id_customer   int,
+    id_store      int,
+    id_cashier int,
+    total         decimal(10, 2),
+    profit        decimal(10, 2),
+    purchase_date datetime,
+    foreign key (id_cashier) references employees (id),
+    foreign key (id_customer) references customers (id),
+    foreign key (id_store) references stores (id)
+);
+
+CREATE TABLE products_receipt
+(
+    id_receipt  int,
+    id_product  int,
+    quantity    int,
+    total_amount decimal(10, 2),
+    profit      decimal(10, 2),
+    foreign key (id_receipt) references receipts (id),
+    foreign key (id_product) references products (id)
+);
+
 -- ENTERPRISE 
 CREATE TABLE business_financial
 (
     id             int auto_increment primary key,
     date           date,
-    financial_type int,
-    total          decimal(12, 2),
-    foreign key (financial_type) references financial (id)
+    turnover       decimal(12,2),
+    capital        decimal(12, 2),
+    profit         decimal(12, 2)
 );
+
 
 -- DATA DEFAULT
 INSERT INTO products (product_name, purchase_price, sale_price, brand, img_address)
@@ -320,7 +303,7 @@ VALUES ('TechStore Branch 1', '350 Fifth Avenue, New York, NY 10118'),
        ('TechStore Branch 2', '1 Infinite Loop, Cupertino, CA 95014'),
        ('TechStore Branch 3', '1600 Amphitheatre Parkway, Mountain View, CA 94043');
 
-INSERT INTO product_warehouse (id_product, id_warehouse, quantity)
+INSERT INTO products_warehouse (id_product, id_warehouse, quantity)
 VALUES (1, 1, 100),
        (2, 1, 50),
        (3, 1, 75),
@@ -354,7 +337,7 @@ VALUES (1, 1, 100),
        (31, 1, 75),
        (32, 1, 50);
 
-INSERT INTO product_warehouse (id_product, id_warehouse, quantity)
+INSERT INTO products_warehouse (id_product, id_warehouse, quantity)
 VALUES (1, 2, 200),
        (2, 2, 80),
        (3, 2, 90),
@@ -388,7 +371,7 @@ VALUES (1, 2, 200),
        (31, 2, 85),
        (32, 2, 60);
 
-INSERT INTO product_warehouse (id_product, id_warehouse, quantity)
+INSERT INTO products_warehouse (id_product, id_warehouse, quantity)
 VALUES (1, 3, 150),
        (2, 3, 70),
        (3, 3, 80),
@@ -494,12 +477,13 @@ INSERT INTO role (role)
 VALUES ('General Director'),
        ('Store Management'),
        ('Warehouse Management'),
-       ('Cashier');
+       ('Cashier'),
+       ('Employee');
 
 INSERT INTO employees (first_name, last_name, gender, dob, email, phone_number, address, hire_date, salary, id_role,
                        id_store, id_warehouse, status)
 VALUES ('John', 'Doe', 1, '1980-05-15', 'john.doe@company.com', '1234567890', '123 view.Main St', '2020-01-01',
-        '150000', 1, NULL, NULL, 'Active');
+        '15000000', 1, NULL, NULL, 'Active');
 
 INSERT INTO employees (first_name, last_name, gender, dob, email, phone_number, address, hire_date, salary, id_role,
                        id_store, id_warehouse, status)
@@ -531,17 +515,17 @@ VALUES ('Frank', 'Wilson', 1, '1995-08-29', 'frank.wilson@company.com', '3344556
 INSERT INTO employees (first_name, last_name, gender, dob, email, phone_number, address, hire_date, salary, id_role,
                        id_store, id_warehouse, status)
 VALUES ('Michael', 'Brown', 1, '1990-04-10', 'michael.brown@company.com', '3216549870', '258 Willow St', '2023-05-01',
-        75000.00, 2, 1, NULL, 'Active'),
+        75000.00, 5, 1, NULL, 'Active'),
        ('Olivia', 'Garcia', 0, '1987-06-15', 'olivia.garcia@company.com', '4561237890', '369 Fir St', '2023-06-10',
-        75000.00, 2, 2, NULL, 'Active'),
+        75000.00, 5, 2, NULL, 'Active'),
        ('William', 'Martinez', 1, '1993-09-20', 'william.martinez@company.com', '1597534862', '753 Spruce St',
-        '2023-07-15', 75000.00, 2, 3, NULL, 'Active'),
+        '2023-07-15', 75000.00, 5, 3, NULL, 'Active'),
        ('Sophia', 'Wilson', 0, '1994-11-25', 'sophia.wilson@company.com', '9876543210', '123 Elm St', '2023-08-01',
-        65000.00, 3, 1, NULL, 'Active'),
+        65000.00, 5, NULL, 1, 'Active'),
        ('James', 'Lee', 1, '1989-02-05', 'james.lee@company.com', '1357924680', '456 Cedar St', '2023-09-12', 65000.00,
-        3, 2, NULL, 'Active'),
+        5, NULL, 2, 'Active'),
        ('Isabella', 'Hernandez', 0, '1996-12-30', 'isabella.hernandez@company.com', '2468135790', '789 Birch St',
-        '2023-10-10', 65000.00, 3, 3, NULL, 'Active');
+        '2023-10-10', 65000.00, 5, NULL, 3, 'Active');
     INSERT
 INTO accounts (username, password, id_person)
 VALUES
@@ -577,3 +561,23 @@ VALUES ('Customer', '1234567890'),
        ('Olivia Wilson', '321-123-4567'),
        ('Liam Harris', '987-321-6540'),
        ('Emma Clark', '456-654-3210');
+       
+       
+       
+       SELECT p.id, p.product_name, p.brand, ps.quantity AS stock, 
+                    IFNULL(SUM(pr.quantity), 0) AS sold_quantity,
+                    IFNULL(SUM(pr.profit), 0) AS profit 
+                    FROM products p 
+                    JOIN products_store ps ON p.id = ps.id_product 
+                    LEFT JOIN products_receipt pr ON p.id = pr.id_product 
+                    LEFT JOIN receipts r ON pr.id_receipt = r.id AND r.id_store = 1 
+                    WHERE ps.id_store = 1
+                    GROUP BY p.id, ps.quantity;
+                    
+                    
+                    SELECT SUM(quantity) AS total_quantity FROM products_store WHERE id_store = 1;
+
+SELECT CONCAT(e.first_name, ' ', e.last_name) AS cashier_name 
+                FROM employees e 
+                JOIN receipts r ON e.id = r.id_cashier 
+                WHERE r.id = 1

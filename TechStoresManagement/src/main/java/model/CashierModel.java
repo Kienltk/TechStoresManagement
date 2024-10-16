@@ -221,17 +221,25 @@ public class CashierModel implements ICommon<Product> {
     }
 
     // Tạo hóa đơn
-    public static int createReceipt(int customerId, int storeId, double total, double profit, Map<Integer, Integer> cartItems) {
-        String query = "INSERT INTO receipts (id_customer, id_store, total, profit, purchase_date) VALUES (?, ?, ?, ?, NOW())";
+    public static int createReceipt(int customerId, int storeId, String employeeName, double total, double profit, Map<Integer, Integer> cartItems) {
+        // Câu lệnh SQL sửa đổi để lấy id của nhân viên
+        String query = "INSERT INTO receipts (id_customer, id_store, id_cashier, total, profit, purchase_date) " +
+                "VALUES (?, ?, (SELECT id FROM employees WHERE CONCAT(first_name, ' ', last_name) = ?), ?, ?, NOW())";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+
+            // Thiết lập các tham số cho PreparedStatement
             stmt.setInt(1, customerId);
             stmt.setInt(2, storeId);
-            stmt.setDouble(3, total);
-            stmt.setDouble(4, profit);
+            stmt.setString(3, employeeName); // Đặt employeeName là tham số thứ 3
+            stmt.setDouble(4, total);
+            stmt.setDouble(5, profit);
+
+            // Thực thi truy vấn
             stmt.executeUpdate();
 
+            // Lấy id của hóa đơn vừa tạo
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 int receiptId = rs.getInt(1);
@@ -241,37 +249,9 @@ public class CashierModel implements ICommon<Product> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return -1;
+        return -1; // Trả về -1 nếu có lỗi xảy ra
     }
 
-    // Lưu sản phẩm vào hóa đơn
-    private static void saveProductsToReceipt(int receiptId, Map<Integer, Integer> cartItems) {
-        String query = "INSERT INTO products_receipt (id_receipt, id_product, quantity, total_amout, profit) VALUES (?, ?, ?, ?, ?)";
-
-        try (Connection conn = JDBCConnect.getJDBCConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
-                int productId = entry.getKey();
-                int quantity = entry.getValue();
-                Product product = getOne(productId);
-
-                if (product != null) {
-                    double totalAmount = product.getSalePrice() * quantity;
-                    double profit = (product.getSalePrice() - product.getPurchasePrice()) * quantity;
-
-                    stmt.setInt(1, receiptId);
-                    stmt.setInt(2, productId);
-                    stmt.setInt(3, quantity);
-                    stmt.setDouble(4, totalAmount);
-                    stmt.setDouble(5, profit);
-                    stmt.addBatch();
-                }
-            }
-            stmt.executeBatch();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     public static int getCustomerIdByPhone(String phoneNumber) {
         int customerId = -1;
@@ -316,28 +296,29 @@ public class CashierModel implements ICommon<Product> {
         return product;
     }
 
-    public static void addProductsToReceipt(int receiptId, Map<Integer, Integer> cartItems) {
-        String query = "INSERT INTO products_receipt (id_receipt, id_product, quantity, total_amout, profit) VALUES (?, ?, ?, ?, ?)";
+    public static void saveProductsToReceipt(int receiptId, Map<Integer, Integer> cartItems) {
+        String query = "INSERT INTO products_receipt (id_receipt, id_product, quantity, total_amount, profit) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
                 int productId = entry.getKey();
                 int quantity = entry.getValue();
-                Product product = getOne(productId); // Lấy thông tin sản phẩm
+                Product product = getOne(productId);
 
                 if (product != null) {
-                    double totalAmount = product.getSalePrice() * quantity; // Tính tổng số tiền
-                    double profit = totalAmount - (product.getPurchasePrice() * quantity); // Tính lợi nhuận
+                    double totalAmount = product.getSalePrice() * quantity;
+                    double profit = (product.getSalePrice() - product.getPurchasePrice()) * quantity;
 
                     stmt.setInt(1, receiptId);
                     stmt.setInt(2, productId);
                     stmt.setInt(3, quantity);
                     stmt.setDouble(4, totalAmount);
                     stmt.setDouble(5, profit);
-                    stmt.executeUpdate(); // Thực hiện chèn dữ liệu vào bảng
+                    stmt.addBatch();
                 }
             }
+            stmt.executeBatch();
         } catch (SQLException e) {
             e.printStackTrace();
         }

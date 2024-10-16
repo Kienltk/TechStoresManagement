@@ -510,7 +510,7 @@ public class Cashier extends Application {
                     if (customerPhoneInput.getText() == null || customerPhoneInput.getText().isEmpty()) {
                         customerPhoneInput.setText("1234567890");
                     }
-                    CashierController.processOrder(customerPhoneInput.getText(), cartItems, total);
+                    CashierController.processOrder(customerPhoneInput.getText(), cartItems, total, employeeName);
                     Alert alert = new Alert(Alert.AlertType.INFORMATION, "Payment successful!");
                     alert.showAndWait();
                     for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {

@@ -9,10 +9,11 @@ public class Product {
     private final SimpleStringProperty name;
     private final SimpleStringProperty brand;
     private SimpleIntegerProperty stock;
-    private final SimpleDoubleProperty salePrice;
+    private SimpleDoubleProperty salePrice;
     private SimpleDoubleProperty purchasePrice;
     private SimpleStringProperty category;
-
+    private SimpleIntegerProperty soldQuantity; // Thêm trường soldQuantity
+    private SimpleDoubleProperty profit; // Thêm trường profit
 
     // Constructor with all fields
     public Product(int id, String image, String name, String brand, int stock, double salePrice, double purchasePrice, String category) {
@@ -39,6 +40,42 @@ public class Product {
     // Constructor without image and category, for minimal product creation
     public Product(int id, String name, String brand, double purchasePrice, double salePrice) {
         this(id, "", name, brand, 0, salePrice, purchasePrice, ""); // Default image and category to empty strings
+    }
+
+    public Product(int id, String name, String brand, int stock, int soldQuantity, double profit) {
+        this.id = new SimpleIntegerProperty(id);
+        this.image = new SimpleStringProperty(""); // Giá trị mặc định cho image
+        this.name = new SimpleStringProperty(name);
+        this.brand = new SimpleStringProperty(brand);
+        this.stock = new SimpleIntegerProperty(stock);
+        this.salePrice = new SimpleDoubleProperty(0.0); // Giá trị mặc định cho salePrice
+        this.purchasePrice = new SimpleDoubleProperty(0.0); // Giá trị mặc định cho purchasePrice
+        this.category = new SimpleStringProperty(""); // Giá trị mặc định cho category
+        this.soldQuantity = new SimpleIntegerProperty(soldQuantity);
+        this.profit = new SimpleDoubleProperty(profit);
+    }
+
+    public Product(int id, String name, String brand, int stock) {
+        this.id = new SimpleIntegerProperty(id);
+        this.name = new SimpleStringProperty(name);
+        this.brand = new SimpleStringProperty(brand);
+        this.stock = new SimpleIntegerProperty(stock);
+    }
+
+    public int getSoldQuantity() {
+        return soldQuantity.get();
+    }
+
+    public SimpleIntegerProperty soldQuantityProperty() {
+        return soldQuantity;
+    }
+
+    public double getProfit() {
+        return profit.get();
+    }
+
+    public SimpleDoubleProperty profitProperty() {
+        return profit;
     }
 
     public double getSalePrice() {
@@ -101,12 +138,23 @@ public class Product {
         this.stock.set(stock);
     }
 
-
     public String getCategory() { // Thêm phương thức getCategory
         return category.get();
     }
 
     public SimpleStringProperty categoryProperty() { // Thêm property cho category
         return category;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", name=" + name +
+                ", brand=" + brand +
+                ", stock=" + stock +
+                ", soldQuantity=" + soldQuantity +
+                ", profit=" + profit +
+                '}';
     }
 }
