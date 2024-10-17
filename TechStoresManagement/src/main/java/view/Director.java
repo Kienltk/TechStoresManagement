@@ -1,5 +1,6 @@
 package view;
 
+import controller.DirectorController;
 import controller.Session;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -26,5 +27,9 @@ public class Director extends Application {
         primaryStage.setTitle("Dashboard");
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        primaryStage.setOnCloseRequest(event -> {
+            DirectorController.deleteTempProductImage();
+        });
     }
 }
