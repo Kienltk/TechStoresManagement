@@ -27,8 +27,8 @@ public class HistoryView extends VBox {
         BorderPane mainLayout = new BorderPane();
         VBox searchBox = new VBox(10);
         searchField = new TextField();
-        searchField.setPromptText("Tìm kiếm theo tên khách hàng");
-        Button searchButton = new Button("Tìm kiếm");
+        searchField.setPromptText("Search");
+        Button searchButton = new Button("Search");
         searchButton.setOnAction(e -> controller.loadReceipts(receiptTable, searchField.getText()));
 
         searchBox.getChildren().addAll(searchField, searchButton);
@@ -46,31 +46,31 @@ public class HistoryView extends VBox {
     }
 
     private void configureReceiptTable() {
-        TableColumn<Receipt, Integer> sttCol = new TableColumn<>("STT");
+        TableColumn<Receipt, Integer> sttCol = new TableColumn<>("ID");
         sttCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(receiptTable.getItems().indexOf(cellData.getValue()) + 1).asObject());
 
-        TableColumn<Receipt, String> customerNameCol = new TableColumn<>("Tên Khách Hàng");
+        TableColumn<Receipt, String> customerNameCol = new TableColumn<>("Customer Name");
         customerNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCustomerName()));
 
-        TableColumn<Receipt, String> storeNameCol = new TableColumn<>("Tên Cửa Hàng");
+        TableColumn<Receipt, String> storeNameCol = new TableColumn<>("Store name");
         storeNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getStoreName()));
 
-        TableColumn<Receipt, String> purchaseDateCol = new TableColumn<>("Thời Gian Mua Hàng");
+        TableColumn<Receipt, String> purchaseDateCol = new TableColumn<>("Order time");
         purchaseDateCol.setCellValueFactory(cellData -> {
             LocalDateTime purchaseDate = cellData.getValue().getPurchaseDate();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             return new SimpleStringProperty(purchaseDate.format(formatter)); // Định dạng thành String
         });
 
-        TableColumn<Receipt, Double> totalCol = new TableColumn<>("Tổng Tiền Hóa Đơn");
+        TableColumn<Receipt, Double> totalCol = new TableColumn<>("Total bill");
         totalCol.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getTotal()).asObject());
 
-        TableColumn<Receipt, Double> profitCol = new TableColumn<>("Lợi Nhuận Hóa Đơn");
+        TableColumn<Receipt, Double> profitCol = new TableColumn<>("Profit bill");
         profitCol.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getProfit()).asObject());
 
-        TableColumn<Receipt, Void> viewCol = new TableColumn<>("Hành Động");
+        TableColumn<Receipt, Void> viewCol = new TableColumn<>("View");
         viewCol.setCellFactory(col -> new TableCell<Receipt, Void>() {
-            private final Button viewButton = new Button("Xem");
+            private final Button viewButton = new Button("View");
 
             @Override
             protected void updateItem(Void item, boolean empty) {
@@ -92,26 +92,26 @@ public class HistoryView extends VBox {
 
     private void showReceiptDetails(Receipt receipt) {
         Stage detailStage = new Stage();
-        detailStage.setTitle("Chi Tiết Hóa Đơn");
+        detailStage.setTitle("Bill Detail");
 
         VBox detailLayout = new VBox(10);
-        Label customerLabel = new Label("Tên Khách Hàng: " + receipt.getCustomerName());
-        Label phoneLabel = new Label("Số Điện Thoại: " + controller.getCustomerPhone(receipt.getCustomerName()));
-        Label storeLabel = new Label("Tên Cửa Hàng: " + receipt.getStoreName());
-        Label managerLabel = new Label("Quản Lí Cửa Hàng: " + controller.getStoreManager(receipt.getStoreName()));
-        Label cashierLabel = new Label("Tên Thu Ngân: " + controller.getCashier(receipt.getId()));
+        Label customerLabel = new Label("Customer name: " + receipt.getCustomerName());
+        Label phoneLabel = new Label("Phone number: " + controller.getCustomerPhone(receipt.getCustomerName()));
+        Label storeLabel = new Label("Store name: " + receipt.getStoreName());
+        Label managerLabel = new Label("Store Manager: " + controller.getStoreManager(receipt.getStoreName()));
+        Label cashierLabel = new Label("Cashier: " + controller.getCashier(receipt.getId()));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formattedPurchaseDate = receipt.getPurchaseDate().format(formatter);
 
-        Label purchaseDateLabel = new Label("Thời Gian Mua Hàng: " + formattedPurchaseDate);
-        Label totalLabel = new Label("Tổng Tiền Hóa Đơn: " + receipt.getTotal());
-        Label profitLabel = new Label("Lợi Nhuận Hóa Đơn: " + receipt.getProfit());
+        Label purchaseDateLabel = new Label("Order time: " + formattedPurchaseDate);
+        Label totalLabel = new Label("Total bill: " + receipt.getTotal());
+        Label profitLabel = new Label("Profit bill: " + receipt.getProfit());
 
         TableView<ProductReceipt> productTable = new TableView<>();
         configureProductTable(productTable, receipt.getId());
 
-        Button closeButton = new Button("Đóng");
+        Button closeButton = new Button("Close");
         closeButton.setOnAction(e -> detailStage.close());
 
         detailLayout.getChildren().addAll(customerLabel, phoneLabel, storeLabel, managerLabel, cashierLabel, purchaseDateLabel, totalLabel, profitLabel, productTable, closeButton);
@@ -127,28 +127,28 @@ public class HistoryView extends VBox {
         productTable.setItems(products);
 
         // Configure columns for the product table
-        TableColumn<ProductReceipt, Integer> productSttCol = new TableColumn<>("STT");
+        TableColumn<ProductReceipt, Integer> productSttCol = new TableColumn<>("ID");
         productSttCol.setCellValueFactory(cellData -> cellData.getValue().idProductProperty().asObject());
 
-        TableColumn<ProductReceipt, String> productNameCol = new TableColumn<>("Tên Sản Phẩm");
+        TableColumn<ProductReceipt, String> productNameCol = new TableColumn<>("Product Name");
         productNameCol.setCellValueFactory(cellData -> cellData.getValue().productNameProperty());
 
         TableColumn<ProductReceipt, String> brandCol = new TableColumn<>("Brand");
         brandCol.setCellValueFactory(cellData -> cellData.getValue().brandProperty());
 
-        TableColumn<ProductReceipt, Double> purchasePriceCol = new TableColumn<>("Giá Nhập");
+        TableColumn<ProductReceipt, Double> purchasePriceCol = new TableColumn<>("Purchase price");
         purchasePriceCol.setCellValueFactory(cellData -> cellData.getValue().purchasePriceProperty().asObject());
 
-        TableColumn<ProductReceipt, Double> salePriceCol = new TableColumn<>("Giá Bán");
+        TableColumn<ProductReceipt, Double> salePriceCol = new TableColumn<>("Sale price");
         salePriceCol.setCellValueFactory(cellData -> cellData.getValue().salePriceProperty().asObject());
 
-        TableColumn<ProductReceipt, Integer> quantityCol = new TableColumn<>("Số Lượng Mua");
+        TableColumn<ProductReceipt, Integer> quantityCol = new TableColumn<>("Quantity");
         quantityCol.setCellValueFactory(cellData -> cellData.getValue().quantityProperty().asObject());
 
-        TableColumn<ProductReceipt, Double> totalAmountCol = new TableColumn<>("Tổng Tiền");
+        TableColumn<ProductReceipt, Double> totalAmountCol = new TableColumn<>("Total amount");
         totalAmountCol.setCellValueFactory(cellData -> cellData.getValue().totalAmountProperty().asObject());
 
-        TableColumn<ProductReceipt, Double> profitCol = new TableColumn<>("Lợi Nhuận");
+        TableColumn<ProductReceipt, Double> profitCol = new TableColumn<>("Profit");
         profitCol.setCellValueFactory(cellData -> cellData.getValue().profitProperty().asObject());
 
         productTable.getColumns().addAll(productSttCol, productNameCol, brandCol, purchasePriceCol, salePriceCol, quantityCol, totalAmountCol, profitCol);

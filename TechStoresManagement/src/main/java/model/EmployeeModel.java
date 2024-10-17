@@ -174,7 +174,7 @@ public class EmployeeModel {
 
     private Employee extractEmployeeFromResultSet(ResultSet rs) throws SQLException {
         Employee employee = new Employee();
-        employee.setId(rs.getInt("employee_id"));
+        employee.setId(rs.getInt("id"));
         employee.setFirstName(rs.getString("first_name"));
         employee.setLastName(rs.getString("last_name"));
         employee.setGender(rs.getBoolean("gender"));
@@ -183,7 +183,7 @@ public class EmployeeModel {
         employee.setPhoneNumber(rs.getString("phone_number"));
         employee.setAddress(rs.getString("address"));
         employee.setSalary(rs.getDouble("salary"));
-        employee.setRole(rs.getString("role"));
+        employee.setRole(rs.getString("id_role"));
         employee.setWorkplace(rs.getString("workplace"));
         return employee;
     }

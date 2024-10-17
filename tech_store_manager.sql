@@ -480,51 +480,51 @@ VALUES ('General Director'),
        ('Employee');
 
 INSERT INTO employees (first_name, last_name, gender, dob, email, phone_number, address, hire_date, salary, id_role,
-                       id_store, id_warehouse, status)
+                       id_store, id_warehouse)
 VALUES ('John', 'Doe', 1, '1980-05-15', 'john.doe@company.com', '1234567890', '123 view.Main St', '2020-01-01',
-        '15000000', 1, NULL, NULL, 'Active');
+        '15000000', 1, NULL, NULL);
 
 INSERT INTO employees (first_name, last_name, gender, dob, email, phone_number, address, hire_date, salary, id_role,
-                       id_store, id_warehouse, status)
+                       id_store, id_warehouse)
 VALUES ('Jane', 'Smith', 0, '1985-03-10', 'jane.smith@company.com', '0987654321', '456 Oak St', '2021-03-15', '70000',
-        2, 1, NULL, 'Active'),
+        2, 1, NULL),
        ('Alice', 'Johnson', 0, '1990-07-22', 'alice.johnson@company.com', '1122334455', '789 Pine St', '2022-04-20',
-        '70000', 2, 2, NULL, 'Active'),
+        '70000', 2, 2, NULL),
        ('Bob', 'Williams', 1, '1988-09-12', 'bob.williams@company.com', '6677889900', '321 Birch St', '2021-06-30',
-        '70000', 2, 3, NULL, 'Active');
+        '70000', 2, 3, NULL);
 
 INSERT INTO employees (first_name, last_name, gender, dob, email, phone_number, address, hire_date, salary, id_role,
-                       id_store, id_warehouse, status)
+                       id_store, id_warehouse)
 VALUES ('Charlie', 'Brown', 1, '1978-11-05', 'charlie.brown@company.com', '7788990011', '147 Cedar St', '2019-07-25',
-        '80000', 3, NULL, 1, 'Active'),
+        '80000', 3, NULL, 1),
        ('Dave', 'Miller', 1, '1983-01-17', 'dave.miller@company.com', '8899001122', '963 Spruce St', '2020-05-05',
-        '80000', 3, NULL, 2, 'Active'),
+        '80000', 3, NULL, 2),
        ('Eve', 'Davis', 0, '1992-02-14', 'eve.davis@company.com', '2233445566', '852 Maple St', '2021-09-10', '80000',
-        3, NULL, 3, 'Active');
+        3, NULL, 3);
 
 INSERT INTO employees (first_name, last_name, gender, dob, email, phone_number, address, hire_date, salary, id_role,
-                       id_store, id_warehouse, status)
+                       id_store, id_warehouse)
 VALUES ('Frank', 'Wilson', 1, '1995-08-29', 'frank.wilson@company.com', '3344556677', '654 Elm St', '2023-02-01',
-        '40000', 4, 1, NULL, 'Active'),
+        '40000', 4, 1, NULL),
        ('Grace', 'Moore', 0, '1997-10-12', 'grace.moore@company.com', '4455667788', '741 Ash St', '2023-03-15', '40000',
-        4, 2, NULL, 'Active'),
+        4, 2, NULL),
        ('Hannah', 'Taylor', 0, '1998-12-05', 'hannah.taylor@company.com', '5566778899', '159 Beech St', '2023-04-20',
-        '40000', 4, 3, NULL, 'Active');
+        '40000', 4, 3, NULL);
 
 INSERT INTO employees (first_name, last_name, gender, dob, email, phone_number, address, hire_date, salary, id_role,
-                       id_store, id_warehouse, status)
+                       id_store, id_warehouse)
 VALUES ('Michael', 'Brown', 1, '1990-04-10', 'michael.brown@company.com', '3216549870', '258 Willow St', '2023-05-01',
-        75000.00, 5, 1, NULL, 'Active'),
+        75000.00, 5, 1, NULL),
        ('Olivia', 'Garcia', 0, '1987-06-15', 'olivia.garcia@company.com', '4561237890', '369 Fir St', '2023-06-10',
-        75000.00, 5, 2, NULL, 'Active'),
+        75000.00, 5, 2, NULL),
        ('William', 'Martinez', 1, '1993-09-20', 'william.martinez@company.com', '1597534862', '753 Spruce St',
-        '2023-07-15', 75000.00, 5, 3, NULL, 'Active'),
+        '2023-07-15', 75000.00, 5, 3, NULL),
        ('Sophia', 'Wilson', 0, '1994-11-25', 'sophia.wilson@company.com', '9876543210', '123 Elm St', '2023-08-01',
-        65000.00, 5, NULL, 1, 'Active'),
+        65000.00, 5, NULL, 1),
        ('James', 'Lee', 1, '1989-02-05', 'james.lee@company.com', '1357924680', '456 Cedar St', '2023-09-12', 65000.00,
-        5, NULL, 2, 'Active'),
+        5, NULL, 2),
        ('Isabella', 'Hernandez', 0, '1996-12-30', 'isabella.hernandez@company.com', '2468135790', '789 Birch St',
-        '2023-10-10', 65000.00, 5, NULL, 3, 'Active');
+        '2023-10-10', 65000.00, 5, NULL, 3);
     INSERT
 INTO accounts (username, password, id_person)
 VALUES
