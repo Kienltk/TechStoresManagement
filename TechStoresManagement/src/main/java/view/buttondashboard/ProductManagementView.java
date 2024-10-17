@@ -1,7 +1,9 @@
 package view.buttondashboard;
 
+import controller.DirectorController;
 import entity.Product;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -14,12 +16,14 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import javafx.util.Callback;
 import model.DirectorModel;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -31,7 +35,6 @@ public class ProductManagementView extends VBox {
     ObservableList<Product> productList = FXCollections.observableArrayList();
     DirectorModel dm = new DirectorModel();
     HashMap<String, Label> messageLabel = new HashMap<>();
-
 
 
     public ProductManagementView() {
@@ -59,9 +62,14 @@ public class ProductManagementView extends VBox {
         TableView<Product> productTable = new TableView<>();
 
         // Table Columns
-        TableColumn<Product, Integer> idColumn = new TableColumn<>("No");
+        TableColumn<Product, Number> idColumn = new TableColumn<>("No.");
         idColumn.setMinWidth(50);
-        idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
+        idColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Product, Number>, ObservableValue<Number>>() {
+            @Override
+            public javafx.beans.value.ObservableValue<Number> call(TableColumn.CellDataFeatures<Product, Number> p) {
+                return javafx.beans.binding.Bindings.createIntegerBinding(() -> productTable.getItems().indexOf(p.getValue()) + 1);
+            }
+        });
 
         TableColumn<Product, HBox> nameColumn = new TableColumn<>("Name");
         nameColumn.setPrefWidth(230);
@@ -376,12 +384,6 @@ public class ProductManagementView extends VBox {
             value.setManaged(false);
         });
 
-        // Clear the message label
-        editStage.setOnCloseRequest(event -> {
-            messageLabel.clear();
-
-        });
-
         // Create input fields and labels
         TextField nameField = new TextField(product.getName());
         TextField brandField = new TextField(product.getBrand());
@@ -411,6 +413,7 @@ public class ProductManagementView extends VBox {
         Button uploadButton = new Button("Upload Image");
         final File[] tempImageFile = new File[1];
         final Image[] uploadedImage = new Image[1];
+        Image tempImage;
 
 
         uploadButton.setOnAction(event -> {
@@ -431,7 +434,7 @@ public class ProductManagementView extends VBox {
                     File targetDir = new File(targetDirectory);
 
                     // Rename uploaded file
-                    String tempFileName = "img_temp" + file.getName().substring(file.getName().lastIndexOf("."));
+                    String tempFileName = "img_temp_" + product.getImage();
                     Path tempPath = new File(targetDir, tempFileName).toPath();
 
                     // Copy the file to the destination
@@ -500,7 +503,7 @@ public class ProductManagementView extends VBox {
                     Path finalImagePath = new File("src/main/resources/view/images", finalImageName).toPath();
 
                     // Move the temporary image to the final destination
-                    Files.move(tempImageFile[0].toPath(), finalImagePath, StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(tempImageFile[0].toPath(), finalImagePath, StandardCopyOption.REPLACE_EXISTING);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -513,6 +516,16 @@ public class ProductManagementView extends VBox {
             editStage.close();
         });
 
+        // Add Temp image
+        tempImage = new Image("file:src/main/resources/view/images/img_temp_" + product.getImage());
+        if (!tempImage.isError()) {
+            imageView.setImage(tempImage);
+        }
+
+        // Cancel button
+        Button cancelButton = new Button("Cancel");
+        cancelButton.setOnAction(event -> editStage.fireEvent(new WindowEvent(editStage, WindowEvent.WINDOW_CLOSE_REQUEST)));
+
         // Reset button
         Button resetButton = new Button("Reset");
         resetButton.setOnAction(event -> {
@@ -521,12 +534,17 @@ public class ProductManagementView extends VBox {
             brandField.setText(oldBrand);
             purchasePriceField.setText(String.valueOf(oldPurchasePrice));
             salePriceField.setText(String.valueOf(oldSalePrice));
-            imageView.setImage(originalImage);
-        });
 
-        // Cancel button
-        Button cancelButton = new Button("Cancel");
-        cancelButton.setOnAction(event -> editStage.close());
+            DirectorController.deleteTempProductImage();
+            try {
+                Files.copy(Path.of("src/main/resources/view/images/" + product.getImage()),
+                        Path.of("src/main/resources/view/images/img_temp_" + product.getImage()),
+                        StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            imageView.setImage(tempImage);
+        });
 
         // Layout for the form using HBox
         HBox formLayout = new HBox(20); // Spacing between elements
@@ -558,6 +576,12 @@ public class ProductManagementView extends VBox {
         Scene scene = new Scene(formLayout, 800, 600); // Adjust size as needed
         editStage.setScene(scene);
         editStage.show();
+
+        // Handle Close
+        editStage.setOnCloseRequest(event -> {
+            // Clear error messages
+            messageLabel.clear();
+        });
     }
 
     // ALERT MESSAGES
@@ -587,4 +611,25 @@ public class ProductManagementView extends VBox {
         messageLabel.setManaged(true);
     }
 
+    public static boolean areFilesIdentical(File file1, File file2) {
+        try {
+            byte[] file1Bytes = Files.readAllBytes(file1.toPath());
+            byte[] file2Bytes = Files.readAllBytes(file2.toPath());
+
+            if (file1Bytes.length != file2Bytes.length) {
+                return false; // Different sizes, so not identical
+            }
+
+            for (int i = 0; i < file1Bytes.length; i++) {
+                if (file1Bytes[i] != file2Bytes[i]) {
+                    return false; // Found a difference in bytes
+                }
+            }
+
+            return true; // Files are identical
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false; // Handle exception (e.g., file not found)
+        }
+    }
 }
