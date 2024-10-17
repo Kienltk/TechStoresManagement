@@ -148,7 +148,6 @@ CREATE TABLE employees
     id_role      int,
     id_store     int,
     id_warehouse int,
-    status       varchar(255),
     foreign key (id_role) references role (id),
     foreign key (id_store) references stores (id),
     foreign key (id_warehouse) references warehouses (id)
