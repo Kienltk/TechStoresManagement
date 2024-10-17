@@ -53,6 +53,9 @@ public class AccountView extends VBox {
         TableColumn<Account, String> passwordColumn = new TableColumn<>("Password");
         passwordColumn.setMinWidth(150);
         passwordColumn.setCellValueFactory(cellData -> cellData.getValue().passwordProperty());
+        TableColumn<Account, String> phoneColumn = new TableColumn<>("Phone Number");
+        phoneColumn.setMinWidth(150);
+        phoneColumn.setCellValueFactory(cellData -> cellData.getValue().phoneNumberProperty());
 
         TableColumn<Account, Void> optionColumn = new TableColumn<>("Option");
         optionColumn.setCellFactory(col -> new TableCell<>() {
@@ -89,7 +92,7 @@ public class AccountView extends VBox {
         });
 
         // Add Columns to Table
-        accountTable.getColumns().addAll(idColumn, nameColumn, usernameColumn, passwordColumn, optionColumn);
+        accountTable.getColumns().addAll(idColumn, nameColumn, usernameColumn,phoneColumn, passwordColumn, optionColumn);
 
         // ObservableList to hold Account data
         AccountModel accountModel = new AccountModel();
@@ -111,7 +114,6 @@ public class AccountView extends VBox {
             // Nếu ô tìm kiếm trống, hiển thị lại tất cả tài khoản
             ((TableView<Account>) getChildren().get(3)).setItems(accountList);
         } else {
-            // Nếu có từ khóa, lọc danh sách tài khoản
             for (Account account : accountList) {
                 if (account.getName().toLowerCase().contains(keyword.toLowerCase()) ||
                         account.getUsername().toLowerCase().contains(keyword.toLowerCase())) {
@@ -131,36 +133,43 @@ public class AccountView extends VBox {
         editStage.initModality(Modality.APPLICATION_MODAL);
         editStage.setTitle("Edit Account");
 
-        // Tạo Label và TextField cho tên đầy đủ
         Label nameLabel = new Label("Full Name:");
-        TextField nameField = new TextField(account.getName()); // Chứa tên hiện tại của tài khoản
+
+        // Tạo ComboBox để hiển thị tên nhân viên
+        ComboBox<String> nameComboBox = new ComboBox<>();
+        AccountModel accountModel = new AccountModel();
+
+        // Lấy danh sách tên nhân viên từ phương thức getAvailableEmployeeNames
+        nameComboBox.setItems(FXCollections.observableArrayList(accountModel.getAvailableEmployeeNames()));
+
+        // Nếu account đã tồn tại, đặt giá trị ComboBox thành tên của account
+        nameComboBox.setValue(account.getName());
 
         Label usernameLabel = new Label("Username:");
         TextField usernameField = new TextField(account.getUsername());
+        Label phoneLabel = new Label("Phone Number:");
+        TextField phoneField = new TextField(account.getPhoneNumber());
 
         Label passwordLabel = new Label("Password:");
         PasswordField passwordField = new PasswordField();
         passwordField.setText(account.getPassword());
 
-        // Nút Save
         Button saveButton = new Button("Save");
         saveButton.setOnAction(event -> {
-            String fullName = nameField.getText();  // Lấy tên đầy đủ từ TextField
+            String fullName = nameComboBox.getValue();
             String newUsername = usernameField.getText();
             String newPassword = passwordField.getText();
+            String newPhoneNumber = phoneField.getText();
+            String role = account.getRole();
 
-            AccountModel accountModel = new AccountModel();
-            String role = account.getRole();  // Lấy tên role từ đối tượng account
-
-            // Kiểm tra điều kiện 1: Name cùng role và chưa có tài khoản
-            boolean isNameValid = true; // Giả định là hợp lệ
-            if (!fullName.equals(account.getName())) { // Chỉ kiểm tra nếu tên đã thay đổi
+            // Kiểm tra tên và username có hợp lệ không
+            boolean isNameValid = true;
+            if (!fullName.equals(account.getName())) {
                 isNameValid = accountModel.isNameValid(fullName, role);
             }
 
-            // Kiểm tra điều kiện 2: Username không trùng
-            boolean isUsernameUnique = true; // Giả định là duy nhất
-            if (!newUsername.equals(account.getUsername())) { // Chỉ kiểm tra nếu username đã thay đổi
+            boolean isUsernameUnique = true;
+            if (!newUsername.equals(account.getUsername())) {
                 isUsernameUnique = accountModel.isUsernameUnique(newUsername);
             }
 
@@ -168,31 +177,25 @@ public class AccountView extends VBox {
                 Alert nameAlert = new Alert(Alert.AlertType.ERROR);
                 nameAlert.setTitle("Invalid Name");
                 nameAlert.setHeaderText("Name already exists or doesn't match the role");
-                nameAlert.setContentText("Please enter a valid name that matches the role and hasn't been used for another account.");
                 nameAlert.showAndWait();
             } else if (!isUsernameUnique) {
                 Alert usernameAlert = new Alert(Alert.AlertType.ERROR);
                 usernameAlert.setTitle("Invalid Username");
                 usernameAlert.setHeaderText("Username already exists");
-                usernameAlert.setContentText("Please enter a unique username.");
                 usernameAlert.showAndWait();
             } else {
-                // Nếu tất cả điều kiện hợp lệ, cập nhật tài khoản
                 account.setName(fullName);
                 account.setUsername(newUsername);
                 account.setPassword(newPassword);
 
                 boolean success = accountModel.updateAccount(account);
-
                 if (success) {
-                    // Đóng cửa sổ sau khi lưu thành công
                     editStage.close();
                     ((TableView<Account>) getChildren().get(3)).refresh();
                 } else {
                     Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                     errorAlert.setTitle("Error");
                     errorAlert.setHeaderText("Update Failed");
-                    errorAlert.setContentText("There was an error while updating the account.");
                     errorAlert.showAndWait();
                 }
             }
@@ -201,7 +204,7 @@ public class AccountView extends VBox {
         Button cancelButton = new Button("Cancel");
         cancelButton.setOnAction(event -> editStage.close());
 
-        VBox layout = new VBox(10, nameLabel, nameField, usernameLabel, usernameField, passwordLabel, passwordField, new HBox(10, saveButton, cancelButton));
+        VBox layout = new VBox(10, nameLabel, nameComboBox, usernameLabel, usernameField, phoneLabel, phoneField, passwordLabel, passwordField, new HBox(10, saveButton, cancelButton));
         layout.setAlignment(Pos.CENTER);
         layout.setStyle("-fx-padding: 20;");
 
@@ -209,6 +212,8 @@ public class AccountView extends VBox {
         editStage.setScene(scene);
         editStage.showAndWait();
     }
+
+
 
 
     // Hàm hiển thị pop-up thêm tài khoản mới
