@@ -15,6 +15,7 @@ public class Product {
     private SimpleIntegerProperty soldQuantity; // Thêm trường soldQuantity
     private SimpleDoubleProperty profit; // Thêm trường profit
 
+
     // Constructor with all fields
     public Product(int id, String image, String name, String brand, int stock, double salePrice, double purchasePrice, String category) {
         this.id = new SimpleIntegerProperty(id);
@@ -38,10 +39,9 @@ public class Product {
     }
 
     // Constructor without image and category, for minimal product creation
-    public Product(int id, String name, String brand, double purchasePrice, double salePrice) {
-        this(id, "", name, brand, 0, salePrice, purchasePrice, ""); // Default image and category to empty strings
+    public Product(int id, String image, String name, String brand, double purchasePrice, double salePrice) {
+        this(id, image, name, brand, 0, salePrice, purchasePrice, ""); // Default image and category to empty strings
     }
-
     public Product(int id, String name, String brand, int stock, int soldQuantity, double profit) {
         this.id = new SimpleIntegerProperty(id);
         this.image = new SimpleStringProperty(""); // Giá trị mặc định cho image
@@ -150,11 +150,13 @@ public class Product {
     public String toString() {
         return "Product{" +
                 "id=" + id +
+                ", image=" + image +
                 ", name=" + name +
                 ", brand=" + brand +
                 ", stock=" + stock +
-                ", soldQuantity=" + soldQuantity +
-                ", profit=" + profit +
+                ", salePrice=" + salePrice +
+                ", purchasePrice=" + purchasePrice +
+                ", category=" + category +
                 '}';
     }
 }

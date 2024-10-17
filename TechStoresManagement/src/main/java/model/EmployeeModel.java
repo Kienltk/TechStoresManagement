@@ -118,7 +118,7 @@ public class EmployeeModel {
 
     public void insertEmployee(Employee employee){
         String sql = "INSERT INTO employees (first_name, last_name, gender, dob, email, phone_number, address, hire_date, salary, id_role, id_store, id_warehouse) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, NOW, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, now(), ?, ?, ?, ?)";
         try (
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, employee.getFirstName());
