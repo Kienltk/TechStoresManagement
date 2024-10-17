@@ -2,8 +2,7 @@ package model;
 
 import dao.JDBCConnect;
 import entity.Employee;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,230 +11,180 @@ import java.util.List;
 public class EmployeeModel {
 
     // Retrieve all employees
-    public ObservableList<Employee> getAllEmployees() {
-        ObservableList<Employee> employees = FXCollections.observableArrayList();
-        String query = "SELECT e.*, r.role, " +
-                "IF(e.id_store IS NULL, w.name, s.name) AS workplace " +
+    private final Connection conn;
+
+    public EmployeeModel() {
+        this.conn = JDBCConnect.getJDBCConnection();
+    }
+    public List<Employee> getAllEmployees() {
+        String sql = "SELECT e.id, e.first_name, e.last_name, e.gender, e.dob, e.email, e.phone_number, e.address, " +
+                "e.salary, r.role, IFNULL(s.name, w.name) AS workplace, e.id_role, e.id_store, e.id_warehouse " +
                 "FROM employees e " +
-                "JOIN role r ON e.id_role = r.id " +
+                "LEFT JOIN role r ON e.id_role = r.id " +
                 "LEFT JOIN stores s ON e.id_store = s.id " +
                 "LEFT JOIN warehouses w ON e.id_warehouse = w.id";
 
-        try (Connection connection = JDBCConnect.getJDBCConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet resultSet = statement.executeQuery()) {
-
-            while (resultSet.next()) {
-                Employee employee = mapRowToEmployee(resultSet);
+        List<Employee> employees = new ArrayList<>();
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Employee employee = new Employee(
+                        rs.getInt("id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getBoolean("gender"),
+                        rs.getDate("dob"),
+                        rs.getString("email"),
+                        rs.getString("phone_number"),
+                        rs.getString("address"),
+                        rs.getDouble("salary"),
+                        rs.getInt("id_role"),  // Lấy idRole từ result set
+                        rs.getInt("id_store"), // Lấy idStore từ result set
+                        rs.getInt("id_warehouse"), // Lấy idWarehouse từ result set
+                        rs.getString("role"),
+                        rs.getString("workplace")
+                );
                 employees.add(employee);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error fetching employees", e);
+        } catch (Exception e) {
+            System.out.println("Database connection error: " + e.getMessage());
         }
         return employees;
     }
-    public void addEmployee(Employee employee, int roleId, int workplaceId) {
-        String query = "INSERT INTO employees (first_name, last_name, gender, dob, email, phone_number, address, hire_date, salary, id_role, id_store, id_warehouse, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection connection = JDBCConnect.getJDBCConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
 
-            statement.setString(1, employee.getFirstName());
-            statement.setString(2, employee.getLastName());
-            statement.setBoolean(3, employee.isGender());
-            statement.setDate(4, employee.getDob());
-            statement.setString(5, employee.getEmail());
-            statement.setString(6, employee.getPhoneNumber());
-            statement.setString(7, employee.getAddress());
-            statement.setDate(8, employee.getHireDate());
-            statement.setDouble(9, employee.getSalary());
-            statement.setInt(10, roleId);
-
-            if (workplaceId > 0) {
-                statement.setInt(11, workplaceId);
-                statement.setNull(12, Types.INTEGER);
-            } else {
-                statement.setNull(11, Types.INTEGER);
-                statement.setInt(12, workplaceId);
+    public List<Employee> searchEmployeesByName(String name) throws SQLException {
+        String query = "SELECT * FROM employees WHERE CONCAT(first_name, ' ', last_name) LIKE ?";
+        List<Employee> employees = new ArrayList<>();
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, "%" + name + "%");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Employee employee = extractEmployeeFromResultSet(rs);
+                employees.add(employee);
             }
-
-            statement.setString(13, employee.getStatus());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Error adding employee", e);
         }
+        return employees;
     }
 
-    // Delete employee and associated accounts
-    public void deleteEmployee(int employeeId) {
-        executeUpdate("DELETE FROM accounts WHERE id_person = ?", employeeId);
-        executeUpdate("DELETE FROM employees WHERE id = ?", employeeId);
-    }
-
-    public void updateEmployee(Employee employee) {
-        String query = "UPDATE employees SET first_name = ?, last_name = ?, gender = ?, dob = ?, email = ?, " +
-                "phone_number = ?, address = ?, hire_date = ?, salary = ?, id_role = ?, " +
-                "id_store = ?, id_warehouse = ?, status = ? WHERE id = ?";
-        try (Connection connection = JDBCConnect.getJDBCConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-
-            statement.setString(1, employee.getFirstName());
-            statement.setString(2, employee.getLastName());
-            statement.setBoolean(3, employee.isGender());
-            statement.setDate(4, employee.getDob());
-            statement.setString(5, employee.getEmail());
-            statement.setString(6, employee.getPhoneNumber());
-            statement.setString(7, employee.getAddress());
-            statement.setDate(8, employee.getHireDate());
-            statement.setDouble(9, employee.getSalary());
-            statement.setInt(10, employee.getIdRole());
-
-            if (employee.getWorkplace().contains("Store")) {
-                int idStore = getIdStoreFromName(employee.getWorkplace().replace("Store", ""));
-                System.out.println(idStore);
-                statement.setInt(11, idStore);
-                statement.setNull(12, Types.INTEGER);
-            } else if (employee.getWorkplace().contains("Warehouse")) {
-                int idWarehouse = getIdWarehouseFromName(employee.getWorkplace().replace("Warehouse", ""));
-                System.out.println(idWarehouse);
-                statement.setNull(11, Types.INTEGER);
-                statement.setInt(12, idWarehouse);
-            } else {
-                statement.setNull(11, Types.INTEGER);
-                statement.setNull(12, Types.INTEGER);
+    // Method để kiểm tra xem nhân viên có tài khoản hay không
+    public boolean hasAccount(int employeeId) throws SQLException {
+        String query = "SELECT COUNT(*) AS account_count FROM accounts WHERE employee_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, employeeId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("account_count") > 0;
             }
-
-            statement.setString(13, employee.getStatus());
-            statement.setInt(14, employee.getId());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Error updating employee", e);
         }
+        return false;
     }
 
-    // Get all stores
-    public List<String> getAllStores() {
-        return fetchWorkplaces("SELECT name FROM stores");
-    }
-
-    // Get all warehouses
-    public List<String> getAllWarehouses() {
-        return fetchWorkplaces("SELECT name FROM warehouses");
-    }
-    public List<String> getAllRoles() {
-        return fetchRoles("SELECT role FROM role");
-    }
-
-    private List<String> fetchRoles(String query) {
+    // Method để lấy tất cả chức vụ từ cơ sở dữ liệu
+    public List<String> getAllRoles() throws SQLException {
+        String query = "SELECT role FROM role";
         List<String> roles = new ArrayList<>();
-        try (Connection connection = JDBCConnect.getJDBCConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet resultSet = statement.executeQuery()) {
-
-            while (resultSet.next()) {
-                roles.add(resultSet.getString("role"));
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                roles.add(rs.getString("role"));
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error fetching roles", e);
         }
         return roles;
     }
-    public int getRoleIdFromName(String roleName) {
-        String query = "SELECT id FROM role WHERE role = ?";
-        try (Connection connection = JDBCConnect.getJDBCConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, roleName);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getInt("id");
-                } else {
-                    return -1; // hoặc throw một exception nếu không tìm thấy vai trò
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error fetching role id", e);
-        }
-    }
 
-    // Helper methods
-    private List<String> fetchWorkplaces(String query) {
+    // Method để lấy tất cả địa điểm làm việc (cửa hàng và kho) từ cơ sở dữ liệu
+    public List<String> getAllWorkplaces() throws SQLException {
+        String warehouseQuery = "SELECT name FROM warehouses";
+        String storeQuery = "SELECT name FROM stores";
         List<String> workplaces = new ArrayList<>();
-        try (Connection connection = JDBCConnect.getJDBCConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet resultSet = statement.executeQuery()) {
 
-            while (resultSet.next()) {
-                workplaces.add(resultSet.getString("name"));
+        // Lấy tên từ bảng warehouses (kho)
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(warehouseQuery)) {
+            while (rs.next()) {
+                workplaces.add("Warehouse: " + rs.getString("name"));
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error fetching workplaces", e);
         }
+
+        // Lấy tên từ bảng stores (cửa hàng)
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(storeQuery)) {
+            while (rs.next()) {
+                workplaces.add("Store: " + rs.getString("name"));
+            }
+        }
+
         return workplaces;
     }
 
-    private void executeUpdate(String query, int parameter) {
-        try (Connection connection = JDBCConnect.getJDBCConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, parameter);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Error executing update", e);
-        }
-    }
-    public int getIdStoreFromName(String storeName) {
-        String query = "SELECT id FROM stores WHERE name = ?";
-        try (Connection connection = JDBCConnect.getJDBCConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, storeName);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getInt("id");
-                } else {
-                    return -1; // hoặc throw một exception nếu không tìm thấy store
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error fetching store id", e);
-        }
-    }
 
-    public int getIdWarehouseFromName(String warehouseName) {
-        String query = "SELECT id FROM warehouses WHERE name = ?";
-        try (Connection connection = JDBCConnect.getJDBCConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, warehouseName);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getInt("id");
-                } else {
-                    return -1; // hoặc throw một exception nếu không tìm thấy warehouse
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error fetching warehouse id", e);
+
+    public void insertEmployee(Employee employee){
+        String sql = "INSERT INTO employees (first_name, last_name, gender, dob, email, phone_number, address, salary, id_role, id_store, id_warehouse) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, employee.getFirstName());
+            stmt.setString(2, employee.getLastName());
+            stmt.setBoolean(3, employee.isGender());
+            stmt.setDate(4, employee.getDob());
+            stmt.setString(5, employee.getEmail());
+            stmt.setString(6, employee.getPhoneNumber());
+            stmt.setString(7, employee.getAddress());
+            stmt.setDouble(8, employee.getSalary());
+            stmt.setInt(9, employee.getIdRole());
+            stmt.setObject(10, employee.getIdStore());
+            stmt.setObject(11, employee.getIdWarehouse());
+            stmt.executeUpdate();
+        }catch (Exception e) {
+            System.out.println("Database connection error: " + e.getMessage());
         }
     }
 
-    private Employee mapRowToEmployee(ResultSet resultSet) throws SQLException {
-        return new Employee(
-                resultSet.getInt("id"),
-                resultSet.getString("first_name"),
-                resultSet.getString("last_name"),
-                resultSet.getBoolean("gender"),
-                resultSet.getDate("dob"),
-                resultSet.getString("email"),
-                resultSet.getString("phone_number"),
-                resultSet.getString("address"),
-                resultSet.getDate("hire_date"),
-                resultSet.getDouble("salary"),
-                resultSet.getInt("id_role"),
-                resultSet.getObject("id_store") != null ? resultSet.getInt("id_store") : null,
-                resultSet.getObject("id_warehouse") != null ? resultSet.getInt("id_warehouse") : null,
-                resultSet.getString("status"),
-                resultSet.getString("role"),
-                resultSet.getString("workplace")
-        );
+    public void updateEmployee(Employee employee){
+        String sql = "UPDATE employees SET first_name = ?, last_name = ?, gender = ?, dob = ?, email = ?, phone_number = ?, " +
+                "address = ?, salary = ?, id_role = ?, id_store = ?, id_warehouse = ? WHERE id = ?";
+        try (
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, employee.getFirstName());
+            stmt.setString(2, employee.getLastName());
+            stmt.setBoolean(3, employee.isGender());
+            stmt.setDate(4, employee.getDob());
+            stmt.setString(5, employee.getEmail());
+            stmt.setString(6, employee.getPhoneNumber());
+            stmt.setString(7, employee.getAddress());
+            stmt.setDouble(8, employee.getSalary());
+            stmt.setInt(9, employee.getIdRole());
+            stmt.setObject(10, employee.getIdStore());
+            stmt.setObject(11, employee.getIdWarehouse());
+            stmt.setInt(12, employee.getId());
+            stmt.executeUpdate();
+        }catch (Exception e) {
+            System.out.println("Database connection error: " + e.getMessage());
+        }
     }
 
-    public void addEmployee(Employee newEmployee) {
+    public void deleteEmployee(int employeeId) throws SQLException {
+        String sql = "DELETE FROM employees WHERE id = ?";
+        try (
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, employeeId);
+            stmt.executeUpdate();
+        }catch (Exception e) {
+            System.out.println("Database connection error: " + e.getMessage());
+        }
+    }
+
+    private Employee extractEmployeeFromResultSet(ResultSet rs) throws SQLException {
+        Employee employee = new Employee();
+        employee.setId(rs.getInt("employee_id"));
+        employee.setFirstName(rs.getString("first_name"));
+        employee.setLastName(rs.getString("last_name"));
+        employee.setGender(rs.getBoolean("gender"));
+        employee.setDob(rs.getDate("dob"));
+        employee.setEmail(rs.getString("email"));
+        employee.setPhoneNumber(rs.getString("phone_number"));
+        employee.setAddress(rs.getString("address"));
+        employee.setSalary(rs.getDouble("salary"));
+        employee.setRole(rs.getString("role"));
+        employee.setWorkplace(rs.getString("workplace"));
+        return employee;
     }
 }
