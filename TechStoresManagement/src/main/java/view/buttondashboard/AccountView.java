@@ -8,9 +8,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.AccountModel;
+import validatepassword.Validate;
 
 public class AccountView extends VBox {
     private ObservableList<Account> accountList;
@@ -50,12 +52,12 @@ public class AccountView extends VBox {
         usernameColumn.setMinWidth(150);
         usernameColumn.setCellValueFactory(cellData -> cellData.getValue().usernameProperty());
 
-        TableColumn<Account, String> passwordColumn = new TableColumn<>("Password");
-        passwordColumn.setMinWidth(150);
-        passwordColumn.setCellValueFactory(cellData -> cellData.getValue().passwordProperty());
-        TableColumn<Account, String> phoneColumn = new TableColumn<>("Phone Number");
-        phoneColumn.setMinWidth(150);
-        phoneColumn.setCellValueFactory(cellData -> cellData.getValue().phoneNumberProperty());
+//        TableColumn<Account, String> passwordColumn = new TableColumn<>("Password");
+//        passwordColumn.setMinWidth(150);
+//        passwordColumn.setCellValueFactory(cellData -> cellData.getValue().passwordProperty());
+//        TableColumn<Account, String> phoneColumn = new TableColumn<>("Phone Number");
+//        phoneColumn.setMinWidth(150);
+//        phoneColumn.setCellValueFactory(cellData -> cellData.getValue().phoneNumberProperty());
 
         TableColumn<Account, Void> optionColumn = new TableColumn<>("Option");
         optionColumn.setCellFactory(col -> new TableCell<>() {
@@ -92,7 +94,7 @@ public class AccountView extends VBox {
         });
 
         // Add Columns to Table
-        accountTable.getColumns().addAll(idColumn, nameColumn, usernameColumn,phoneColumn, passwordColumn, optionColumn);
+        accountTable.getColumns().addAll(idColumn, nameColumn, usernameColumn, optionColumn);
 
         // ObservableList to hold Account data
         AccountModel accountModel = new AccountModel();
@@ -145,157 +147,240 @@ public class AccountView extends VBox {
         // Nếu account đã tồn tại, đặt giá trị ComboBox thành tên của account
         nameComboBox.setValue(account.getName());
 
+        // Label để hiển thị thông báo lỗi cho Full Name
+        Label nameErrorLabel = new Label();
+        nameErrorLabel.setTextFill(Color.RED); // Đặt màu chữ thành đỏ
+
         Label usernameLabel = new Label("Username:");
         TextField usernameField = new TextField(account.getUsername());
-        Label phoneLabel = new Label("Phone Number:");
-        TextField phoneField = new TextField(account.getPhoneNumber());
 
-        Label passwordLabel = new Label("Password:");
+        // Label để hiển thị thông báo lỗi cho Username
+        Label usernameErrorLabel = new Label();
+        usernameErrorLabel.setTextFill(Color.RED); // Đặt màu chữ thành đỏ
+
+        Label oldPasswordLabel = new Label("Old Password:");
+        PasswordField oldPasswordField = new PasswordField();
+
+        // Label để hiển thị thông báo lỗi cho Old Password
+        Label oldPasswordErrorLabel = new Label();
+        oldPasswordErrorLabel.setTextFill(Color.RED);
+
+        Label passwordLabel = new Label("New Password:");
         PasswordField passwordField = new PasswordField();
-        passwordField.setText(account.getPassword());
+
+        // Label để hiển thị thông báo lỗi cho Password
+        Label passwordErrorLabel = new Label();
+        passwordErrorLabel.setTextFill(Color.RED);
+        passwordField.setOnKeyReleased(event -> {
+            String password = passwordField.getText();
+            String validationMessage = Validate.validatePassword(password);
+            if (!validationMessage.isEmpty()) {
+                passwordErrorLabel.setText(validationMessage);
+            } else {
+                passwordErrorLabel.setText("");
+            }
+        });
 
         Button saveButton = new Button("Save");
         saveButton.setOnAction(event -> {
             String fullName = nameComboBox.getValue();
             String newUsername = usernameField.getText();
+            String oldPassword = oldPasswordField.getText();
             String newPassword = passwordField.getText();
-            String newPhoneNumber = phoneField.getText();
             String role = account.getRole();
 
+            // Đặt lại các thông báo lỗi
+            nameErrorLabel.setText("");
+            usernameErrorLabel.setText("");
+            oldPasswordErrorLabel.setText("");
+            passwordErrorLabel.setText("");
+
             // Kiểm tra tên và username có hợp lệ không
-            boolean isNameValid = true;
-            if (!fullName.equals(account.getName())) {
-                isNameValid = accountModel.isNameValid(fullName, role);
+            boolean hasError = false; // Biến để kiểm tra có lỗi hay không
+
+            if (fullName == null) {
+                nameErrorLabel.setText("Please select a full name.");
+                hasError = true;
+            } else if (!fullName.equals(account.getName()) && !accountModel.isNameValid(fullName, role)) {
+                nameErrorLabel.setText("Name already exists or doesn't match the role.");
+                hasError = true;
             }
 
-            boolean isUsernameUnique = true;
-            if (!newUsername.equals(account.getUsername())) {
-                isUsernameUnique = accountModel.isUsernameUnique(newUsername);
+            if (newUsername.isEmpty()) {
+                usernameErrorLabel.setText("Username is required.");
+                hasError = true;
+            } else if (!newUsername.equals(account.getUsername()) && !accountModel.isUsernameUnique(newUsername)) {
+                usernameErrorLabel.setText("Username already exists.");
+                hasError = true;
             }
 
-            if (!isNameValid) {
-                Alert nameAlert = new Alert(Alert.AlertType.ERROR);
-                nameAlert.setTitle("Invalid Name");
-                nameAlert.setHeaderText("Name already exists or doesn't match the role");
-                nameAlert.showAndWait();
-            } else if (!isUsernameUnique) {
-                Alert usernameAlert = new Alert(Alert.AlertType.ERROR);
-                usernameAlert.setTitle("Invalid Username");
-                usernameAlert.setHeaderText("Username already exists");
-                usernameAlert.showAndWait();
+            // Kiểm tra mật khẩu cũ
+            if (oldPassword.isEmpty()) {
+                oldPasswordErrorLabel.setText("Old password is required.");
+                hasError = true;
+            } else if (!oldPassword.equals(account.getPassword())) {
+                oldPasswordErrorLabel.setText("Old password is incorrect.");
+                hasError = true;
+            }
+
+            if (hasError) {
+                return;
+            }
+
+            // Cập nhật thông tin tài khoản
+            account.setName(fullName);
+            account.setUsername(newUsername);
+            account.setPassword(newPassword);
+
+            boolean success = accountModel.updateAccount(account);
+            if (success) {
+                editStage.close();
+                ((TableView<Account>) getChildren().get(3)).refresh();
             } else {
-                account.setName(fullName);
-                account.setUsername(newUsername);
-                account.setPassword(newPassword);
-
-                boolean success = accountModel.updateAccount(account);
-                if (success) {
-                    editStage.close();
-                    ((TableView<Account>) getChildren().get(3)).refresh();
-                } else {
-                    Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                    errorAlert.setTitle("Error");
-                    errorAlert.setHeaderText("Update Failed");
-                    errorAlert.showAndWait();
-                }
+                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                errorAlert.setTitle("Error");
+                errorAlert.setHeaderText("Update Failed");
+                errorAlert.showAndWait();
             }
         });
 
         Button cancelButton = new Button("Cancel");
         cancelButton.setOnAction(event -> editStage.close());
 
-        VBox layout = new VBox(10, nameLabel, nameComboBox, usernameLabel, usernameField, phoneLabel, phoneField, passwordLabel, passwordField, new HBox(10, saveButton, cancelButton));
+        VBox layout = new VBox(10, nameLabel, nameComboBox, nameErrorLabel, usernameLabel, usernameField, usernameErrorLabel,
+                oldPasswordLabel, oldPasswordField, oldPasswordErrorLabel, passwordLabel, passwordField, passwordErrorLabel,
+                new HBox(10, saveButton, cancelButton));
         layout.setAlignment(Pos.CENTER);
         layout.setStyle("-fx-padding: 20;");
 
-        Scene scene = new Scene(layout, 300, 300);
+        Scene scene = new Scene(layout, 300, 400);
         editStage.setScene(scene);
         editStage.showAndWait();
     }
 
 
 
-
-    // Hàm hiển thị pop-up thêm tài khoản mới
-// Hàm hiển thị pop-up thêm tài khoản mới
     private void showNewAccountPopup() {
         Stage newAccountStage = new Stage();
         newAccountStage.initModality(Modality.APPLICATION_MODAL);
         newAccountStage.setTitle("New Account");
 
-        // Tạo Label và TextField cho các trường thông tin tài khoản
+        // Tạo Label và ComboBox cho trường Full Name
         Label nameLabel = new Label("Full Name:");
-        TextField nameField = new TextField();
+        ComboBox<String> nameComboBox = new ComboBox<>();
+        AccountModel accountModel = new AccountModel();
+        nameComboBox.setItems(FXCollections.observableArrayList(accountModel.getAvailableEmployeeNames()));
+
+        Label nameErrorLabel = new Label();
+        nameErrorLabel.setTextFill(Color.RED);
 
         Label usernameLabel = new Label("Username:");
         TextField usernameField = new TextField();
+        Label usernameErrorLabel = new Label();
+        usernameErrorLabel.setTextFill(Color.RED);
 
         Label passwordLabel = new Label("Password:");
         PasswordField passwordField = new PasswordField();
+        Label passwordErrorLabel = new Label();
+        passwordErrorLabel.setTextFill(Color.RED);
+
+        Label confirmPassword = new Label("Confirm Password:");
+        PasswordField confirmPasswordField = new PasswordField();
+        Label confirmPasswordErrorLabel = new Label();
+        confirmPasswordErrorLabel.setTextFill(Color.RED);
+
+        usernameField.setOnKeyReleased(event -> {
+            String username = usernameField.getText();
+            if (username.isEmpty()) {
+                usernameErrorLabel.setText("Username is required.");
+            } else if (!accountModel.isUsernameUnique(username)) {
+                usernameErrorLabel.setText("Username already exists. Please enter a unique username.");
+            } else {
+                usernameErrorLabel.setText("");
+            }
+        });
+
+        passwordField.setOnKeyReleased(event -> {
+            String password = passwordField.getText();
+            String validationMessage = Validate.validatePassword(password);
+            if (!validationMessage.isEmpty()) {
+                passwordErrorLabel.setText(validationMessage);
+            } else {
+                passwordErrorLabel.setText("");
+            }
+        });
 
         // Nút Save
         Button saveButton = new Button("Save");
         saveButton.setOnAction(event -> {
-            String fullName = nameField.getText();
+            String fullName = nameComboBox.getValue();
             String username = usernameField.getText();
             String password = passwordField.getText();
+            String confirmPasswordValue = confirmPasswordField.getText();
 
-            // Kiểm tra xem các trường thông tin đã được điền đầy đủ chưa
-            if (fullName.isEmpty() || username.isEmpty() || password.isEmpty()) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Missing Information");
-                alert.setHeaderText("Please fill in all fields.");
-                alert.showAndWait();
+            nameErrorLabel.setText("");
+            usernameErrorLabel.setText("");
+            passwordErrorLabel.setText("");
+            confirmPasswordErrorLabel.setText("");
+
+            boolean hasError = false;
+
+            if (fullName == null) {
+                nameErrorLabel.setText("Please select a full name.");
+                hasError = true;
+            }
+            if (username.isEmpty()) {
+                usernameErrorLabel.setText("Username is required.");
+                hasError = true;
+            }
+            if (password.isEmpty()) {
+                passwordErrorLabel.setText("Password is required.");
+                hasError = true;
+            }
+            if (confirmPasswordValue.isEmpty()) {
+                confirmPasswordErrorLabel.setText("Please confirm your password.");
+                hasError = true;
+            } else if (!password.equals(confirmPasswordValue)) {
+                confirmPasswordErrorLabel.setText("Passwords do not match.");
+                hasError = true;
+            }
+
+            if (hasError) {
+                return;
+            }
+
+            Account newAccount = new Account(0, fullName, username, password);
+
+            boolean success = accountModel.addAccount(newAccount);
+
+            if (success) {
+                accountList.setAll(accountModel.loadAccounts(""));
+                newAccountStage.close();
+                ((TableView<Account>) getChildren().get(3)).refresh();
             } else {
-                // Kiểm tra xem username có trùng không
-                AccountModel accountModel = new AccountModel();
-                boolean isUsernameUnique = accountModel.isUsernameUnique(username);
-
-                if (!isUsernameUnique) {
-                    Alert usernameAlert = new Alert(Alert.AlertType.ERROR);
-                    usernameAlert.setTitle("Invalid Username");
-                    usernameAlert.setHeaderText("Username already exists");
-                    usernameAlert.setContentText("Please enter a unique username.");
-                    usernameAlert.showAndWait();
-                } else {
-                    // Tạo đối tượng Account mới
-                    Account newAccount = new Account(0, fullName, username, password); // Sử dụng ID là 0 hoặc có thể sửa theo logic của bạn
-
-                    // Gọi AccountModel để thêm tài khoản vào database
-                    boolean success = accountModel.addAccount(newAccount);
-
-                    if (success) {
-                        accountList.setAll(accountModel.loadAccounts("")); // Cập nhật danh sách tài khoản
-                        newAccountStage.close();
-                        ((TableView<Account>) getChildren().get(3)).refresh();
-                    } else {
-                        Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                        errorAlert.setTitle("Error");
-                        errorAlert.setHeaderText("Failed to add account.");
-                        errorAlert.setContentText("There was an error while adding the account.");
-                        errorAlert.showAndWait();
-                    }
-                }
+                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                errorAlert.setTitle("Error");
+                errorAlert.setHeaderText("Failed to add account.");
+                errorAlert.setContentText("There was an error while adding the account.");
+                errorAlert.showAndWait();
             }
         });
 
         Button cancelButton = new Button("Cancel");
         cancelButton.setOnAction(event -> newAccountStage.close());
 
-        VBox layout = new VBox(10, nameLabel, nameField, usernameLabel, usernameField, passwordLabel, passwordField, new HBox(10, saveButton, cancelButton));
+        VBox layout = new VBox(10, nameLabel, nameComboBox, nameErrorLabel, usernameLabel, usernameField, usernameErrorLabel,
+                passwordLabel, passwordField, passwordErrorLabel, confirmPassword, confirmPasswordField, confirmPasswordErrorLabel,
+                new HBox(10, saveButton, cancelButton));
         layout.setAlignment(Pos.CENTER);
         layout.setStyle("-fx-padding: 20;");
 
-        Scene scene = new Scene(layout, 300, 300);
+        Scene scene = new Scene(layout, 300, 400);
         newAccountStage.setScene(scene);
         newAccountStage.showAndWait();
     }
 
 
-
-
-
-    // Hàm xác nhận xóa tài khoản
     private void confirmDelete(Account account) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmation");
