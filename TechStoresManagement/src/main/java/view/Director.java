@@ -12,15 +12,15 @@ import javafx.stage.Stage;
 public class Director extends Application {
     @Override
     public void start(Stage primaryStage)throws Exception {
-        if (!Session.isLoggedIn()) {
-            try {
-                new Login().start(new Stage());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            primaryStage.close();
-            return;
-        }
+//        if (!Session.isLoggedIn()) {
+//            try {
+//                new Login().start(new Stage());
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            primaryStage.close();
+//            return;
+//        }
         FXMLLoader loader = new FXMLLoader(getClass().getResource("Dashboard.fxml"));
         Scene scene = new Scene(loader.load());
         primaryStage.setResizable(false);
