@@ -14,6 +14,10 @@ import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.WarehouseModel;
+import view.stage.AdditionSuccess;
+import view.stage.DeletionFailed;
+import view.stage.DeletionSuccess;
+import view.stage.EditSuccess;
 
 import java.util.List;
 
@@ -30,32 +34,28 @@ public class WarehouseManagementView extends VBox {
 
         // Create layout
         BorderPane borderPane = new BorderPane();
-        VBox topLayout = new VBox(10);
-        topLayout.setPadding(new Insets(10));
 
         // Search field and button layout
         searchField = new TextField();
         searchField.setPromptText("Search by name or address...");
-        Button searchButton = new Button("Search");
-        searchButton.setOnAction(e -> loadWarehouses());
+        searchField.getStyleClass().add("search-box");
         searchField.textProperty().addListener((observable, oldValue, newValue) -> loadWarehouses());
 
-        HBox searchLayout = new HBox(10);
-        searchLayout.getChildren().addAll(searchField, searchButton);
-        HBox.setHgrow(searchField, Priority.ALWAYS); // Đẩy searchField ra toàn bộ chiều ngang
+        HBox searchBar = new HBox(searchField);
+        searchBar.setAlignment(Pos.CENTER_RIGHT);
+        searchBar.setStyle(" -fx-padding:0 10 10 10;");
 
         // Create warehouse button
         Button createWarehouseButton = new Button("Create Warehouse");
         createWarehouseButton.setOnAction(e -> showCreateWarehouseDialog());
+        createWarehouseButton.getStyleClass().add("button-pagination");
         createWarehouseButton.setAlignment(Pos.CENTER_LEFT); // Đặt nút ở bên trái
 
         // Thêm nút Create Warehouse bên dưới ô search
-        VBox topControls = new VBox(10);
-        topControls.getChildren().addAll(searchLayout, createWarehouseButton);
-        topControls.setSpacing(10);
-        topControls.setPadding(new Insets(10, 0, 10, 0));
-        topLayout.getChildren().addAll(topControls);
-        borderPane.setTop(topLayout);
+        HBox topControls = new HBox(10);
+        topControls.setStyle("-fx-padding:10; -fx-min-width: 1000");
+        topControls.getChildren().addAll( createWarehouseButton,searchBar);
+        borderPane.setTop(topControls);
 
         // Table setup
         tableView = new TableView<>();
@@ -63,12 +63,8 @@ public class WarehouseManagementView extends VBox {
         loadWarehouses();
 
         // Set kích thước bảng hợp lý cho cửa sổ 1300x1000
-        tableView.setPrefSize(1000, 500); // Đặt kích thước phù hợp
         borderPane.setCenter(tableView);
 
-        // Set padding cho bảng và các phần tử
-        BorderPane.setMargin(tableView, new Insets(10, 10, 10, 10)); // Cách đều lề của bảng
-        borderPane.setPadding(new Insets(20)); // Cách đều các lề của layout
 
         // Add everything to main layout
         this.getChildren().addAll(titleLabel, borderPane);
@@ -77,25 +73,35 @@ public class WarehouseManagementView extends VBox {
     private void setupTableView() {
         TableColumn<Warehouse, Integer> indexColumn = new TableColumn<>("STT");
         indexColumn.setCellValueFactory(cellData -> new SimpleIntegerProperty(tableView.getItems().indexOf(cellData.getValue()) + 1).asObject());
-        indexColumn.setPrefWidth(50);
+        indexColumn.setPrefWidth(40);
+        indexColumn.getStyleClass().add("column");
 
         TableColumn<Warehouse, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
-        nameColumn.setPrefWidth(250);
+        nameColumn.setPrefWidth(300);
+        nameColumn.getStyleClass().add("column");
 
         TableColumn<Warehouse, String> addressColumn = new TableColumn<>("Address");
         addressColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getAddress()));
         addressColumn.setPrefWidth(400);
+        addressColumn.getStyleClass().add("column");
 
         TableColumn<Warehouse, String> managerColumn = new TableColumn<>("Manager");
         managerColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getManagerName()));
         managerColumn.setPrefWidth(150);
+        managerColumn.getStyleClass().add("column");
 
         TableColumn<Warehouse, String> actionColumn = new TableColumn<>("Action");
+        actionColumn.setPrefWidth(190);
         actionColumn.setCellFactory(col -> new TableCell<Warehouse, String>() {
             private final Button viewButton = new Button("View");
             private final Button editButton = new Button("Edit");
             private final Button deleteButton = new Button("Delete");
+            {
+                editButton.setStyle("-fx-background-color: yellow;");
+                deleteButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+                viewButton.setStyle("-fx-background-color: #4AD4DD; -fx-text-fill: white;");
+            }
 
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -108,12 +114,12 @@ public class WarehouseManagementView extends VBox {
                     editButton.setOnAction(e -> showEditWarehouseDialog(warehouse));
                     deleteButton.setOnAction(e -> deleteWarehouse(warehouse));
                     HBox buttons = new HBox(viewButton, editButton, deleteButton);
+                    buttons.setSpacing(10);
                     setGraphic(buttons);
                 }
             }
         });
 
-        actionColumn.setPrefWidth(150);
 
         tableView.getColumns().addAll(indexColumn, nameColumn, addressColumn, managerColumn, actionColumn);
     }
@@ -154,6 +160,9 @@ public class WarehouseManagementView extends VBox {
                 showAlert("Duplicate Warehouse", "Warehouse name or address already exists.");
             } else {
                 warehouseController.addWarehouse(name, address);
+                Stage stage = new Stage();
+                AdditionSuccess message = new AdditionSuccess();
+                message.start(stage);
                 dialog.close();
                 loadWarehouses();
             }
@@ -309,6 +318,9 @@ public class WarehouseManagementView extends VBox {
             } else {
                 // Cập nhật thông tin cửa hàng
                 warehouseController.updateWarehouse(warehouse.getId(), name, address, managerId);
+                Stage stage = new Stage();
+                EditSuccess message = new EditSuccess();
+                message.start(stage);
                 dialog.close();
                 loadWarehouses();
             }
@@ -329,8 +341,14 @@ public class WarehouseManagementView extends VBox {
 
     private void deleteWarehouse(Warehouse warehouse) {
         if (warehouseController.deleteWarehouse(warehouse.getId())) {
+            Stage stage = new Stage();
+            DeletionSuccess message = new DeletionSuccess();
+            message.start(stage);
             loadWarehouses();
         } else {
+            Stage stage = new Stage();
+            DeletionFailed message = new DeletionFailed();
+            message.start(stage);
             showAlert("Cannot Delete Warehouse", "Warehouse has products and cannot be deleted.");
         }
     }

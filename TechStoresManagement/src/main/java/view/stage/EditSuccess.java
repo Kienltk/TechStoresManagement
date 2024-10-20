@@ -85,7 +85,7 @@ public class EditSuccess extends Application {
         returnButton.setOnAction(e -> fadeOut.play());
 
         // Tự động đóng cửa sổ sau 10 giây với hiệu ứng
-        Timeline autoClose = new Timeline(new KeyFrame(Duration.seconds(10), event -> fadeOut.play()));
+        Timeline autoClose = new Timeline(new KeyFrame(Duration.seconds(3), event -> fadeOut.play()));
         autoClose.play();
     }
 

@@ -4,6 +4,7 @@ import controller.StoreController;
 import entity.Employee;
 import entity.Product;
 import entity.Store;
+import entity.Warehouse;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -18,6 +19,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import model.StoreModel;
+import view.stage.AdditionSuccess;
+import view.stage.DeletionFailed;
+import view.stage.DeletionSuccess;
+import view.stage.EditSuccess;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,39 +47,33 @@ public class StoreManagementView extends VBox {
         // Search field and button layout
         searchField = new TextField();
         searchField.setPromptText("Search by name or address...");
-        Button searchButton = new Button("Search");
-        searchButton.setOnAction(e -> loadStores());
+        searchField.getStyleClass().add("search-box");
         searchField.textProperty().addListener((observable, oldValue, newValue) -> loadStores());
 
-        HBox searchLayout = new HBox(10);
-        searchLayout.getChildren().addAll(searchField, searchButton);
-        HBox.setHgrow(searchField, Priority.ALWAYS); // Đẩy searchField ra toàn bộ chiều ngang
+        HBox searchBar = new HBox(searchField);
+        searchBar.setAlignment(Pos.CENTER_RIGHT);
+        searchBar.setStyle(" -fx-padding:0 10 10 10;");
 
-        // Create store button
-        Button createStoreButton = new Button("Create Store");
-        createStoreButton.setOnAction(e -> showCreateStoreDialog());
-        createStoreButton.setAlignment(Pos.CENTER_LEFT); // Đặt nút ở bên trái
+        // Create warehouse button
+        Button createWarehouseButton = new Button("Create Warehouse");
+        createWarehouseButton.setOnAction(e -> showCreateStoreDialog());
+        createWarehouseButton.getStyleClass().add("button-pagination");
+        createWarehouseButton.setAlignment(Pos.CENTER_LEFT); // Đặt nút ở bên trái
 
-        // Thêm nút Create Store bên dưới ô search
-        VBox topControls = new VBox(10);
-        topControls.getChildren().addAll(searchLayout, createStoreButton);
-        topControls.setSpacing(10);
-        topControls.setPadding(new Insets(10, 0, 10, 0));
-        topLayout.getChildren().addAll(topControls);
-        borderPane.setTop(topLayout);
+        // Thêm nút Create Warehouse bên dưới ô search
+        HBox topControls = new HBox(10);
+        topControls.setStyle("-fx-padding:10; -fx-min-width: 1000");
+        topControls.getChildren().addAll( createWarehouseButton,searchBar);
+        borderPane.setTop(topControls);
+
 
         // Table setup
         tableView = new TableView<>();
         setupTableView(); // Cấu hình bảng
         loadStores();
 
-        // Set kích thước bảng hợp lý cho cửa sổ 1300x1000
-        tableView.setPrefSize(1000, 500); // Đặt kích thước phù hợp
         borderPane.setCenter(tableView);
 
-        // Set padding cho bảng và các phần tử
-        BorderPane.setMargin(tableView, new Insets(10, 10, 10, 10)); // Cách đều lề của bảng
-        borderPane.setPadding(new Insets(20)); // Cách đều các lề của layout
 
         // Add everything to main layout
         this.getChildren().addAll(titleLabel, borderPane);
@@ -84,25 +83,35 @@ public class StoreManagementView extends VBox {
     private void setupTableView() {
         TableColumn<Store, Integer> indexColumn = new TableColumn<>("STT");
         indexColumn.setCellValueFactory(cellData -> new SimpleIntegerProperty(tableView.getItems().indexOf(cellData.getValue()) + 1).asObject());
-        indexColumn.setPrefWidth(50);
+        indexColumn.setPrefWidth(40);
+        indexColumn.getStyleClass().add("column");
 
         TableColumn<Store, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
-        nameColumn.setPrefWidth(250);
+        nameColumn.setPrefWidth(300);
+        nameColumn.getStyleClass().add("column");
 
         TableColumn<Store, String> addressColumn = new TableColumn<>("Address");
         addressColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getAddress()));
         addressColumn.setPrefWidth(400);
+        addressColumn.getStyleClass().add("column");
 
         TableColumn<Store, String> managerColumn = new TableColumn<>("Manager");
         managerColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getManagerName()));
         managerColumn.setPrefWidth(150);
+        managerColumn.getStyleClass().add("column");
 
         TableColumn<Store, String> actionColumn = new TableColumn<>("Action");
+        actionColumn.setPrefWidth(190);
         actionColumn.setCellFactory(col -> new TableCell<Store, String>() {
             private final Button viewButton = new Button("View");
             private final Button editButton = new Button("Edit");
             private final Button deleteButton = new Button("Delete");
+            {
+                editButton.setStyle("-fx-background-color: yellow;");
+                deleteButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+                viewButton.setStyle("-fx-background-color: #4AD4DD; -fx-text-fill: white;");
+            }
 
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -115,12 +124,11 @@ public class StoreManagementView extends VBox {
                     editButton.setOnAction(e -> showEditStoreDialog(store));
                     deleteButton.setOnAction(e -> deleteStore(store));
                     HBox buttons = new HBox(viewButton, editButton, deleteButton);
+                    buttons.setSpacing(10);
                     setGraphic(buttons);
                 }
             }
         });
-
-        actionColumn.setPrefWidth(150);
 
         tableView.getColumns().addAll(indexColumn, nameColumn, addressColumn, managerColumn, actionColumn);
     }
@@ -161,6 +169,9 @@ public class StoreManagementView extends VBox {
                 showAlert("Duplicate Store", "Store name or address already exists.");
             } else {
                 storeController.addStore(name, address);
+                Stage stage = new Stage();
+                AdditionSuccess message = new AdditionSuccess();
+                message.start(stage);
                 dialog.close();
                 loadStores();
             }
@@ -327,6 +338,9 @@ public class StoreManagementView extends VBox {
             } else {
                 // Cập nhật thông tin cửa hàng
                 storeController.updateStore(store.getId(), name, address, managerId);
+                Stage stage = new Stage();
+                EditSuccess message = new EditSuccess();
+                message.start(stage);
                 dialog.close();
                 loadStores();
             }
@@ -347,8 +361,14 @@ public class StoreManagementView extends VBox {
 
     private void deleteStore(Store store) {
         if (storeController.deleteStore(store.getId())) {
+            Stage stage = new Stage();
+            DeletionSuccess message = new DeletionSuccess();
+            message.start(stage);
             loadStores();
         } else {
+            Stage stage = new Stage();
+            DeletionFailed message = new DeletionFailed();
+            message.start(stage);
             showAlert("Cannot Delete Store", "Store has products and cannot be deleted.");
         }
     }

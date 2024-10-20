@@ -9,6 +9,8 @@ import javafx.scene.Scene;
 
 import javafx.stage.Stage;
 
+import java.util.Objects;
+
 public class Director extends Application {
     @Override
     public void start(Stage primaryStage)throws Exception {
@@ -23,6 +25,7 @@ public class Director extends Application {
 //        }
         FXMLLoader loader = new FXMLLoader(getClass().getResource("Dashboard.fxml"));
         Scene scene = new Scene(loader.load());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("director.css")).toExternalForm());
         primaryStage.setResizable(false);
         primaryStage.setTitle("Dashboard");
         primaryStage.setScene(scene);

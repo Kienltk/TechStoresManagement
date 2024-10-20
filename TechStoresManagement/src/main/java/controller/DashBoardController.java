@@ -1,5 +1,7 @@
 package controller;
 
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
@@ -7,6 +9,8 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import view.Login;
 import view.buttondashboard.*;
+import view.stage.LogoutFailed;
+import view.stage.LogoutSuccess;
 
 import java.util.Collection;
 
@@ -61,13 +65,32 @@ public class DashBoardController {
         }
 
         try {
-            new Login().start(new Stage());
+            // Tạo một Stage cho pop-up LogoutSuccess
+            Stage dialog = new Stage();
+            LogoutSuccess logoutSuccessPopup = new LogoutSuccess();
+            logoutSuccessPopup.start(dialog);
+
+            // Lắng nghe sự kiện khi pop-up đóng
+            dialog.setOnHidden(event -> {
+                try {
+                    new Login().start(new Stage());
+                } catch (Exception e) {
+                    Stage dialogFailed = new Stage();
+                    LogoutFailed logoutFailedPopup = new LogoutFailed();
+                    logoutFailedPopup.start(dialogFailed);
+                    e.printStackTrace(); // In lỗi nếu có
+                    System.out.println("Lỗi khi khởi động màn hình đăng nhập: " + e.getMessage());
+                }
+            });
+
         } catch (Exception e) {
+            Stage dialog = new Stage();
+            LogoutFailed logoutFailedPopup = new LogoutFailed();
+            logoutFailedPopup.start(dialog);
             e.printStackTrace(); // In lỗi nếu có
             System.out.println("Lỗi khi khởi động màn hình đăng nhập: " + e.getMessage());
         }
     }
-
 
     public void showHistory() {
         clearActive();

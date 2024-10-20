@@ -1,6 +1,8 @@
 package view.buttondashboard;
 
 import controller.DirectorController;
+import java.util.ArrayList;
+import java.util.List;
 import entity.Product;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -20,6 +22,9 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import model.DirectorModel;
+import view.stage.AdditionSuccess;
+import view.stage.DeletionFailed;
+import view.stage.DeletionSuccess;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,37 +38,56 @@ import java.util.Objects;
 public class ProductManagementView extends VBox {
 
     ObservableList<Product> productList = FXCollections.observableArrayList();
+    ObservableList<Product> filteredList = FXCollections.observableArrayList();
     DirectorModel dm = new DirectorModel();
     HashMap<String, Label> messageLabel = new HashMap<>();
 
 
-    public ProductManagementView() {
+    // Biến cho phân trang
+    private Pagination pagination;
+    private Label pageLabel; // Label hiển thị số trang
+    private int itemsPerPage = 12; // Số sản phẩm hiển thị trên mỗi trang
+    private int currentPage = 0; // Trang hiện tại
 
+    TableView<Product> productTable = new TableView<>();
+
+
+    public ProductManagementView() {
         // Title Label
         Label titleLabel = new Label("Product Management");
         titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
+        pageLabel = new Label();
+        pageLabel.getStyleClass().add("text-pagination");// Khởi tạo pageLabel
+        updatePageLabel(); // Cập nhật nhãn số trang
         // New Product Button
         Button newProductButton = new Button("New Product");
-        newProductButton.setStyle("-fx-background-color: #00C2FF; -fx-text-fill: white;");
+        newProductButton.getStyleClass().add("button-pagination");
 
         newProductButton.setOnAction(event -> showNewProductForm());
 
         // Search Bar
         TextField searchField = new TextField();
         searchField.setPromptText("Search Item");
-        Button searchButton = new Button("🔍");
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            isFiltered = !newValue.isEmpty(); // Cập nhật trạng thái lọc
+            filterList(newValue);
+        });
+        searchField.getStyleClass().add("search-box");
 
-        HBox searchBar = new HBox(searchField, searchButton);
+        HBox searchBar = new HBox(searchField);
         searchBar.setAlignment(Pos.CENTER_RIGHT);
-        searchBar.setSpacing(10);
+        searchBar.setStyle(" -fx-padding:0 10 10 10;");
 
         // TableView for Product Data
-        TableView<Product> productTable = new TableView<>();
+
+        productTable.setItems(productList);
+        productTable.getStyleClass().add("table-view");
 
         // Table Columns
         TableColumn<Product, Number> idColumn = new TableColumn<>("No.");
-        idColumn.setMinWidth(50);
+        idColumn.setMinWidth(80);
+        idColumn.getStyleClass().add("column");
         idColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Product, Number>, ObservableValue<Number>>() {
             @Override
             public javafx.beans.value.ObservableValue<Number> call(TableColumn.CellDataFeatures<Product, Number> p) {
@@ -72,7 +96,8 @@ public class ProductManagementView extends VBox {
         });
 
         TableColumn<Product, HBox> nameColumn = new TableColumn<>("Name");
-        nameColumn.setPrefWidth(230);
+        nameColumn.setPrefWidth(400);
+        nameColumn.getStyleClass().add("column");
         nameColumn.setCellValueFactory(cellData -> {
             Product product = cellData.getValue();
             Label nameLabel = new Label(product.getName());
@@ -82,19 +107,23 @@ public class ProductManagementView extends VBox {
         });
 
         TableColumn<Product, String> brandColumn = new TableColumn<>("Brand");
-        brandColumn.setMinWidth(150);
+        brandColumn.setMinWidth(180);
+        brandColumn.getStyleClass().add("column");
         brandColumn.setCellValueFactory(cellData -> cellData.getValue().brandProperty());
 
         TableColumn<Product, Double> purchasePriceColumn = new TableColumn<>("Purchase Price");
-        purchasePriceColumn.setMinWidth(100);
+        purchasePriceColumn.setMinWidth(130);
+        purchasePriceColumn.getStyleClass().add("column");
         purchasePriceColumn.setCellValueFactory(cellData -> cellData.getValue().purchasePriceProperty().asObject());
 
         TableColumn<Product, Double> salePriceColumn = new TableColumn<>("Sale Price");
-        salePriceColumn.setMinWidth(100);
+        salePriceColumn.setMinWidth(130);
+        salePriceColumn.getStyleClass().add("column");
         salePriceColumn.setCellValueFactory(cellData -> cellData.getValue().salePriceProperty().asObject());
 
         // Option Column with Edit and Delete buttons
         TableColumn<Product, Void> optionColumn = new TableColumn<>("Option");
+        optionColumn.setMinWidth(150);
         optionColumn.setCellFactory(col -> new TableCell<>() {
             final Button editButton = new Button("Edit");
             final Button deleteButton = new Button("Delete");
@@ -134,9 +163,15 @@ public class ProductManagementView extends VBox {
                                     boolean deleted = dm.delete(selectedProduct.getId());
 
                                     if (deleted) {
+                                        Stage stage = new Stage();
+                                        DeletionSuccess message = new DeletionSuccess();
+                                        message.start(stage);
                                         // Remove the product from the table
                                         productList.remove(selectedProduct);
                                     } else {
+                                        Stage stage = new Stage();
+                                        DeletionFailed message = new DeletionFailed();
+                                        message.start(stage);
                                         // If delete failed, show an error alert
                                         Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                                         errorAlert.setTitle("Error");
@@ -165,15 +200,87 @@ public class ProductManagementView extends VBox {
 
         // Add Columns to Table
         productTable.getColumns().addAll(idColumn, nameColumn, brandColumn, purchasePriceColumn, salePriceColumn, optionColumn);
-
-        // ObservableList to hold Product data
+        // Update the initial call to set the product list
         productList.setAll(dm.getAll());
+        loadPageData();
 
-        // Bind the data to the TableView
-        productTable.setItems(productList);
+        // Update the pagination buttons to reflect the filtered list
+        Button prevButton = new Button("<-");
+        prevButton.getStyleClass().add("button-pagination");
+        prevButton.setOnAction(event -> {
+            if (currentPage > 0) {
+                currentPage--;
+                loadPageData();
+                updatePageLabel(); // Cập nhật Label số trang
+            }
+        });
 
-        // Thêm các thành phần vào VBox
-        this.getChildren().addAll(titleLabel, newProductButton, searchBar, productTable);
+// Cập nhật sự kiện cho nút Next
+
+
+        Button nextButton = new Button("->");
+        nextButton.getStyleClass().add("button-pagination");
+        nextButton.setOnAction(event -> {
+            if ((currentPage + 1) * itemsPerPage < productList.size()) {
+                currentPage++;
+                loadPageData();
+                updatePageLabel(); // Cập nhật Label số trang
+            }
+        });
+        updatePageLabel();
+
+
+        // HBox chứa các nút phân trang và nhãn số trang
+        HBox paginationBox = new HBox(10, prevButton, pageLabel, nextButton);
+        paginationBox.setAlignment(Pos.CENTER);
+        paginationBox.setSpacing(30);
+        paginationBox.setStyle("-fx-padding: 8");
+
+        // Thêm các thành ph���n vào VBox
+        this.getChildren().addAll(titleLabel, newProductButton, searchBar, productTable, paginationBox);
+
+    }
+    private void filterList(String searchTerm) {
+        filteredList.clear(); // Xóa danh sách lọc trước khi thêm mới
+
+        for (Product product : dm.getAll()) {
+            if (product.getName().toLowerCase().contains(searchTerm.toLowerCase()) ||
+                    product.getBrand().toLowerCase().contains(searchTerm.toLowerCase())) {
+                filteredList.add(product);
+            }
+        }
+
+        // Cập nhật TableView với filteredList
+        productTable.setItems(filteredList);
+        currentPage = 0; // Đặt lại trang về 0 sau khi tìm kiếm
+        int totalPages = (int) Math.ceil((double) filteredList.size() / itemsPerPage);
+        pageLabel.setText("Page " + (currentPage + 1) + " of " + totalPages);
+        loadPageData(); // Tải lại dữ liệu
+    }
+
+    private boolean isFiltered = false;
+
+    private void paginate() {
+        ObservableList<Product> sourceList = isFiltered ? filteredList : productList;
+
+        int fromIndex = currentPage * itemsPerPage;
+        int toIndex = Math.min(fromIndex + itemsPerPage, sourceList.size());
+
+        if (fromIndex >= sourceList.size()) {
+            currentPage = 0;
+            fromIndex = 0;
+            toIndex = Math.min(itemsPerPage, sourceList.size());
+        }
+
+        ObservableList<Product> paginatedList = FXCollections.observableArrayList(sourceList.subList(fromIndex, toIndex));
+        productTable.setItems(paginatedList);
+    }
+    private void loadPageData() {
+        paginate();
+    }
+    private void updatePageLabel() {
+        int totalPages = (int) Math.ceil((double) productList.size() / itemsPerPage);
+        pageLabel.setText("Page " + (currentPage + 1) + " of " + totalPages);
     }
 
     private void showNewProductForm() {
@@ -321,6 +428,9 @@ public class ProductManagementView extends VBox {
 
             // Refresh the table data
             productList.setAll(dm.getAll());
+            Stage stage = new Stage();
+            AdditionSuccess message = new AdditionSuccess();
+            message.start(stage);
 
             // Close the form after saving
             newProductStage.close();

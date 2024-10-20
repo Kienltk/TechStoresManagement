@@ -13,9 +13,20 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.AccountModel;
 import validatepassword.Validate;
+import view.stage.AdditionSuccess;
+import view.stage.DeletionFailed;
+import view.stage.DeletionSuccess;
+import view.stage.EditSuccess;
+
+import java.util.Objects;
 
 public class AccountView extends VBox {
     private ObservableList<Account> accountList;
+    private ObservableList<Account> paginatedAccountList = FXCollections.observableArrayList();
+    private int currentPage = 1;
+    private final int itemsPerPage = 12;
+    private int totalPages;
+    private final Label pageLabel = new Label();
 
     public AccountView() {
         // Title Label
@@ -29,27 +40,33 @@ public class AccountView extends VBox {
 
         TextField searchField = new TextField();
         searchField.setPromptText("Search Account");
-
         searchField.setOnKeyReleased(event -> filterAccounts(searchField.getText()));
 
         HBox searchBar = new HBox(searchField);
         searchBar.setAlignment(Pos.CENTER_RIGHT);
-        searchBar.setSpacing(10);
+        searchBar.setStyle(" -fx-padding:0 10 10 10;");
+        
+        searchField.getStyleClass().add("search-box");
 
         // TableView for Account Data
         TableView<Account> accountTable = new TableView<>();
-
         // Table Columns
         TableColumn<Account, Integer> idColumn = new TableColumn<>("ID");
-        idColumn.setMinWidth(50);
+        idColumn.setMinWidth(85);
+        idColumn.getStyleClass().add("column");
+        idColumn.setStyle("-fx-alignment: CENTER;");
         idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
 
         TableColumn<Account, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setPrefWidth(230);
+        nameColumn.setPrefWidth(500);
+        nameColumn.getStyleClass().add("column");
+        nameColumn.setStyle("-fx-alignment: CENTER;");
         nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
 
         TableColumn<Account, String> usernameColumn = new TableColumn<>("Username");
-        usernameColumn.setMinWidth(150);
+        usernameColumn.setMinWidth(350);
+        usernameColumn.getStyleClass().add("column");
+        usernameColumn.setStyle("-fx-alignment: CENTER;");
         usernameColumn.setCellValueFactory(cellData -> cellData.getValue().usernameProperty());
 
 //        TableColumn<Account, String> passwordColumn = new TableColumn<>("Password");
@@ -60,6 +77,7 @@ public class AccountView extends VBox {
 //        phoneColumn.setCellValueFactory(cellData -> cellData.getValue().phoneNumberProperty());
 
         TableColumn<Account, Void> optionColumn = new TableColumn<>("Option");
+        optionColumn.setMinWidth(150);
         optionColumn.setCellFactory(col -> new TableCell<>() {
             final Button editButton = new Button("Edit");
             final Button deleteButton = new Button("Delete");
@@ -76,7 +94,8 @@ public class AccountView extends VBox {
                     setGraphic(null);
                 } else {
                     HBox optionBox = new HBox(editButton, deleteButton);
-                    optionBox.setSpacing(10);
+                    optionBox.setSpacing(20);
+                    optionBox.setStyle("-fx-alignment: CENTER;");
                     setGraphic(optionBox);
 
                     editButton.setOnAction(event -> {
@@ -100,12 +119,42 @@ public class AccountView extends VBox {
         AccountModel accountModel = new AccountModel();
         accountList = FXCollections.observableArrayList();
         accountList.setAll(accountModel.loadAccounts("")); // Load tất cả tài khoản
+        totalPages = (int) Math.ceil((double) accountList.size() / itemsPerPage);
 
         // Bind the data to the TableView
         accountTable.setItems(accountList);
+        Button prevButton = new Button("<-");
+        prevButton.getStyleClass().add("button-pagination");
+        Button nextButton = new Button("->");
+        nextButton.getStyleClass().add("button-pagination");
+        Label pageLabel = new Label("Page 1 / " + totalPages);
+        pageLabel.getStyleClass().add("text-pagination");
+
+        prevButton.setOnAction(e -> {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTableData();
+                pageLabel.setText("Page " + currentPage + " / " + totalPages); // Cập nhật số trang
+            }
+        });
+
+        nextButton.setOnAction(e -> {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTableData();
+                pageLabel.setText("Page " + currentPage + " / " + totalPages); // Cập nhật số trang
+            }
+        });
+
+
+        // HBox chứa các nút phân trang và nhãn số trang
+        HBox paginationBox = new HBox(10, prevButton, pageLabel, nextButton);
+        paginationBox.setAlignment(Pos.CENTER);
+        paginationBox.setSpacing(30);
+        paginationBox.setStyle("-fx-padding: 8");
 
         // Thêm các thành phần vào VBox
-        this.getChildren().addAll(titleLabel, newAccountButton, searchBar, accountTable);
+        this.getChildren().addAll(titleLabel, newAccountButton, searchBar, accountTable, paginationBox);
     }
 
     // Hàm lọc danh sách tài khoản dựa trên từ khóa tìm kiếm
@@ -127,6 +176,21 @@ public class AccountView extends VBox {
 
         // Refresh table để đảm bảo các nút hiển thị đúng
         ((TableView<Account>) getChildren().get(3)).refresh();
+    }
+    // Hàm cập nhật dữ liệu bảng theo trang hiện tại
+    private void updateTableData() {
+        // Tính toán chỉ số bắt đầu và kết thúc của danh sách tài khoản cho trang hiện tại
+        int fromIndex = (currentPage - 1) * itemsPerPage;
+        int toIndex = Math.min(fromIndex + itemsPerPage, accountList.size());
+
+        // Cập nhật danh sách đã phân trang
+        paginatedAccountList.setAll(accountList.subList(fromIndex, toIndex));
+
+        // Đặt dữ liệu đã phân trang vào TableView
+        ((TableView<Account>) getChildren().get(3)).setItems(paginatedAccountList);
+
+        // Cập nhật nhãn số trang
+        pageLabel.setText("Page " + currentPage + " / " + totalPages);
     }
 
     // Hàm hiển thị pop-up chỉnh sửa tài khoản
@@ -235,6 +299,9 @@ public class AccountView extends VBox {
             boolean success = accountModel.updateAccount(account);
             if (success) {
                 editStage.close();
+                Stage stage = new Stage();
+                EditSuccess message = new EditSuccess();
+                message.start(stage);
                 ((TableView<Account>) getChildren().get(3)).refresh();
             } else {
                 Alert errorAlert = new Alert(Alert.AlertType.ERROR);
@@ -354,6 +421,9 @@ public class AccountView extends VBox {
             boolean success = accountModel.addAccount(newAccount);
 
             if (success) {
+                Stage stage = new Stage();
+                AdditionSuccess message = new AdditionSuccess();
+                message.start(stage);
                 accountList.setAll(accountModel.loadAccounts(""));
                 newAccountStage.close();
                 ((TableView<Account>) getChildren().get(3)).refresh();
@@ -395,8 +465,14 @@ public class AccountView extends VBox {
 
                 if (success) {
                     accountList.remove(account);
+                    Stage stage = new Stage();
+                    DeletionSuccess message = new DeletionSuccess();
+                    message.start(stage);
                     ((TableView<Account>) getChildren().get(3)).refresh();
                 } else {
+                    Stage stage = new Stage();
+                    DeletionFailed message = new DeletionFailed();
+                    message.start(stage);
                     // Hiển thị thông báo lỗi nếu không xóa được
                     Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                     errorAlert.setTitle("Error");
