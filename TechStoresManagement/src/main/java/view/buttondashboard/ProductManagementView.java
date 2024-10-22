@@ -296,20 +296,25 @@ public class ProductManagementView extends VBox {
         // Create input fields for the product form
         TextField nameField = new TextField();
         nameField.setPromptText("Product Name");
+        nameField.getStyleClass().add("popup-text-field"); // Add CSS class
 
         TextField brandField = new TextField();
         brandField.setPromptText("Brand");
+        brandField.getStyleClass().add("popup-text-field"); // Add CSS class
 
         TextField purchasePriceField = new TextField();
         purchasePriceField.setPromptText("Purchase Price");
+        purchasePriceField.getStyleClass().add("popup-text-field"); // Add CSS class
 
         TextField salePriceField = new TextField();
         salePriceField.setPromptText("Sale Price");
+        salePriceField.getStyleClass().add("popup-text-field"); // Add CSS class
 
         // Create Save and Cancel buttons
         Button saveButton = new Button("Save");
+        saveButton.getStyleClass().add("popup-button"); // Add CSS class
         Button cancelButton = new Button("Cancel");
-
+        cancelButton.getStyleClass().add("popup-button"); // Add CSS class
         // Error messages for CRUD
         messageLabel.put("name", new Label());
         messageLabel.put("brand", new Label());
@@ -458,10 +463,14 @@ public class ProductManagementView extends VBox {
 
         // Add input fields and labels to the inputFields VBox
         inputFields.getChildren().addAll(
-                new Label("Product Name:"), nameField, messageLabel.get("name"),
-                new Label("Brand:"), brandField, messageLabel.get("brand"),
-                new Label("Purchase Price:"), purchasePriceField, messageLabel.get("purchasePrice"),
-                new Label("Sale Price:"), salePriceField, messageLabel.get("salePrice"),
+                new Label("Product Name:") {{ getStyleClass().add("popup-label"); }},
+                nameField, messageLabel.get("name"),
+                new Label("Brand:") {{ getStyleClass().add("popup-label"); }},
+                brandField, messageLabel.get("brand"),
+                new Label("Purchase Price:") {{ getStyleClass().add("popup-label"); }},
+                purchasePriceField, messageLabel.get("purchasePrice"),
+                new Label("Sale Price:") {{ getStyleClass().add("popup-label"); }},
+                salePriceField, messageLabel.get("salePrice"),
                 new HBox(10, saveButton, cancelButton) // Buttons in a horizontal box
         );
 
@@ -475,7 +484,8 @@ public class ProductManagementView extends VBox {
         formLayout.getChildren().addAll(inputFields, imageUploadSection);
 
         // Create the scene and set it to the stage
-        Scene scene = new Scene(formLayout, 800, 600); // Adjust size as needed
+        Scene scene = new Scene(formLayout, 800, 600);
+        scene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());// Adjust size as needed
         newProductStage.setScene(scene);
         newProductStage.show();
     }
@@ -502,9 +512,14 @@ public class ProductManagementView extends VBox {
 
         // Create input fields and labels
         TextField nameField = new TextField(product.getName());
+        nameField.getStyleClass().add("popup-text-field"); // Add CSS class
+
         TextField brandField = new TextField(product.getBrand());
+        brandField.getStyleClass().add("popup-text-field"); // Add CSS class
         TextField purchasePriceField = new TextField(String.valueOf(product.getPurchasePrice()));
+        purchasePriceField.getStyleClass().add("popup-text-field"); // Add CSS class
         TextField salePriceField = new TextField(String.valueOf(product.getSalePrice()));
+        salePriceField.getStyleClass().add("popup-text-field"); // Add CSS class
 
         // Old Data
         final String oldName = nameField.getText();
@@ -567,6 +582,7 @@ public class ProductManagementView extends VBox {
 
         // Save button to apply changes
         Button saveButton = new Button("Save");
+        saveButton.getStyleClass().add("popup-button"); // Add CSS class
         saveButton.setOnAction(event -> {
             boolean flag = true; //TRUE = no error
 
@@ -640,10 +656,12 @@ public class ProductManagementView extends VBox {
 
         // Cancel button
         Button cancelButton = new Button("Cancel");
+        cancelButton.getStyleClass().add("popup-button"); // Add CSS class
         cancelButton.setOnAction(event -> editStage.fireEvent(new WindowEvent(editStage, WindowEvent.WINDOW_CLOSE_REQUEST)));
 
         // Reset button
         Button resetButton = new Button("Reset");
+        resetButton.getStyleClass().add("popup-button"); // Add CSS class
         resetButton.setOnAction(event -> {
             // Restore old values
             nameField.setText(oldName);
@@ -690,6 +708,8 @@ public class ProductManagementView extends VBox {
 
         // Create the scene and set it to the stage
         Scene scene = new Scene(formLayout, 800, 600); // Adjust size as needed
+
+        scene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());// Adjust size as needed
         editStage.setScene(scene);
         editStage.show();
 

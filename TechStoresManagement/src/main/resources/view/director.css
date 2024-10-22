@@ -4,8 +4,7 @@
 .table-view {
     -fx-border-color: transparent !important; /* Loại bỏ viền bao ngoài */
     -fx-border-width: 0 !important; /* Đặt độ rộng viền bằng 0 */
-    -fx-min-width: 1050;
-    -fx-min-height: 626;
+    -fx-pref-width: 1050;
     -fx-fixed-cell-size:50;
     -fx-pref-height: 626;
     -fx-max-height: 626;

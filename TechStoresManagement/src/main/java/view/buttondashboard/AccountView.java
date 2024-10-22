@@ -195,47 +195,51 @@ public class AccountView extends VBox {
     }
 
     // Hàm hiển thị pop-up chỉnh sửa tài khoản
+
     private void showEditPopup(Account account) {
         Stage editStage = new Stage();
         editStage.initModality(Modality.APPLICATION_MODAL);
         editStage.setTitle("Edit Account");
 
         Label nameLabel = new Label("Full Name:");
+        nameLabel.getStyleClass().add("label-account");
 
-        // Tạo ComboBox để hiển thị tên nhân viên
         ComboBox<String> nameComboBox = new ComboBox<>();
+        nameComboBox.getStyleClass().add("combo-box-account");
         AccountModel accountModel = new AccountModel();
-
-        // Lấy danh sách tên nhân viên từ phương thức getAvailableEmployeeNames
         nameComboBox.setItems(FXCollections.observableArrayList(accountModel.getAvailableEmployeeNames()));
-
-        // Nếu account đã tồn tại, đặt giá trị ComboBox thành tên của account
         nameComboBox.setValue(account.getName());
 
-        // Label để hiển thị thông báo lỗi cho Full Name
         Label nameErrorLabel = new Label();
-        nameErrorLabel.setTextFill(Color.RED); // Đặt màu chữ thành đỏ
+        nameErrorLabel.setTextFill(Color.RED);
+        nameErrorLabel.getStyleClass().add("label-error-account");
 
         Label usernameLabel = new Label("Username:");
+        usernameLabel.getStyleClass().add("label-account");
         TextField usernameField = new TextField(account.getUsername());
+        usernameField.getStyleClass().add("text-field-account");
 
-        // Label để hiển thị thông báo lỗi cho Username
         Label usernameErrorLabel = new Label();
-        usernameErrorLabel.setTextFill(Color.RED); // Đặt màu chữ thành đỏ
+        usernameErrorLabel.setTextFill(Color.RED);
+        usernameErrorLabel.getStyleClass().add("label-error-account");
 
         Label oldPasswordLabel = new Label("Old Password:");
+        oldPasswordLabel.getStyleClass().add("label-account");
         PasswordField oldPasswordField = new PasswordField();
+        oldPasswordField.getStyleClass().add("password-field-account");
 
-        // Label để hiển thị thông báo lỗi cho Old Password
         Label oldPasswordErrorLabel = new Label();
         oldPasswordErrorLabel.setTextFill(Color.RED);
+        oldPasswordErrorLabel.getStyleClass().add("label-error-account");
 
         Label passwordLabel = new Label("New Password:");
+        passwordLabel.getStyleClass().add("label-account");
         PasswordField passwordField = new PasswordField();
+        passwordField.getStyleClass().add("password-field-account");
 
-        // Label để hiển thị thông báo lỗi cho Password
         Label passwordErrorLabel = new Label();
         passwordErrorLabel.setTextFill(Color.RED);
+        passwordErrorLabel.getStyleClass().add("label-error-account");
         passwordField.setOnKeyReleased(event -> {
             String password = passwordField.getText();
             String validationMessage = Validate.validatePassword(password);
@@ -245,14 +249,19 @@ public class AccountView extends VBox {
                 passwordErrorLabel.setText("");
             }
         });
-        Label emailLabel = new Label("Email:"); // Thêm Label cho email
-        TextField emailField = new TextField(account.getEmail()); // Thêm TextField cho email
-        Label emailErrorLabel = new Label(); // Thêm Label cho lỗi email
-        emailErrorLabel.setTextFill(Color.RED);
 
+        Label emailLabel = new Label("Email:");
+        emailLabel.getStyleClass().add("label-account");
+        TextField emailField = new TextField(account.getEmail());
+        emailField.getStyleClass().add("text-field-account");
+        Label emailErrorLabel = new Label();
+        emailErrorLabel.setTextFill(Color.RED);
+        emailErrorLabel.getStyleClass().add("label-error-account");
 
         Button saveButton = new Button("Save");
+        saveButton.getStyleClass().add("button-account");
         saveButton.setOnAction(event -> {
+
             String fullName = nameComboBox.getValue();
             String newUsername = usernameField.getText();
             String oldPassword = oldPasswordField.getText();
@@ -322,16 +331,19 @@ public class AccountView extends VBox {
         });
 
         Button cancelButton = new Button("Cancel");
+        cancelButton.getStyleClass().add("button-cancel-account");
         cancelButton.setOnAction(event -> editStage.close());
 
-        VBox layout = new VBox(10, nameLabel, nameComboBox, nameErrorLabel, usernameLabel, usernameField, usernameErrorLabel,
-                oldPasswordLabel, oldPasswordField, oldPasswordErrorLabel, passwordLabel, passwordField, passwordErrorLabel,emailLabel,
-                emailField, emailErrorLabel,
+        VBox layout = new VBox(5, nameLabel, nameComboBox, nameErrorLabel, usernameLabel, usernameField, usernameErrorLabel,
+                oldPasswordLabel, oldPasswordField, oldPasswordErrorLabel, passwordLabel, passwordField, passwordErrorLabel,
+                emailLabel, emailField, emailErrorLabel,
                 new HBox(10, saveButton, cancelButton));
-        layout.setAlignment(Pos.CENTER);
+        layout.setAlignment(Pos.CENTER_LEFT);
         layout.setStyle("-fx-padding: 20;");
+        layout.getStyleClass().add("popup-account");
 
-        Scene scene = new Scene(layout, 300, 400);
+        Scene scene = new Scene(layout, 400, 550);
+        scene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
         editStage.setScene(scene);
         editStage.showAndWait();
     }
@@ -345,32 +357,56 @@ public class AccountView extends VBox {
 
         // Tạo Label và ComboBox cho trường Full Name
         Label nameLabel = new Label("Full Name:");
+        nameLabel.getStyleClass().add("label-account");
+
         ComboBox<String> nameComboBox = new ComboBox<>();
         AccountModel accountModel = new AccountModel();
         nameComboBox.setItems(FXCollections.observableArrayList(accountModel.getAvailableEmployeeNames()));
+        nameComboBox.getStyleClass().add("combo-box-account");
 
         Label nameErrorLabel = new Label();
         nameErrorLabel.setTextFill(Color.RED);
+        nameErrorLabel.getStyleClass().add("label-error-account");
 
         Label usernameLabel = new Label("Username:");
+        usernameLabel.getStyleClass().add("label-account");
+
         TextField usernameField = new TextField();
+        usernameField.getStyleClass().add("text-field-account");
+
         Label usernameErrorLabel = new Label();
         usernameErrorLabel.setTextFill(Color.RED);
+        usernameErrorLabel.getStyleClass().add("label-error-account");
 
         Label passwordLabel = new Label("Password:");
+        passwordLabel.getStyleClass().add("label-account");
+
         PasswordField passwordField = new PasswordField();
+        passwordField.getStyleClass().add("password-field-account");
+
         Label passwordErrorLabel = new Label();
         passwordErrorLabel.setTextFill(Color.RED);
+        passwordErrorLabel.getStyleClass().add("label-error-account");
 
         Label confirmPassword = new Label("Confirm Password:");
+        confirmPassword.getStyleClass().add("label-account");
+
         PasswordField confirmPasswordField = new PasswordField();
+        confirmPasswordField.getStyleClass().add("password-field-account");
+
         Label confirmPasswordErrorLabel = new Label();
         confirmPasswordErrorLabel.setTextFill(Color.RED);
+        confirmPasswordErrorLabel.getStyleClass().add("label-error-account");
 
-        Label emailLabel = new Label("Email:"); // Thêm Label cho email
-        TextField emailField = new TextField(); // Thêm TextField cho email
-        Label emailErrorLabel = new Label(); // Thêm Label cho lỗi email
+        Label emailLabel = new Label("Email:");
+        emailLabel.getStyleClass().add("label-account");
+
+        TextField emailField = new TextField();
+        emailField.getStyleClass().add("text-field-account");
+
+        Label emailErrorLabel = new Label();
         emailErrorLabel.setTextFill(Color.RED);
+        emailErrorLabel.getStyleClass().add("label-error-account");
 
         usernameField.setOnKeyReleased(event -> {
             String username = usernameField.getText();
@@ -395,6 +431,7 @@ public class AccountView extends VBox {
 
         // Nút Save
         Button saveButton = new Button("Save");
+        saveButton.getStyleClass().add("button-account");
         saveButton.setOnAction(event -> {
             String fullName = nameComboBox.getValue();
             String username = usernameField.getText();
@@ -439,7 +476,7 @@ public class AccountView extends VBox {
                 return;
             }
 
-            Account newAccount = new Account(0, fullName, username, password ,email);
+            Account newAccount = new Account(0, fullName, username, password, email);
 
             boolean success = accountModel.addAccount(newAccount);
 
@@ -460,16 +497,19 @@ public class AccountView extends VBox {
         });
 
         Button cancelButton = new Button("Cancel");
+        cancelButton.getStyleClass().add("button-cancel-account");
         cancelButton.setOnAction(event -> newAccountStage.close());
 
         VBox layout = new VBox(10, nameLabel, nameComboBox, nameErrorLabel, usernameLabel, usernameField, usernameErrorLabel,
                 passwordLabel, passwordField, passwordErrorLabel, confirmPassword, confirmPasswordField, confirmPasswordErrorLabel,
                 emailLabel, emailField, emailErrorLabel,
                 new HBox(10, saveButton, cancelButton));
-        layout.setAlignment(Pos.CENTER);
+        layout.setAlignment(Pos.CENTER_LEFT);
         layout.setStyle("-fx-padding: 20;");
+        layout.getStyleClass().add("popup-account");
 
-        Scene scene = new Scene(layout, 300, 400);
+        Scene scene = new Scene(layout, 400, 550);
+        scene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
         newAccountStage.setScene(scene);
         newAccountStage.showAndWait();
     }

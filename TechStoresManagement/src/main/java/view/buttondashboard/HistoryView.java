@@ -184,9 +184,11 @@ public class HistoryView extends VBox {
 
         Button closeButton = new Button("Close");
         closeButton.setOnAction(e -> detailStage.close());
-
+        closeButton.getStyleClass().add("button-pagination");
+        detailLayout.getStyleClass().add("vbox");
         detailLayout.getChildren().addAll(customerLabel, phoneLabel, storeLabel, managerLabel, cashierLabel, purchaseDateLabel, totalLabel, profitLabel, productTable, closeButton);
-        Scene detailScene = new Scene(detailLayout, 800, 600);
+        Scene detailScene = new Scene(detailLayout, 830, 600);
+        detailScene.getStylesheets().add(getClass().getResource("/view/director.css").toExternalForm());
         detailStage.initModality(Modality.APPLICATION_MODAL);
         detailStage.setScene(detailScene);
         detailStage.show();
@@ -201,37 +203,46 @@ public class HistoryView extends VBox {
         // Configure columns for the product table
         TableColumn<ProductReceipt, Integer> productSttCol = new TableColumn<>("ID");
         productSttCol.setPrefWidth(50); // Chiều rộng cột ID
+        productSttCol.setStyle("-fx-alignment: center");
+        productSttCol.getStyleClass().add("column");
         productSttCol.setCellValueFactory(cellData -> cellData.getValue().idProductProperty().asObject());
 
         TableColumn<ProductReceipt, String> productNameCol = new TableColumn<>("Product Name");
         productNameCol.setPrefWidth(150); // Chiều rộng cột Product Name
+        productNameCol.getStyleClass().add("column");
         productNameCol.setCellValueFactory(cellData -> cellData.getValue().productNameProperty());
 
         TableColumn<ProductReceipt, String> brandCol = new TableColumn<>("Brand");
         brandCol.setPrefWidth(100); // Chiều rộng cột Brand
+        brandCol.getStyleClass().add("column");
         brandCol.setCellValueFactory(cellData -> cellData.getValue().brandProperty());
 
         TableColumn<ProductReceipt, Double> purchasePriceCol = new TableColumn<>("Purchase price");
         purchasePriceCol.setPrefWidth(100); // Chiều rộng cột Purchase Price
+        purchasePriceCol.getStyleClass().add("column");
         purchasePriceCol.setCellValueFactory(cellData -> cellData.getValue().purchasePriceProperty().asObject());
 
         TableColumn<ProductReceipt, Double> salePriceCol = new TableColumn<>("Sale price");
         salePriceCol.setPrefWidth(100); // Chiều rộng cột Sale Price
+        salePriceCol.getStyleClass().add("column");
         salePriceCol.setCellValueFactory(cellData -> cellData.getValue().salePriceProperty().asObject());
 
         TableColumn<ProductReceipt, Integer> quantityCol = new TableColumn<>("Quantity");
         quantityCol.setPrefWidth(80); // Chiều rộng cột Quantity
+        quantityCol.getStyleClass().add("column");
         quantityCol.setCellValueFactory(cellData -> cellData.getValue().quantityProperty().asObject());
 
         TableColumn<ProductReceipt, Double> totalAmountCol = new TableColumn<>("Total amount");
         totalAmountCol.setPrefWidth(120); // Chiều rộng cột Total Amount
+        totalAmountCol.getStyleClass().add("column");
         totalAmountCol.setCellValueFactory(cellData -> cellData.getValue().totalAmountProperty().asObject());
 
         TableColumn<ProductReceipt, Double> profitCol = new TableColumn<>("Profit");
         profitCol.setPrefWidth(100); // Chiều rộng cột Profit
+        profitCol.getStyleClass().add("column");
         profitCol.setCellValueFactory(cellData -> cellData.getValue().profitProperty().asObject());
 
         productTable.getColumns().addAll(productSttCol, productNameCol, brandCol, purchasePriceCol, salePriceCol, quantityCol, totalAmountCol, profitCol);
-        productTable.getStyleClass().add("table-view");
+        productTable.setStyle("-fx-pref-height: 380; -fx-pref-width :580");
     }
 }

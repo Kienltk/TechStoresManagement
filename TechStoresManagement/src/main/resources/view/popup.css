@@ -1,0 +1,145 @@
+/* Style cho VBox chính */
+.popup-account {
+    -fx-background-color: #f0f4f8;
+    -fx-padding: 20px;
+    -fx-spacing: 5px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+
+/* Style cho các Label */
+.label-account {
+    -fx-font-family: 'Arial';
+    -fx-font-size: 14px;
+    -fx-text-fill: #4AD4DD;
+    -fx-font-weight: bold;
+}
+
+/* Style cho các ComboBox và TextField */
+.combo-box-account, .text-field-account, .password-field-account {
+    -fx-font-family: 'Arial';
+    -fx-font-size: 14px;
+    -fx-padding: 8px;
+    -fx-border-color: #4AD4DD;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-background-color: #ffffff;
+    -fx-border-width: 2px;
+    -fx-pref-width: 250px;
+}
+
+/* Style cho thông báo lỗi */
+.label-error-account {
+    -fx-font-family: 'Arial';
+    -fx-font-size: 12px;
+    -fx-text-fill: red;
+}
+
+/* Style cho các Button */
+.button-account {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #4AD4DD;
+    -fx-font-family: 'Arial';
+    -fx-font-size: 14px;
+    -fx-border-color: #4AD4DD;
+    -fx-border-width: 2px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 15px;
+}
+
+.button-account:hover {
+    -fx-background-color: #4AD4DD;
+    -fx-text-fill: white;
+}
+
+/* Style cho Button 'Cancel' */
+.button-cancel-account {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #dd4a4a;
+    -fx-font-family: 'Arial';
+    -fx-font-size: 14px;
+    -fx-border-color: #dd4a4a;
+    -fx-border-width: 2px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 15px;
+}
+
+.button-cancel-account:hover {
+    -fx-background-color: #dd4a4a;
+    -fx-text-fill: #000000;
+}
+
+/* HBox style để căn chỉnh hai nút Save và Cancel */
+.hbox-account {
+    -fx-alignment: center;
+    -fx-spacing: 10px;
+}
+.reload-button{
+
+-fx-background-color: #ffffff;
+-fx-text-fill: #ffd94b;
+-fx-font-family: 'Arial';
+-fx-font-size: 14px;
+-fx-border-color: #ffd94b;
+-fx-border-width: 2px;
+-fx-border-radius: 5px;
+-fx-background-radius: 5px;
+-fx-padding: 8px 15px;
+}
+
+.reload-button:hover {
+    -fx-background-color: #ffd94b;
+    -fx-text-fill: #ffffff;
+}
+
+/* popupStyles.css */
+
+/* General styles for the pop-up dialog */
+.popup-dialog {
+    -fx-background-color: #f9f9f9; /* Light background color */
+    -fx-border-color: #ccc; /* Light gray border */
+    -fx-border-radius: 5; /* Rounded corners */
+    -fx-padding: 20; /* Padding around the content */
+}
+
+/* Title styles */
+.popup-title {
+    -fx-font-size: 24px; /* Larger font size for the title */
+    -fx-font-weight: bold; /* Bold text */
+    -fx-text-fill: #333; /* Dark text color */
+}
+
+/* Label styles */
+.popup-label {
+    -fx-font-size: 14px; /* Font size for labels */
+    -fx-text-fill: #555; /* Medium gray text color */
+}
+
+/* Input field styles */
+.popup-text-field {
+    -fx-padding: 10; /* Padding inside the text fields */
+    -fx-background-color: #fff; /* White background */
+    -fx-border-color: #ccc; /* Light gray border */
+    -fx-border-radius: 5; /* Rounded corners */
+}
+
+/* Button styles */
+.popup-button {
+    -fx-background-color: #007bff; /* Blue background */
+    -fx-text-fill: white; /* White text */
+    -fx-padding: 10 20; /* Padding for buttons */
+    -fx-background-radius: 5; /* Rounded corners */
+}
+
+.popup-button:hover {
+    -fx-background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Error message styles */
+.error-message {
+    -fx-text-fill: red; /* Red text for error messages */
+    -fx-font-size: 12px; /* Smaller font size for error messages */
+    -fx-padding: 5; /* Padding around error messages */
+}

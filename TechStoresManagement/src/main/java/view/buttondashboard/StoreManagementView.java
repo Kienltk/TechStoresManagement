@@ -190,9 +190,13 @@ public class StoreManagementView extends VBox {
         grid.setHgap(10);
 
         TextField nameField = new TextField();
+        nameField.getStyleClass().add("text-field-account");
         TextField addressField = new TextField();
+        addressField.getStyleClass().add("text-field-account");
         Button submitButton = new Button("Submit");
+        submitButton.getStyleClass().add("button-account");
         Button cancelButton = new Button("Cancel");
+        cancelButton.getStyleClass().add("button-cancel-account");
 
         grid.add(new Label("Store Name:"), 0, 0);
         grid.add(nameField, 1, 0);
@@ -219,6 +223,7 @@ public class StoreManagementView extends VBox {
         cancelButton.setOnAction(e -> dialog.close());
 
         Scene dialogScene = new Scene(grid);
+        dialogScene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
         dialog.setScene(dialogScene);
         dialog.show();
     }
@@ -230,7 +235,7 @@ public class StoreManagementView extends VBox {
 
         VBox vbox = new VBox();
         vbox.setPadding(new Insets(10));
-        vbox.setSpacing(8);
+        vbox.setSpacing(10);
 
         // Financial information
         double[] financials = storeController.calculateFinancials(store.getId());
@@ -254,10 +259,12 @@ public class StoreManagementView extends VBox {
 
         // Close button
         Button closeButton = new Button("Close");
+        closeButton.getStyleClass().add("button-pagination");
         closeButton.setOnAction(e -> dialog.close());
         vbox.getChildren().addAll(productTable, closeButton);
 
         Scene dialogScene = new Scene(vbox);
+        dialogScene.getStylesheets().add(getClass().getResource("/view/director.css").toExternalForm());
         dialog.setScene(dialogScene);
         dialog.show();
     }
@@ -265,21 +272,32 @@ public class StoreManagementView extends VBox {
     private void setupProductTableColumns(TableView<Product> productTable) {
         TableColumn<Product, String> nameColumn = new TableColumn<>("Product Name");
         nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
+        nameColumn.setPrefWidth(200);
+        nameColumn.getStyleClass().add("column");
 
         TableColumn<Product, String> brandColumn = new TableColumn<>("Brand");
         brandColumn.setCellValueFactory(cellData -> cellData.getValue().brandProperty());
+        brandColumn.setPrefWidth(150);
+        brandColumn.getStyleClass().add("column");
 
         TableColumn<Product, Integer> stockColumn = new TableColumn<>("Stock");
         stockColumn.setCellValueFactory(cellData -> cellData.getValue().stockProperty().asObject());
+        stockColumn.setPrefWidth(70);
+        stockColumn.getStyleClass().add("column");
 
         TableColumn<Product, Integer> soldColumn = new TableColumn<>("Sold Quantity");
         soldColumn.setCellValueFactory(cellData -> cellData.getValue().soldQuantityProperty().asObject()); // Lấy soldQuantity từ Product
+        soldColumn.setPrefWidth(70);
+        soldColumn.getStyleClass().add("column");
 
         TableColumn<Product, Double> profitColumn = new TableColumn<>("Profit");
         profitColumn.setCellValueFactory(cellData -> cellData.getValue().profitProperty().asObject()); // Lấy profit từ Product
+        profitColumn.setPrefWidth(70);
+        profitColumn.getStyleClass().add("column");
 
 
         productTable.getColumns().addAll(nameColumn, brandColumn, stockColumn, soldColumn, profitColumn);
+        productTable.setStyle("-fx-pref-height: 380; -fx-pref-width :580");
     }
 
 
@@ -294,12 +312,18 @@ public class StoreManagementView extends VBox {
         grid.setHgap(10);
 
         TextField nameField = new TextField(store.getName());
+        nameField.getStyleClass().add("text-field-account");
         TextField addressField = new TextField(store.getAddress());
+        addressField.getStyleClass().add("text-field-account");
         TextField managerField = new TextField();
+        managerField.getStyleClass().add("text-field-account");
         managerField.setPromptText("Nhập tên nhân viên quản lý");
         Button saveButton = new Button("Save");
-        Button reloadButton = new Button("Reload");
+        saveButton.getStyleClass().add("button-account");
         Button cancelButton = new Button("Cancel");
+        cancelButton.getStyleClass().add("button-cancel-account");
+        Button reloadButton = new Button("Reload");
+        reloadButton.getStyleClass().add("reload-button");
 
         managerField.setText(store.getManagerName());
 
@@ -394,6 +418,7 @@ public class StoreManagementView extends VBox {
         cancelButton.setOnAction(e -> dialog.close());
 
         Scene dialogScene = new Scene(grid);
+        dialogScene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
         dialog.setScene(dialogScene);
         dialog.show();
     }
