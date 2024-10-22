@@ -138,7 +138,7 @@ public class DirectorModel implements ICommon<Product> {
     public boolean ifDependencies(int id) {
         // TRUE = Still have dependencies
         // FALSE = No dependencies
-        String sqlWarehouse = "SELECT COUNT(*) AS count FROM product_warehouse WHERE id_product =?;";
+        String sqlWarehouse = "SELECT COUNT(*) AS count FROM products_warehouse WHERE id_product =?;";
         String sqlStore = "SELECT COUNT(*) AS count FROM products_store WHERE id_product =?";
         try (Connection con = JDBCConnect.getJDBCConnection();
              PreparedStatement ps1 = con.prepareStatement(sqlWarehouse);

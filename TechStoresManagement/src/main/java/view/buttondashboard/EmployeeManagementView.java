@@ -1,5 +1,6 @@
 package view.buttondashboard;
 
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -56,12 +57,18 @@ public class EmployeeManagementView extends VBox {
 
 
     private void configureTableView() {
+        TableColumn<Employee, Number> sttCol = new TableColumn<>("No.");
+        sttCol.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(tableView.getItems().indexOf(cellData.getValue()) + 1));
+        sttCol.setSortable(false);
+
         TableColumn<Employee, String> fullNameCol = new TableColumn<>("Full Name");
         fullNameCol.setCellValueFactory(data -> data.getValue().firstNameProperty().concat(" ").concat(data.getValue().lastNameProperty()));
 
         TableColumn<Employee, String> genderCol = new TableColumn<>("Gender");
-        genderCol.setCellValueFactory(data -> data.getValue().genderProperty().asString());
-
+        genderCol.setCellValueFactory(data -> {
+            boolean isMale = data.getValue().isGender();
+            return new SimpleStringProperty(isMale ? "Male" : "Female");
+        });
         TableColumn<Employee, LocalDate> dobCol = new TableColumn<>("Date of Birth");
         dobCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getDob().toLocalDate()));
 
@@ -106,7 +113,7 @@ public class EmployeeManagementView extends VBox {
 
         });
 
-        tableView.getColumns().addAll(fullNameCol, genderCol, dobCol, emailCol, phoneCol, roleCol, workplaceCol, salaryCol, actionCol);
+        tableView.getColumns().addAll(sttCol, fullNameCol, genderCol, dobCol, emailCol, phoneCol, roleCol, workplaceCol, salaryCol, actionCol);
     }
 
     private void loadEmployees() {
