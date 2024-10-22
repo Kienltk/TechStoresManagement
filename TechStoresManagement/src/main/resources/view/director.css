@@ -1,9 +1,14 @@
+.vbox{
+    -fx-padding: 15px;
+}
 .table-view {
     -fx-border-color: transparent !important; /* Loại bỏ viền bao ngoài */
     -fx-border-width: 0 !important; /* Đặt độ rộng viền bằng 0 */
-    -fx-min-width: 1080;
+    -fx-min-width: 1050;
     -fx-min-height: 626;
     -fx-fixed-cell-size:50;
+    -fx-pref-height: 626;
+    -fx-max-height: 626;
 }
 
 .table-view .table-column-header {
@@ -23,7 +28,7 @@
 .column {
     -fx-border-color: #4AD4DD; /* Đặt màu viền giữa các ô cột là màu xanh */
     -fx-border-width: 0 2 0 0; /* Đặt độ rộng viền giữa các ô cột */
-    -fx-alignment: CENTER; /* Căn giữa tiêu đề */
+    -fx-alignment: CENTER_LEFT; /* Căn giữa tiêu đ�� */
 }
 .column .table-header-cell {
 

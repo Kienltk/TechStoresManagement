@@ -77,7 +77,11 @@ public class ProductManagementView extends VBox {
 
         HBox searchBar = new HBox(searchField);
         searchBar.setAlignment(Pos.CENTER_RIGHT);
-        searchBar.setStyle(" -fx-padding:0 10 10 10;");
+        searchBar.setStyle(" -fx-padding:0 10 10 620;");
+
+        HBox topControls = new HBox(10);
+        topControls.setStyle("-fx-min-width: 1000");
+        topControls.getChildren().addAll( newProductButton,searchBar);
 
         // TableView for Product Data
 
@@ -87,6 +91,7 @@ public class ProductManagementView extends VBox {
         // Table Columns
         TableColumn<Product, Number> idColumn = new TableColumn<>("No.");
         idColumn.setMinWidth(80);
+        idColumn.setStyle("-fx-alignment: center");
         idColumn.getStyleClass().add("column");
         idColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Product, Number>, ObservableValue<Number>>() {
             @Override
@@ -123,7 +128,7 @@ public class ProductManagementView extends VBox {
 
         // Option Column with Edit and Delete buttons
         TableColumn<Product, Void> optionColumn = new TableColumn<>("Option");
-        optionColumn.setMinWidth(150);
+        optionColumn.setMinWidth(135);
         optionColumn.setCellFactory(col -> new TableCell<>() {
             final Button editButton = new Button("Edit");
             final Button deleteButton = new Button("Delete");
@@ -237,7 +242,8 @@ public class ProductManagementView extends VBox {
         paginationBox.setStyle("-fx-padding: 8");
 
         // Thêm các thành ph���n vào VBox
-        this.getChildren().addAll(titleLabel, newProductButton, searchBar, productTable, paginationBox);
+        this.getChildren().addAll(titleLabel, topControls, productTable, paginationBox);
+        this.getStyleClass().add("vbox");
 
     }
     private void filterList(String searchTerm) {

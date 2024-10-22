@@ -13,7 +13,7 @@ public class Account {
     private StringProperty username;
     private StringProperty password;
     private StringProperty role;
-    private StringProperty phoneNumber;
+    private StringProperty email;
 
     // Constructors
 
@@ -32,9 +32,9 @@ public class Account {
     }
 
     // Constructor với 6 thuộc tính, bao gồm số điện thoại
-    public Account(int id, String name, String username, String password, String role, String phoneNumber) {
+    public Account(int id, String name, String username, String password, String role, String email) {
         this(id, name, username, password, role); // Sử dụng constructor khác
-        this.phoneNumber = new SimpleStringProperty(phoneNumber);
+        this.email = new SimpleStringProperty(email);
     }
 
     // Getters và setters
@@ -93,17 +93,17 @@ public class Account {
         }
     }
 
-    // Getter cho thuộc tính phoneNumber
-    public String getPhoneNumber() {
-        return phoneNumber == null ? null : phoneNumber.get(); // Tránh null pointer
+    // Getter cho thuộc tính email
+    public String getEmail() {
+        return email == null ? null : email.get(); // Tránh null pointer
     }
 
-    // Setter cho thuộc tính phoneNumber
-    public void setPhoneNumber(String phoneNumber) {
-        if (this.phoneNumber == null) {
-            this.phoneNumber = new SimpleStringProperty(phoneNumber);
+    // Setter cho thuộc tính email
+    public void setEmail(String email) {
+        if (this.email == null) {
+            this.email = new SimpleStringProperty(email);
         } else {
-            this.phoneNumber.set(phoneNumber);
+            this.email.set(email);
         }
     }
 
@@ -128,8 +128,8 @@ public class Account {
         return role;
     }
 
-    public StringProperty phoneNumberProperty() {
-        return phoneNumber;
+    public StringProperty emailProperty() {
+        return email;
     }
 
     // Override phương thức toString để hiển thị thông tin của đối tượng
@@ -141,7 +141,7 @@ public class Account {
                 ", username=" + username.get() +
                 ", password=" + password.get() +
                 (role != null ? ", role=" + role.get() : "") +
-                (phoneNumber != null ? ", phoneNumber=" + phoneNumber.get() : "") +
+                (email != null ? ", email=" + email.get() : "") +
                 '}';
     }
 }

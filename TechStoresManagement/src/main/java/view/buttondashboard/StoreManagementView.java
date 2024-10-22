@@ -1,10 +1,7 @@
 package view.buttondashboard;
 
 import controller.StoreController;
-import entity.Employee;
-import entity.Product;
-import entity.Store;
-import entity.Warehouse;
+import entity.*;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -31,6 +28,10 @@ public class StoreManagementView extends VBox {
     private TableView<Store> tableView;
     private StoreController storeController;
     private TextField searchField;
+    private int currentPage = 1;
+    private final int itemsPerPage = 12;
+    private int totalPages;
+    private final Label pageLabel = new Label();
 
     public StoreManagementView() {
         storeController = new StoreController();
@@ -52,7 +53,7 @@ public class StoreManagementView extends VBox {
 
         HBox searchBar = new HBox(searchField);
         searchBar.setAlignment(Pos.CENTER_RIGHT);
-        searchBar.setStyle(" -fx-padding:0 10 10 10;");
+        searchBar.setStyle(" -fx-padding:0 10 10 595;");
 
         // Create warehouse button
         Button createWarehouseButton = new Button("Create Warehouse");
@@ -62,7 +63,7 @@ public class StoreManagementView extends VBox {
 
         // Thêm nút Create Warehouse bên dưới ô search
         HBox topControls = new HBox(10);
-        topControls.setStyle("-fx-padding:10; -fx-min-width: 1000");
+        topControls.setStyle("-fx-min-width: 1000");
         topControls.getChildren().addAll( createWarehouseButton,searchBar);
         borderPane.setTop(topControls);
 
@@ -75,8 +76,35 @@ public class StoreManagementView extends VBox {
         borderPane.setCenter(tableView);
 
 
+        Button prevButton = new Button("<-");
+        prevButton.getStyleClass().add("button-pagination");
+        Button nextButton = new Button("->");
+        nextButton.getStyleClass().add("button-pagination");
+        pageLabel.getStyleClass().add("text-pagination");
+
+        prevButton.setOnAction(e -> {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTableData(); // Update the table data for the new page
+            }
+        });
+
+        nextButton.setOnAction(e -> {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTableData(); // Update the table data for the new page
+            }
+        });
+        // HBox chứa các nút phân trang và nhãn số trang
+        HBox paginationBox = new HBox(10, prevButton, pageLabel, nextButton);
+        paginationBox.setAlignment(Pos.CENTER);
+        paginationBox.setSpacing(30);
+        paginationBox.setStyle("-fx-padding: 8");
+
+
         // Add everything to main layout
-        this.getChildren().addAll(titleLabel, borderPane);
+        this.getChildren().addAll(titleLabel, borderPane,paginationBox);
+        this.getStyleClass().add("vbox");
     }
 
 
@@ -84,11 +112,12 @@ public class StoreManagementView extends VBox {
         TableColumn<Store, Integer> indexColumn = new TableColumn<>("STT");
         indexColumn.setCellValueFactory(cellData -> new SimpleIntegerProperty(tableView.getItems().indexOf(cellData.getValue()) + 1).asObject());
         indexColumn.setPrefWidth(40);
+        indexColumn.setStyle("-fx-alignment: center");
         indexColumn.getStyleClass().add("column");
 
         TableColumn<Store, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
-        nameColumn.setPrefWidth(300);
+        nameColumn.setPrefWidth(275);
         nameColumn.getStyleClass().add("column");
 
         TableColumn<Store, String> addressColumn = new TableColumn<>("Address");
@@ -133,13 +162,23 @@ public class StoreManagementView extends VBox {
         tableView.getColumns().addAll(indexColumn, nameColumn, addressColumn, managerColumn, actionColumn);
     }
 
+    private void updateTableData() {
+        loadStores(); // Load stores for the current page
+    };
     private void loadStores() {
         String search = searchField.getText().trim();
         List<Store> stores = storeController.getStores(search);
-        ObservableList<Store> observableStores = FXCollections.observableArrayList(stores);
-        tableView.setItems(observableStores);
-    }
+        totalPages = (int) Math.ceil((double) stores.size() / itemsPerPage);
 
+        // Get the sublist for the current page
+        int fromIndex = (currentPage - 1) * itemsPerPage;
+        int toIndex = Math.min(fromIndex + itemsPerPage, stores.size());
+        List<Store> paginatedStores = stores.subList(fromIndex, toIndex);
+
+        ObservableList<Store> observableStores = FXCollections.observableArrayList(paginatedStores);
+        tableView.setItems(observableStores);
+        pageLabel.setText("Page " + currentPage + " / " + totalPages); // Update the page label
+    };
     private void showCreateStoreDialog() {
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);

@@ -40,7 +40,7 @@ public class AccountModel {
                 "role.role AS role, " +
                 "accounts.username AS username, " +
                 "accounts.password AS password, " +
-                "employees.phone_number AS phone_number " +  // Lấy thêm phone_number
+                "employees.email AS email " +  // Lấy thêm phone_number
                 "FROM accounts " +
                 "INNER JOIN employees ON accounts.id_person = employees.id " +
                 "INNER JOIN role ON employees.id_role = role.id " +
@@ -64,7 +64,7 @@ public class AccountModel {
                             rs.getString("username"),
                             rs.getString("password"),
                             rs.getString("role"),
-                            rs.getString("phone_number")
+                            rs.getString("email")
                     );
                     accountList.add(account);
                 }
@@ -139,11 +139,10 @@ public class AccountModel {
 
 
 
-    // Phương thức thêm tài khoản mới
     public boolean addAccount(Account account) {
         // Truy vấn SQL để thêm tài khoản mới vào bảng accounts
-        String insertSQL = "INSERT INTO accounts (username, password, id_person) " +
-                "VALUES (?, ?, (SELECT id FROM employees WHERE CONCAT(first_name, ' ', last_name) = ?))";
+        String insertSQL = "INSERT INTO accounts (username, password, id_person, email) " +
+                "VALUES (?, ?, (SELECT id FROM employees WHERE CONCAT(first_name, ' ', last_name) = ?), ?)";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement pstmt = conn.prepareStatement(insertSQL)) {
@@ -155,6 +154,7 @@ public class AccountModel {
             pstmt.setString(2, hashedPassword);
 
             pstmt.setString(3, account.getName());
+            pstmt.setString(4, account.getEmail()); // Thêm email vào truy vấn
 
             // Thực thi truy vấn
             int rowsAffected = pstmt.executeUpdate();
@@ -168,11 +168,10 @@ public class AccountModel {
 
 
 
-    // Phương thức chỉnh sửa tài khoản
     public boolean updateAccount(Account account) {
         // Truy vấn SQL để cập nhật thông tin tài khoản
         String query = "UPDATE accounts SET id_person = (SELECT id FROM employees WHERE CONCAT(first_name, ' ', last_name) = ?), " +
-                "username = ?, password = ? WHERE id = ?";
+                "username = ?, password = ?, email = ? WHERE id = ?"; // Thêm email vào truy vấn
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -184,7 +183,8 @@ public class AccountModel {
             String hashedPassword = encryptPassword(account.getPassword());
             pstmt.setString(3, hashedPassword);
 
-            pstmt.setInt(4, account.getId());
+            pstmt.setString(4, account.getEmail()); // Thêm email vào truy vấn
+            pstmt.setInt(5, account.getId());
 
             // Thực thi truy vấn
             int affectedRows = pstmt.executeUpdate();

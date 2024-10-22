@@ -1,6 +1,8 @@
 package view.buttondashboard;
 import controller.WarehouseController;
+import entity.Account;
 import entity.Product;
+import entity.Store;
 import entity.Warehouse;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -25,6 +27,10 @@ public class WarehouseManagementView extends VBox {
     private TableView<Warehouse> tableView;
     private WarehouseController warehouseController;
     private TextField searchField;
+    private int currentPage = 1;
+    private final int itemsPerPage = 12;
+    private int totalPages;
+    private final Label pageLabel = new Label();
     public WarehouseManagementView() {
         warehouseController = new WarehouseController();
 
@@ -43,7 +49,7 @@ public class WarehouseManagementView extends VBox {
 
         HBox searchBar = new HBox(searchField);
         searchBar.setAlignment(Pos.CENTER_RIGHT);
-        searchBar.setStyle(" -fx-padding:0 10 10 10;");
+        searchBar.setStyle(" -fx-padding:0 10 10 595;");
 
         // Create warehouse button
         Button createWarehouseButton = new Button("Create Warehouse");
@@ -53,7 +59,7 @@ public class WarehouseManagementView extends VBox {
 
         // Thêm nút Create Warehouse bên dưới ô search
         HBox topControls = new HBox(10);
-        topControls.setStyle("-fx-padding:10; -fx-min-width: 1000");
+        topControls.setStyle("-fx-min-width: 1000");
         topControls.getChildren().addAll( createWarehouseButton,searchBar);
         borderPane.setTop(topControls);
 
@@ -65,20 +71,54 @@ public class WarehouseManagementView extends VBox {
         // Set kích thước bảng hợp lý cho cửa sổ 1300x1000
         borderPane.setCenter(tableView);
 
+        totalPages = 0;
+
+        // Bind the data to the TableView
+
+        Button prevButton = new Button("<-");
+        prevButton.getStyleClass().add("button-pagination");
+        Button nextButton = new Button("->");
+        nextButton.getStyleClass().add("button-pagination");
+        pageLabel.getStyleClass().add("text-pagination");
+
+        prevButton.setOnAction(e -> {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTableData();
+                pageLabel.setText("Page " + currentPage + " / " + totalPages); // Cập nhật số trang
+            }
+        });
+
+        nextButton.setOnAction(e -> {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTableData();
+                pageLabel.setText("Page " + currentPage + " / " + totalPages); // Cập nhật số trang
+            }
+        });
+
+
+        // HBox chứa các nút phân trang và nhãn số trang
+        HBox paginationBox = new HBox(10, prevButton, pageLabel, nextButton);
+        paginationBox.setAlignment(Pos.CENTER);
+        paginationBox.setSpacing(30);
+        paginationBox.setStyle("-fx-padding: 8");
 
         // Add everything to main layout
-        this.getChildren().addAll(titleLabel, borderPane);
+        this.getChildren().addAll(titleLabel, borderPane , paginationBox);
+        this.getStyleClass().add("vbox");
     }
 
     private void setupTableView() {
         TableColumn<Warehouse, Integer> indexColumn = new TableColumn<>("STT");
         indexColumn.setCellValueFactory(cellData -> new SimpleIntegerProperty(tableView.getItems().indexOf(cellData.getValue()) + 1).asObject());
         indexColumn.setPrefWidth(40);
+        indexColumn.setStyle("-fx-alignment: center");
         indexColumn.getStyleClass().add("column");
 
         TableColumn<Warehouse, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
-        nameColumn.setPrefWidth(300);
+        nameColumn.setPrefWidth(275);
         nameColumn.getStyleClass().add("column");
 
         TableColumn<Warehouse, String> addressColumn = new TableColumn<>("Address");
@@ -127,8 +167,22 @@ public class WarehouseManagementView extends VBox {
     private void loadWarehouses() {
         String search = searchField.getText().trim();
         List<Warehouse> warehouses = warehouseController.getWarehouses(search);
-        ObservableList<Warehouse> observableWarehouses = FXCollections.observableArrayList(warehouses);
+
+        // Calculate total pages
+        totalPages = (int) Math.ceil((double) warehouses.size() / itemsPerPage);
+
+        // Get the sublist for the current page
+        int fromIndex = (currentPage - 1) * itemsPerPage;
+        int toIndex = Math.min(fromIndex + itemsPerPage, warehouses.size());
+        List<Warehouse> paginatedWarehouses = warehouses.subList(fromIndex, toIndex);
+
+        ObservableList<Warehouse> observableWarehouses = FXCollections.observableArrayList(paginatedWarehouses);
         tableView.setItems(observableWarehouses);
+        pageLabel.setText("Page " + currentPage + " / " + totalPages); // Update the page label
+    }
+
+    private void updateTableData() {
+        loadWarehouses(); // Load warehouses for the current page
     }
 
     private void showCreateWarehouseDialog() {

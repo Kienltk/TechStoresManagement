@@ -35,7 +35,7 @@ public class AccountView extends VBox {
 
         // New Account Button
         Button newAccountButton = new Button("New Account");
-        newAccountButton.setStyle("-fx-background-color: #00C2FF; -fx-text-fill: white;");
+        newAccountButton.getStyleClass().add("button-pagination");
         newAccountButton.setOnAction(event -> showNewAccountPopup());
 
         TextField searchField = new TextField();
@@ -44,9 +44,13 @@ public class AccountView extends VBox {
 
         HBox searchBar = new HBox(searchField);
         searchBar.setAlignment(Pos.CENTER_RIGHT);
-        searchBar.setStyle(" -fx-padding:0 10 10 10;");
+        searchBar.setStyle(" -fx-padding:0 10 10 620;");
         
         searchField.getStyleClass().add("search-box");
+
+        HBox topControls = new HBox(10);
+        topControls.setStyle("-fx-min-width: 1000");
+        topControls.getChildren().addAll( newAccountButton,searchBar);
 
         // TableView for Account Data
         TableView<Account> accountTable = new TableView<>();
@@ -58,23 +62,19 @@ public class AccountView extends VBox {
         idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
 
         TableColumn<Account, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setPrefWidth(500);
+        nameColumn.setPrefWidth(250);
         nameColumn.getStyleClass().add("column");
-        nameColumn.setStyle("-fx-alignment: CENTER;");
         nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
 
         TableColumn<Account, String> usernameColumn = new TableColumn<>("Username");
-        usernameColumn.setMinWidth(350);
+        usernameColumn.setMinWidth(270);
         usernameColumn.getStyleClass().add("column");
-        usernameColumn.setStyle("-fx-alignment: CENTER;");
         usernameColumn.setCellValueFactory(cellData -> cellData.getValue().usernameProperty());
 
-//        TableColumn<Account, String> passwordColumn = new TableColumn<>("Password");
-//        passwordColumn.setMinWidth(150);
-//        passwordColumn.setCellValueFactory(cellData -> cellData.getValue().passwordProperty());
-//        TableColumn<Account, String> phoneColumn = new TableColumn<>("Phone Number");
-//        phoneColumn.setMinWidth(150);
-//        phoneColumn.setCellValueFactory(cellData -> cellData.getValue().phoneNumberProperty());
+        TableColumn<Account, String> emailColumn = new TableColumn<>("Email");
+        emailColumn.setMinWidth(300);
+        emailColumn.getStyleClass().add("column");
+        emailColumn.setCellValueFactory(cellData -> cellData.getValue().emailProperty());
 
         TableColumn<Account, Void> optionColumn = new TableColumn<>("Option");
         optionColumn.setMinWidth(150);
@@ -113,7 +113,7 @@ public class AccountView extends VBox {
         });
 
         // Add Columns to Table
-        accountTable.getColumns().addAll(idColumn, nameColumn, usernameColumn, optionColumn);
+        accountTable.getColumns().addAll(idColumn, nameColumn, usernameColumn,emailColumn, optionColumn);
 
         // ObservableList to hold Account data
         AccountModel accountModel = new AccountModel();
@@ -154,7 +154,8 @@ public class AccountView extends VBox {
         paginationBox.setStyle("-fx-padding: 8");
 
         // Thêm các thành phần vào VBox
-        this.getChildren().addAll(titleLabel, newAccountButton, searchBar, accountTable, paginationBox);
+        this.getChildren().addAll(titleLabel, topControls, accountTable, paginationBox);
+        this.getStyleClass().add("vbox");
     }
 
     // Hàm lọc danh sách tài khoản dựa trên từ khóa tìm kiếm
@@ -244,6 +245,11 @@ public class AccountView extends VBox {
                 passwordErrorLabel.setText("");
             }
         });
+        Label emailLabel = new Label("Email:"); // Thêm Label cho email
+        TextField emailField = new TextField(account.getEmail()); // Thêm TextField cho email
+        Label emailErrorLabel = new Label(); // Thêm Label cho lỗi email
+        emailErrorLabel.setTextFill(Color.RED);
+
 
         Button saveButton = new Button("Save");
         saveButton.setOnAction(event -> {
@@ -252,12 +258,14 @@ public class AccountView extends VBox {
             String oldPassword = oldPasswordField.getText();
             String newPassword = passwordField.getText();
             String role = account.getRole();
+            String email = emailField.getText();
 
             // Đặt lại các thông báo lỗi
             nameErrorLabel.setText("");
             usernameErrorLabel.setText("");
             oldPasswordErrorLabel.setText("");
             passwordErrorLabel.setText("");
+            emailErrorLabel.setText("");
 
             // Kiểm tra tên và username có hợp lệ không
             boolean hasError = false; // Biến để kiểm tra có lỗi hay không
@@ -295,6 +303,8 @@ public class AccountView extends VBox {
             account.setName(fullName);
             account.setUsername(newUsername);
             account.setPassword(newPassword);
+            account.setEmail(email);
+
 
             boolean success = accountModel.updateAccount(account);
             if (success) {
@@ -315,7 +325,8 @@ public class AccountView extends VBox {
         cancelButton.setOnAction(event -> editStage.close());
 
         VBox layout = new VBox(10, nameLabel, nameComboBox, nameErrorLabel, usernameLabel, usernameField, usernameErrorLabel,
-                oldPasswordLabel, oldPasswordField, oldPasswordErrorLabel, passwordLabel, passwordField, passwordErrorLabel,
+                oldPasswordLabel, oldPasswordField, oldPasswordErrorLabel, passwordLabel, passwordField, passwordErrorLabel,emailLabel,
+                emailField, emailErrorLabel,
                 new HBox(10, saveButton, cancelButton));
         layout.setAlignment(Pos.CENTER);
         layout.setStyle("-fx-padding: 20;");
@@ -356,6 +367,11 @@ public class AccountView extends VBox {
         Label confirmPasswordErrorLabel = new Label();
         confirmPasswordErrorLabel.setTextFill(Color.RED);
 
+        Label emailLabel = new Label("Email:"); // Thêm Label cho email
+        TextField emailField = new TextField(); // Thêm TextField cho email
+        Label emailErrorLabel = new Label(); // Thêm Label cho lỗi email
+        emailErrorLabel.setTextFill(Color.RED);
+
         usernameField.setOnKeyReleased(event -> {
             String username = usernameField.getText();
             if (username.isEmpty()) {
@@ -384,11 +400,13 @@ public class AccountView extends VBox {
             String username = usernameField.getText();
             String password = passwordField.getText();
             String confirmPasswordValue = confirmPasswordField.getText();
+            String email = emailField.getText();
 
             nameErrorLabel.setText("");
             usernameErrorLabel.setText("");
             passwordErrorLabel.setText("");
             confirmPasswordErrorLabel.setText("");
+            emailErrorLabel.setText("");
 
             boolean hasError = false;
 
@@ -412,11 +430,16 @@ public class AccountView extends VBox {
                 hasError = true;
             }
 
+            if (email.isEmpty()) {
+                emailErrorLabel.setText("Email is required.");
+                hasError = true;
+            }
+
             if (hasError) {
                 return;
             }
 
-            Account newAccount = new Account(0, fullName, username, password);
+            Account newAccount = new Account(0, fullName, username, password ,email);
 
             boolean success = accountModel.addAccount(newAccount);
 
@@ -441,6 +464,7 @@ public class AccountView extends VBox {
 
         VBox layout = new VBox(10, nameLabel, nameComboBox, nameErrorLabel, usernameLabel, usernameField, usernameErrorLabel,
                 passwordLabel, passwordField, passwordErrorLabel, confirmPassword, confirmPasswordField, confirmPasswordErrorLabel,
+                emailLabel, emailField, emailErrorLabel,
                 new HBox(10, saveButton, cancelButton));
         layout.setAlignment(Pos.CENTER);
         layout.setStyle("-fx-padding: 20;");
