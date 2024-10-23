@@ -59,3 +59,16 @@
     -fx-font-weight: bold;
     -fx-font-size: 14;
 }
+.label-popup {
+    -fx-font-size: 14;
+    -fx-text-fill: #000000;
+    -fx-font-weight: bold;
+    -fx-padding: 0 20;
+
+}
+.data-popup {
+    -fx-text-fill: #4AD4DD;
+    -fx-font-weight: bold;
+    -fx-font-size: 14;
+}
+

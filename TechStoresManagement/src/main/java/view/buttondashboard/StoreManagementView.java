@@ -233,21 +233,88 @@ public class StoreManagementView extends VBox {
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setTitle("Store Details");
 
-        VBox vbox = new VBox();
-        vbox.setPadding(new Insets(10));
-        vbox.setSpacing(10);
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(10));
+        grid.setVgap(10);
+        grid.setHgap(10);
 
         // Financial information
         double[] financials = storeController.calculateFinancials(store.getId());
-        vbox.getChildren().addAll(
-                new Label("Store Name: " + store.getName()),
-                new Label("Address: " + store.getAddress()),
-                new Label("Manager: " + store.getManagerName()),
-                new Label("Total Revenue: " + financials[0]),
-                new Label("Total Profit: " + financials[1]),
-                new Label("Total Capital: " + financials[2]),
-                new Label("Total Inventory: " + store.getTotalInventory())
-        );
+
+        // Create variables for store details
+        String storeName = store.getName();
+        String address = store.getAddress();
+        String managerName = store.getManagerName();
+        double totalRevenue = financials[0];
+        double totalProfit = financials[1];
+        double totalCapital = financials[2];
+        int totalInventory = store.getTotalInventory();
+
+        // Create Labels with the variable data
+        Label storeNameLabel = new Label("Store Name");
+        Label storeNameData = new Label(storeName);
+
+        Label addressLabel = new Label("Address");
+        Label addressData = new Label(address);
+
+        Label managerNameLabel = new Label("Manager");
+        Label managerNameData = new Label(managerName);
+
+        Label totalRevenueLabel = new Label("Total Revenue");
+        Label totalRevenueData = new Label(String.valueOf(totalRevenue));
+
+        Label totalProfitLabel = new Label("Total Profit");
+        Label totalProfitData = new Label(String.valueOf(totalProfit));
+
+        Label totalCapitalLabel = new Label("Total Capital");
+        Label totalCapitalData = new Label(String.valueOf(totalCapital));
+
+        Label totalInventoryLabel = new Label("Total Inventory");
+        Label totalInventoryData = new Label(String.valueOf(totalInventory));
+
+        // Add the same CSS class for labels and data with different classes for color
+        storeNameLabel.getStyleClass().add("label-popup");
+        storeNameData.getStyleClass().add("data-popup");
+
+        addressLabel.getStyleClass().add("label-popup");
+        addressData.getStyleClass().add("data-popup");
+
+        managerNameLabel.getStyleClass().add("label-popup");
+        managerNameData.getStyleClass().add("data-popup");
+
+        totalRevenueLabel.getStyleClass().add("label-popup");
+        totalRevenueData.getStyleClass().add("data-popup");
+
+        totalProfitLabel.getStyleClass().add("label-popup");
+        totalProfitData.getStyleClass().add("data-popup");
+
+        totalCapitalLabel.getStyleClass().add("label-popup");
+        totalCapitalData.getStyleClass().add("data-popup");
+
+        totalInventoryLabel.getStyleClass().add("label-popup");
+        totalInventoryData.getStyleClass().add("data-popup");
+
+        // Add labels and data to the grid
+        grid.add(storeNameLabel, 0, 0);
+        grid.add(storeNameData, 1, 0);
+
+        grid.add(addressLabel, 0, 1);
+        grid.add(addressData, 1, 1);
+
+        grid.add(managerNameLabel, 0, 2);
+        grid.add(managerNameData, 1, 2);
+
+        grid.add(totalRevenueLabel, 0, 3);
+        grid.add(totalRevenueData, 1, 3);
+
+        grid.add(totalProfitLabel, 0, 4);
+        grid.add(totalProfitData, 1, 4);
+
+        grid.add(totalCapitalLabel, 0, 5);
+        grid.add(totalCapitalData, 1, 5);
+
+        grid.add(totalInventoryLabel, 0, 6);
+        grid.add(totalInventoryData, 1, 6);
 
         // Create a table for products in store
         TableView<Product> productTable = new TableView<>();
@@ -261,13 +328,20 @@ public class StoreManagementView extends VBox {
         Button closeButton = new Button("Close");
         closeButton.getStyleClass().add("button-pagination");
         closeButton.setOnAction(e -> dialog.close());
-        vbox.getChildren().addAll(productTable, closeButton);
+
+        // Add the grid and button to the VBox
+        VBox vbox = new VBox(grid, productTable, closeButton);
+        vbox.setSpacing(10);
+        vbox.setPadding(new Insets(15));
 
         Scene dialogScene = new Scene(vbox);
         dialogScene.getStylesheets().add(getClass().getResource("/view/director.css").toExternalForm());
         dialog.setScene(dialogScene);
         dialog.show();
     }
+
+
+
 
     private void setupProductTableColumns(TableView<Product> productTable) {
         TableColumn<Product, String> nameColumn = new TableColumn<>("Product Name");
@@ -277,7 +351,7 @@ public class StoreManagementView extends VBox {
 
         TableColumn<Product, String> brandColumn = new TableColumn<>("Brand");
         brandColumn.setCellValueFactory(cellData -> cellData.getValue().brandProperty());
-        brandColumn.setPrefWidth(150);
+        brandColumn.setPrefWidth(130);
         brandColumn.getStyleClass().add("column");
 
         TableColumn<Product, Integer> stockColumn = new TableColumn<>("Stock");
@@ -287,7 +361,7 @@ public class StoreManagementView extends VBox {
 
         TableColumn<Product, Integer> soldColumn = new TableColumn<>("Sold Quantity");
         soldColumn.setCellValueFactory(cellData -> cellData.getValue().soldQuantityProperty().asObject()); // Lấy soldQuantity từ Product
-        soldColumn.setPrefWidth(70);
+        soldColumn.setPrefWidth(90);
         soldColumn.getStyleClass().add("column");
 
         TableColumn<Product, Double> profitColumn = new TableColumn<>("Profit");

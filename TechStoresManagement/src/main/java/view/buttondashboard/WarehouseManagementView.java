@@ -239,16 +239,55 @@ public class WarehouseManagementView extends VBox {
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setTitle("Warehouse Details");
 
-        VBox vbox = new VBox();
-        vbox.setPadding(new Insets(10));
-        vbox.setSpacing(10);
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(10));
+        grid.setVgap(10);
+        grid.setHgap(10);
 
-        vbox.getChildren().addAll(
-                new Label("Warehouse Name: " + warehouse.getName()),
-                new Label("Address: " + warehouse.getAddress()),
-                new Label("Manager: " + warehouse.getManagerName()),
-                new Label("Total Inventory: " + warehouse.getTotalInventory())
-        );
+        // Create variables for warehouse details
+        String warehouseName = warehouse.getName();
+        String address = warehouse.getAddress();
+        String managerName = warehouse.getManagerName();
+        int totalInventory = warehouse.getTotalInventory();
+
+        // Create Labels with the variable data
+        Label warehouseNameLabel = new Label("Warehouse Name");
+        Label warehouseNameData = new Label(warehouseName);
+
+        Label addressLabel = new Label("Address");
+        Label addressData = new Label(address);
+
+        Label managerNameLabel = new Label("Manager");
+        Label managerNameData = new Label(managerName);
+
+        Label totalInventoryLabel = new Label("Total Inventory");
+        Label totalInventoryData = new Label(String.valueOf(totalInventory));
+
+        // Add the same CSS class for labels and data with different classes for color
+        warehouseNameLabel.getStyleClass().add("label-popup");
+        warehouseNameData.getStyleClass().add("data-popup");
+
+        addressLabel.getStyleClass().add("label-popup");
+        addressData.getStyleClass().add("data-popup");
+
+        managerNameLabel.getStyleClass().add("label-popup");
+        managerNameData.getStyleClass().add("data-popup");
+
+        totalInventoryLabel.getStyleClass().add("label-popup");
+        totalInventoryData.getStyleClass().add("data-popup");
+
+        // Add labels and data to the grid
+        grid.add(warehouseNameLabel, 0, 0);
+        grid.add(warehouseNameData, 1, 0);
+
+        grid.add(addressLabel, 0, 1);
+        grid.add(addressData, 1, 1);
+
+        grid.add(managerNameLabel, 0, 2);
+        grid.add(managerNameData, 1, 2);
+
+        grid.add(totalInventoryLabel, 0, 3);
+        grid.add(totalInventoryData, 1, 3);
 
         // Create a table for products in warehouse
         TableView<Product> productTable = new TableView<>();
@@ -262,13 +301,19 @@ public class WarehouseManagementView extends VBox {
         Button closeButton = new Button("Close");
         closeButton.getStyleClass().add("button-pagination");
         closeButton.setOnAction(e -> dialog.close());
-        vbox.getChildren().addAll(productTable, closeButton);
+
+        // Add the grid and button to the VBox
+        VBox vbox = new VBox(grid, productTable, closeButton);
+        vbox.setSpacing(10);
+        vbox.setPadding(new Insets(15));
 
         Scene dialogScene = new Scene(vbox);
         dialogScene.getStylesheets().add(getClass().getResource("/view/director.css").toExternalForm());
         dialog.setScene(dialogScene);
         dialog.show();
     }
+
+
 
     private void setupProductTableColumns(TableView<Product> productTable) {
         TableColumn<Product, String> nameColumn = new TableColumn<>("Product Name");
