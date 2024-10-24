@@ -44,6 +44,7 @@ public class GeneralView extends VBox {
     private Map<Integer, Map<String, BigDecimal>> financialData;
 
 
+
     public GeneralView() {
         // Tiêu đề "Dashboard"
         Text title = new Text("Dashboard");
@@ -55,12 +56,12 @@ public class GeneralView extends VBox {
         StackPane stockPane = createInfoPane(stockLabel);
 
         // Nút Reload
-        Button reloadButton = new Button("Reload");
-        reloadButton.setOnAction(e -> {
-            controller.handleReload();
-            updateData();
-            updateChart(chart);
-        });
+//        Button reloadButton = new Button("Reload");
+//        reloadButton.setOnAction(e -> {
+//            controller.handleReload();
+//            updateData();
+//            updateChart(chart);
+//        });
 
         // Sắp xếp các ô thông tin trên cùng một hàng, cách đều nhau 50px
         HBox infoBox = new HBox(50, turnoverPane, capitalPane, profitPane, stockPane);
@@ -96,7 +97,7 @@ public class GeneralView extends VBox {
 
 
         // Sắp xếp tiêu đề, các ô thông tin và nút Reload
-        VBox vbox = new VBox(20, title, infoBox, reloadButton);
+        VBox vbox = new VBox(20, title, infoBox);
         vbox.setPadding(new Insets(20));
         vbox.setAlignment(Pos.CENTER);
 
@@ -106,7 +107,9 @@ public class GeneralView extends VBox {
 
         this.getChildren().addAll(vbox,comboBox, createChart());
 
+        controller.handleReload();
         updateData();
+        updateChart(chart);
     }
 
     private StackPane createInfoPane(Text label) {
@@ -246,6 +249,7 @@ public class GeneralView extends VBox {
 
     public void updateChart(BarChart<String, Number> chart) {
         chart.getData().clear();
+        chart.setAnimated(false);
 
         XYChart.Series<String, Number> seriesTurnover = new XYChart.Series<>();
         seriesTurnover.setName("Turnover");
