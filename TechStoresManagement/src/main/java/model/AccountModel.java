@@ -141,8 +141,8 @@ public class AccountModel {
 
     public boolean addAccount(Account account) {
         // Truy vấn SQL để thêm tài khoản mới vào bảng accounts
-        String insertSQL = "INSERT INTO accounts (username, password, id_person, email) " +
-                "VALUES (?, ?, (SELECT id FROM employees WHERE CONCAT(first_name, ' ', last_name) = ?), ?)";
+        String insertSQL = "INSERT INTO accounts (username, password, id_person) " +
+                "VALUES (?, ?, (SELECT id FROM employees WHERE CONCAT(first_name, ' ', last_name) = ?))";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement pstmt = conn.prepareStatement(insertSQL)) {
@@ -150,11 +150,10 @@ public class AccountModel {
             pstmt.setString(1, account.getUsername());
 
             // Băm mật khẩu trước khi lưu
-            String hashedPassword = encryptPassword(account.getPassword());
+            String hashedPassword = PasswordUtil.hashPassword(account.getPassword());
             pstmt.setString(2, hashedPassword);
 
             pstmt.setString(3, account.getName());
-            pstmt.setString(4, account.getEmail()); // Thêm email vào truy vấn
 
             // Thực thi truy vấn
             int rowsAffected = pstmt.executeUpdate();
@@ -171,7 +170,7 @@ public class AccountModel {
     public boolean updateAccount(Account account) {
         // Truy vấn SQL để cập nhật thông tin tài khoản
         String query = "UPDATE accounts SET id_person = (SELECT id FROM employees WHERE CONCAT(first_name, ' ', last_name) = ?), " +
-                "username = ?, password = ?, email = ? WHERE id = ?"; // Thêm email vào truy vấn
+                "username = ?, password = ? WHERE id = ?";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -180,11 +179,10 @@ public class AccountModel {
             pstmt.setString(2, account.getUsername());
 
             // Băm mật khẩu trước khi lưu
-            String hashedPassword = encryptPassword(account.getPassword());
+            String hashedPassword = PasswordUtil.hashPassword(account.getPassword());
             pstmt.setString(3, hashedPassword);
 
-            pstmt.setString(4, account.getEmail()); // Thêm email vào truy vấn
-            pstmt.setInt(5, account.getId());
+            pstmt.setInt(4, account.getId());
 
             // Thực thi truy vấn
             int affectedRows = pstmt.executeUpdate();
@@ -196,19 +194,8 @@ public class AccountModel {
         }
     }
 
-    public String encryptPassword(String password) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = md.digest(password.getBytes());
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashedBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
+
     // Phương thức xóa tài khoản
     public boolean deleteAccount(int id) {
         String deleteSQL = "DELETE FROM accounts WHERE id = ?";

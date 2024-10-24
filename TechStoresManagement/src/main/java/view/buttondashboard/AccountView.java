@@ -12,11 +12,9 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.AccountModel;
+import utils.PasswordUtil;
 import validatepassword.Validate;
-import view.stage.AdditionSuccess;
-import view.stage.DeletionFailed;
-import view.stage.DeletionSuccess;
-import view.stage.EditSuccess;
+import view.stage.*;
 
 import java.util.Objects;
 
@@ -250,13 +248,6 @@ public class AccountView extends VBox {
             }
         });
 
-        Label emailLabel = new Label("Email:");
-        emailLabel.getStyleClass().add("label-account");
-        TextField emailField = new TextField(account.getEmail());
-        emailField.getStyleClass().add("text-field-account");
-        Label emailErrorLabel = new Label();
-        emailErrorLabel.setTextFill(Color.RED);
-        emailErrorLabel.getStyleClass().add("label-error-account");
 
         Button saveButton = new Button("Save");
         saveButton.getStyleClass().add("button-account");
@@ -267,14 +258,12 @@ public class AccountView extends VBox {
             String oldPassword = oldPasswordField.getText();
             String newPassword = passwordField.getText();
             String role = account.getRole();
-            String email = emailField.getText();
 
             // Đặt lại các thông báo lỗi
             nameErrorLabel.setText("");
             usernameErrorLabel.setText("");
             oldPasswordErrorLabel.setText("");
             passwordErrorLabel.setText("");
-            emailErrorLabel.setText("");
 
             // Kiểm tra tên và username có hợp lệ không
             boolean hasError = false; // Biến để kiểm tra có lỗi hay không
@@ -299,7 +288,7 @@ public class AccountView extends VBox {
             if (oldPassword.isEmpty()) {
                 oldPasswordErrorLabel.setText("Old password is required.");
                 hasError = true;
-            } else if (!oldPassword.equals(account.getPassword())) {
+            } else if (!PasswordUtil.checkPassword(oldPassword,account.getPassword())) {
                 oldPasswordErrorLabel.setText("Old password is incorrect.");
                 hasError = true;
             }
@@ -312,7 +301,6 @@ public class AccountView extends VBox {
             account.setName(fullName);
             account.setUsername(newUsername);
             account.setPassword(newPassword);
-            account.setEmail(email);
 
 
             boolean success = accountModel.updateAccount(account);
@@ -321,9 +309,12 @@ public class AccountView extends VBox {
                 Stage stage = new Stage();
                 EditSuccess message = new EditSuccess();
                 message.start(stage);
-                ((TableView<Account>) getChildren().get(3)).refresh();
+//                ((TableView<Account>) getChildren().get(3)).refresh();
             } else {
                 Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                Stage stage = new Stage();
+                EditFailed message = new EditFailed();
+                message.start(stage);
                 errorAlert.setTitle("Error");
                 errorAlert.setHeaderText("Update Failed");
                 errorAlert.showAndWait();
@@ -336,7 +327,6 @@ public class AccountView extends VBox {
 
         VBox layout = new VBox(5, nameLabel, nameComboBox, nameErrorLabel, usernameLabel, usernameField, usernameErrorLabel,
                 oldPasswordLabel, oldPasswordField, oldPasswordErrorLabel, passwordLabel, passwordField, passwordErrorLabel,
-                emailLabel, emailField, emailErrorLabel,
                 new HBox(10, saveButton, cancelButton));
         layout.setAlignment(Pos.CENTER_LEFT);
         layout.setStyle("-fx-padding: 20;");
@@ -398,16 +388,6 @@ public class AccountView extends VBox {
         confirmPasswordErrorLabel.setTextFill(Color.RED);
         confirmPasswordErrorLabel.getStyleClass().add("label-error-account");
 
-        Label emailLabel = new Label("Email:");
-        emailLabel.getStyleClass().add("label-account");
-
-        TextField emailField = new TextField();
-        emailField.getStyleClass().add("text-field-account");
-
-        Label emailErrorLabel = new Label();
-        emailErrorLabel.setTextFill(Color.RED);
-        emailErrorLabel.getStyleClass().add("label-error-account");
-
         usernameField.setOnKeyReleased(event -> {
             String username = usernameField.getText();
             if (username.isEmpty()) {
@@ -437,13 +417,13 @@ public class AccountView extends VBox {
             String username = usernameField.getText();
             String password = passwordField.getText();
             String confirmPasswordValue = confirmPasswordField.getText();
-            String email = emailField.getText();
+
 
             nameErrorLabel.setText("");
             usernameErrorLabel.setText("");
             passwordErrorLabel.setText("");
             confirmPasswordErrorLabel.setText("");
-            emailErrorLabel.setText("");
+
 
             boolean hasError = false;
 
@@ -467,16 +447,12 @@ public class AccountView extends VBox {
                 hasError = true;
             }
 
-            if (email.isEmpty()) {
-                emailErrorLabel.setText("Email is required.");
-                hasError = true;
-            }
 
             if (hasError) {
                 return;
             }
 
-            Account newAccount = new Account(0, fullName, username, password, email);
+            Account newAccount = new Account(0, fullName, username, password);
 
             boolean success = accountModel.addAccount(newAccount);
 
@@ -486,7 +462,7 @@ public class AccountView extends VBox {
                 message.start(stage);
                 accountList.setAll(accountModel.loadAccounts(""));
                 newAccountStage.close();
-                ((TableView<Account>) getChildren().get(3)).refresh();
+//                ((TableView<Account>) getChildren().get(3)).refresh();
             } else {
                 Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                 errorAlert.setTitle("Error");
@@ -502,7 +478,6 @@ public class AccountView extends VBox {
 
         VBox layout = new VBox(10, nameLabel, nameComboBox, nameErrorLabel, usernameLabel, usernameField, usernameErrorLabel,
                 passwordLabel, passwordField, passwordErrorLabel, confirmPassword, confirmPasswordField, confirmPasswordErrorLabel,
-                emailLabel, emailField, emailErrorLabel,
                 new HBox(10, saveButton, cancelButton));
         layout.setAlignment(Pos.CENTER_LEFT);
         layout.setStyle("-fx-padding: 20;");
@@ -532,7 +507,7 @@ public class AccountView extends VBox {
                     Stage stage = new Stage();
                     DeletionSuccess message = new DeletionSuccess();
                     message.start(stage);
-                    ((TableView<Account>) getChildren().get(3)).refresh();
+//                    ((TableView<Account>) getChildren().get(3)).refresh();
                 } else {
                     Stage stage = new Stage();
                     DeletionFailed message = new DeletionFailed();
