@@ -18,10 +18,6 @@ import java.util.Map;
 import static model.CashierModel.getOne;
 
 public class CashierController {
-
-//    public static Map<Integer, Integer> cartItems = new HashMap<>();
-    public static int idStore = 1; // ID cửa hàng mặc định, có thể thay đổi theo yêu cầu
-
     // Tìm khách hàng theo số điện thoại
     public static List<Customer> searchCustomerByPhone(String phoneNumber) {
         return CashierModel.searchCustomerByPhone(phoneNumber);
@@ -43,7 +39,7 @@ public class CashierController {
     }
 
     // Xử lý đơn hàng
-    public static void processOrder(String customerPhone, Map<Integer, Integer> cartItems, double total, String employeeName) {
+    public static void processOrder(String customerPhone, Map<Integer, Integer> cartItems, double total, String employeeName, int idStore) {
         int customerId = CashierModel.getCustomerIdByPhone(customerPhone);
         System.out.println(customerId);
         if (customerId == -1) {

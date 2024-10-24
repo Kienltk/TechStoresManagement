@@ -510,18 +510,18 @@ public class Cashier extends Application {
                     if (customerPhoneInput.getText() == null || customerPhoneInput.getText().isEmpty()) {
                         customerPhoneInput.setText("1234567890");
                     }
-                    CashierController.processOrder(customerPhoneInput.getText(), cartItems, total, employeeName);
+                    CashierController.processOrder(customerPhoneInput.getText(), cartItems, total, employeeName, idStore);
                     Alert alert = new Alert(Alert.AlertType.INFORMATION, "Payment successful!");
                     alert.showAndWait();
                     for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
                         int productId = entry.getKey();
                         int quantity = entry.getValue();
                         CashierModel.handlePurchase(productId, quantity, idStore); // Xử lý giao dịch
-                        Product product = cm.getOne(idStore, productId); // Lấy sản phẩm theo ID
-                        if (product != null) {
-                            int newStock = product.getStock() - quantity; // Tính số lượng mới
-                            product.setStock(newStock); // Cập nhật số lượng sản phẩm
-                        }
+//                        Product product = cm.getOne(idStore, productId); // Lấy sản phẩm theo ID
+//                        if (product != null) {
+//                            int newStock = product.getStock() - quantity; // Tính số lượng mới
+//                            product.setStock(newStock); // Cập nhật số lượng sản phẩm
+//                        }
                     }
 
                     cartItems.clear();

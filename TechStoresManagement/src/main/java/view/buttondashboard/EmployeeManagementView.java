@@ -113,7 +113,7 @@ public class EmployeeManagementView extends VBox {
 
         });
 
-        tableView.getColumns().addAll(sttCol, fullNameCol, genderCol, dobCol, emailCol, phoneCol, roleCol, workplaceCol, salaryCol, actionCol);
+        tableView.getColumns().addAll(sttCol, fullNameCol, genderCol, roleCol, workplaceCol, actionCol);
     }
 
     private void loadEmployees() {
