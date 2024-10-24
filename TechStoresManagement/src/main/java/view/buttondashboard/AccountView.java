@@ -409,6 +409,16 @@ public class AccountView extends VBox {
             }
         });
 
+        confirmPasswordField.setOnKeyReleased(event -> {
+            String password = passwordField.getText();
+            String confirmPasswordValue = confirmPasswordField.getText();
+            if (!password.equals(confirmPasswordValue)) {
+                confirmPasswordErrorLabel.setText("Passwords do not match.");
+            } else {
+                confirmPasswordErrorLabel.setText("");
+            }
+        });
+
         // Nút Save
         Button saveButton = new Button("Save");
         saveButton.getStyleClass().add("button-account");
@@ -440,10 +450,7 @@ public class AccountView extends VBox {
                 hasError = true;
             }
             if (confirmPasswordValue.isEmpty()) {
-                confirmPasswordErrorLabel.setText("Please confirm your password.");
-                hasError = true;
-            } else if (!password.equals(confirmPasswordValue)) {
-                confirmPasswordErrorLabel.setText("Passwords do not match.");
+                confirmPasswordErrorLabel.setText("Confirm password is required.");
                 hasError = true;
             }
 

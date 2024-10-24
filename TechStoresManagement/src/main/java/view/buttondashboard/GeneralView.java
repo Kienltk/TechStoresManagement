@@ -35,7 +35,7 @@ public class GeneralView extends VBox {
     private Text turnoverLabel = new Text("Turnover: $");
     private Text capitalLabel = new Text("Capital: $");
     private Text profitLabel = new Text("Profit: $");
-    private Text stockLabel = new Text("Stock: $");
+    private Text stockLabel = new Text("Stock: ");
 
     private BarChart<String, Number> chart;
     private ComboBox<String> criteriaComboBox;
@@ -59,7 +59,7 @@ public class GeneralView extends VBox {
         reloadButton.setOnAction(e -> {
             controller.handleReload();
             updateData();
-            onDataChanged();
+            updateChart(chart);
         });
 
         // Sắp xếp các ô thông tin trên cùng một hàng, cách đều nhau 50px
@@ -68,8 +68,8 @@ public class GeneralView extends VBox {
         infoBox.setAlignment(Pos.CENTER);
 
         criteriaComboBox = new ComboBox<>();
-        criteriaComboBox.getItems().addAll("Ngày", "Tháng", "Năm");
-        criteriaComboBox.setValue("Tháng");
+        criteriaComboBox.getItems().addAll("Day", "Month", "Year");
+        criteriaComboBox.setValue("Month");
 
         // ComboBox cho tháng (1-12)
         monthComboBox = new ComboBox<>();
@@ -86,14 +86,13 @@ public class GeneralView extends VBox {
         yearComboBox.setValue(Calendar.getInstance().get(Calendar.YEAR)); // Năm hiện tại
 
         // In ra tiêu chí mặc định ngay lập tức
-        if (criteriaComboBox.getValue().equals("Tháng")) {
+        if (criteriaComboBox.getValue().equals("Month")) {
             monthComboBox.setVisible(false); // Ẩn ComboBox tháng
         }
         System.out.println("Tiêu chí: Tháng - Năm: " + yearComboBox.getValue());
 
-        criteriaComboBox.setOnAction(event -> onDataChanged());
-        yearComboBox.setOnAction(event -> onDataChanged());
-        monthComboBox.setOnAction(event -> onDataChanged());
+        criteriaComboBox.setOnAction(event -> handleCriteriaChange());
+        yearComboBox.setOnAction(event -> handleCriteriaChange());
 
 
         // Sắp xếp tiêu đề, các ô thông tin và nút Reload
@@ -102,7 +101,7 @@ public class GeneralView extends VBox {
         vbox.setAlignment(Pos.CENTER);
 
         VBox comboBox = new VBox(10);
-        comboBox.getChildren().addAll(new Label("Chọn tiêu chí:"), criteriaComboBox, monthComboBox, yearComboBox);
+        comboBox.getChildren().addAll(new Label("Choose Criteria:"), criteriaComboBox, monthComboBox, yearComboBox);
 
 
         this.getChildren().addAll(vbox,comboBox, createChart());
@@ -126,7 +125,7 @@ public class GeneralView extends VBox {
         turnoverLabel.setText("Turnover: $" + controller.getTurnover());
         capitalLabel.setText("Capital: $" + controller.getCapital());
         profitLabel.setText("Profit: $" + controller.getProfit());
-        stockLabel.setText("Stock: $" + controller.getStock());
+        stockLabel.setText("Stock: " + controller.getStock());
     }
 
     public BarChart<String, Number> createChart() {
@@ -146,18 +145,19 @@ public class GeneralView extends VBox {
 
         chart = new BarChart<>(xAxis, yAxis);
 
-        handleCriteriaChange();
+        financialData = model.getFinancialDataByMonth(yearComboBox.getValue());
+//        Map<Integer, Map<String, BigDecimal>> financialData = model.getFinancialDataByDay(2024, 1);
 
         // Populate the series with data and add labels on top of bars
         for (Map.Entry<Integer, Map<String, BigDecimal>> entry : financialData.entrySet()) {
-            String year = String.valueOf(entry.getKey());
+            String month = String.valueOf(entry.getKey());
             BigDecimal turnover = entry.getValue().get("turnover");
             BigDecimal capital = entry.getValue().get("capital");
             BigDecimal profit = entry.getValue().get("profit");
 
-            XYChart.Data<String, Number> turnoverData = new XYChart.Data<>(year, turnover);
-            XYChart.Data<String, Number> capitalData = new XYChart.Data<>(year, capital);
-            XYChart.Data<String, Number> profitData = new XYChart.Data<>(year, profit);
+            XYChart.Data<String, Number> turnoverData = new XYChart.Data<>(month, turnover);
+            XYChart.Data<String, Number> capitalData = new XYChart.Data<>(month, capital);
+            XYChart.Data<String, Number> profitData = new XYChart.Data<>(month, profit);
 
             addValueLabel(turnoverData);
             addValueLabel(capitalData);
@@ -169,7 +169,7 @@ public class GeneralView extends VBox {
         }
 
         chart.getData().addAll(seriesTurnover, seriesCapital, seriesProfit);
-        chart.setTitle("Financial Data by Year");
+        chart.setTitle("Financial Data by Month");
 
         return chart;
     }
@@ -179,53 +179,21 @@ public class GeneralView extends VBox {
             Node node = data.getNode();  // Lấy node đại diện cho cột
             if (node != null) {  // Đảm bảo node không null
                 StackPane parent = (StackPane) node;
-                Label label = new Label(data.getYValue().toString());  // Tạo label với giá trị
-
-                // Kiểm tra chiều cao cột
-                double barHeight = data.getYValue().doubleValue();
-                if (barHeight > 0) {
-                    label.setTranslateY(-15);  // Đẩy label lên 15px
-                } else {
-                    label.setTranslateY(0);  // Điều chỉnh cho cột chiều cao 0
-                }
-
-                // Thay đổi kiểu và vị trí của label
-                label.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
-                parent.getChildren().add(label);  // Thêm label vào stack pane
 
                 Tooltip tooltip = new Tooltip(data.getYValue().toString());
                 tooltip.setShowDelay(Duration.ZERO); // Hiển thị tooltip ngay lập tức
                 Tooltip.install(node, tooltip);
 
-                Platform.runLater(() -> adjustLabelPosition(label, parent));
             }
         });
     }
 
-    private void adjustLabelPosition(Label label, StackPane parent) {
-        // Lấy bề ngang của cột
-        double parentWidth = parent.getWidth();
-        System.out.println(parentWidth);
-        double labelWidth = label.getLayoutBounds().getWidth();
-        System.out.println(labelWidth);
-
-        // Kiểm tra xem bề ngang của label có lớn hơn 90% bề ngang của cột hay không
-        if (labelWidth > parentWidth) {
-            label.setVisible(false);  // Ẩn label nếu nó lớn hơn 90% bề ngang của cột
-        } else {
-            label.setVisible(true);  // Hiện label nếu không
-        }
-    }
-
-    public void onDataChanged() {
-        updateChart(chart);
-    }
-
     public void handleCriteriaChange() {
         String selectedCriteria = criteriaComboBox.getValue();
+        System.out.println(criteriaComboBox.getValue());
 
         switch (selectedCriteria) {
-            case "Tháng":
+            case "Month" -> {
                 monthComboBox.setVisible(false); // Ẩn ComboBox tháng
                 yearComboBox.setVisible(true); // Hiện ComboBox năm
                 System.out.println("Tiêu chí: Tháng");
@@ -235,21 +203,21 @@ public class GeneralView extends VBox {
                     System.out.println("Tiêu chí: Tháng - Năm: " + yearComboBox.getValue());
                     financialData = model.getFinancialDataByMonth(yearComboBox.getValue());
                     System.out.println(financialData);
+                    updateChart(chart);
                 });
-                // Gọi lại để xử lý khi chương trình khởi động
                 financialData = model.getFinancialDataByMonth(yearComboBox.getValue());
                 System.out.println(financialData);
-                break;
-
-            case "Năm":
+                updateChart(chart);
+            }
+            case "Year" -> {
                 monthComboBox.setVisible(false); // Ẩn ComboBox tháng
                 yearComboBox.setVisible(false); // Ẩn ComboBox năm
                 System.out.println("Tiêu chí: Năm");
                 financialData = model.getFinancialDataByYear();
                 System.out.println(financialData);
-                break;
-
-            case "Ngày":
+                updateChart(chart);
+            }
+            case "Day" -> {
                 monthComboBox.setVisible(true); // Hiện ComboBox tháng
                 yearComboBox.setVisible(true); // Hiện ComboBox năm
                 System.out.println("Tiêu chí: Ngày - Tháng: " + monthComboBox.getValue() + " - Năm: " + yearComboBox.getValue());
@@ -259,24 +227,25 @@ public class GeneralView extends VBox {
                     System.out.println("Tiêu chí: Ngày - Tháng: " + monthComboBox.getValue() + " - Năm: " + yearComboBox.getValue());
                     financialData = model.getFinancialDataByDay(yearComboBox.getValue(), monthComboBox.getValue());
                     System.out.println(financialData);
+                    updateChart(chart);
                 });
                 monthComboBox.setOnAction(event -> {
                     System.out.println("Tiêu chí: Ngày - Tháng: " + monthComboBox.getValue() + " - Năm: " + yearComboBox.getValue());
                     financialData = model.getFinancialDataByDay(yearComboBox.getValue(), monthComboBox.getValue());
                     System.out.println(financialData);
+                    updateChart(chart);
                 });
 
                 // Gọi lại khi khởi chạy để lấy dữ liệu ngay lập tức
                 financialData = model.getFinancialDataByDay(yearComboBox.getValue(), monthComboBox.getValue());
                 System.out.println(financialData);
-                break;
+                updateChart(chart);
+            }
         }
     }
 
     public void updateChart(BarChart<String, Number> chart) {
         chart.getData().clear();
-
-        handleCriteriaChange();
 
         XYChart.Series<String, Number> seriesTurnover = new XYChart.Series<>();
         seriesTurnover.setName("Turnover");
@@ -285,18 +254,18 @@ public class GeneralView extends VBox {
         XYChart.Series<String, Number> seriesProfit = new XYChart.Series<>();
         seriesProfit.setName("Profit");
 
+        System.out.println(financialData);
+
         for (Map.Entry<Integer, Map<String, BigDecimal>> entry : financialData.entrySet()) {
-            String year = String.valueOf(entry.getKey());
+            String time = String.valueOf(entry.getKey());
             BigDecimal turnover = entry.getValue().get("turnover");
             BigDecimal capital = entry.getValue().get("capital");
             BigDecimal profit = entry.getValue().get("profit");
 
-            // Add data to each series
-            XYChart.Data<String, Number> turnoverData = new XYChart.Data<>(year, turnover);
-            XYChart.Data<String, Number> capitalData = new XYChart.Data<>(year, capital);
-            XYChart.Data<String, Number> profitData = new XYChart.Data<>(year, profit);
+            XYChart.Data<String, Number> turnoverData = new XYChart.Data<>(time, turnover);
+            XYChart.Data<String, Number> capitalData = new XYChart.Data<>(time, capital);
+            XYChart.Data<String, Number> profitData = new XYChart.Data<>(time, profit);
 
-            // Add labels to the bars
             addValueLabel(turnoverData);
             addValueLabel(capitalData);
             addValueLabel(profitData);
@@ -306,8 +275,6 @@ public class GeneralView extends VBox {
             seriesProfit.getData().add(profitData);
         }
 
-
-        // Thêm lại các series vào biểu đồ
         chart.getData().addAll(seriesTurnover, seriesCapital, seriesProfit);
     }
 
