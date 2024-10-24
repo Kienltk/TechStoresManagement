@@ -8,11 +8,13 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -165,34 +167,109 @@ public class HistoryView extends VBox {
         Stage detailStage = new Stage();
         detailStage.setTitle("Bill Detail");
 
-        VBox detailLayout = new VBox(10);
-        Label customerLabel = new Label("Customer name: " + receipt.getCustomerName());
-        Label phoneLabel = new Label("Phone number: " + controller.getCustomerPhone(receipt.getCustomerName()));
-        Label storeLabel = new Label("Store name: " + receipt.getStoreName());
-        Label managerLabel = new Label("Store Manager: " + controller.getStoreManager(receipt.getStoreName()));
-        Label cashierLabel = new Label("Cashier: " + controller.getCashier(receipt.getId()));
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(10));
+        grid.setVgap(10);
+        grid.setHgap(10);
+
+        // Create labels and get data for the receipt details
+        Label customerLabel = new Label("Customer name:");
+        Label customerData = new Label(receipt.getCustomerName());
+
+        Label phoneLabel = new Label("Phone number:");
+        Label phoneData = new Label(controller.getCustomerPhone(receipt.getCustomerName()));
+
+        Label storeLabel = new Label("Store name:");
+        Label storeData = new Label(receipt.getStoreName());
+
+        Label managerLabel = new Label("Store Manager:");
+        Label managerData = new Label(controller.getStoreManager(receipt.getStoreName()));
+
+        Label cashierLabel = new Label("Cashier:");
+        Label cashierData = new Label(controller.getCashier(receipt.getId()));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formattedPurchaseDate = receipt.getPurchaseDate().format(formatter);
 
-        Label purchaseDateLabel = new Label("Order time: " + formattedPurchaseDate);
-        Label totalLabel = new Label("Total bill: " + receipt.getTotal());
-        Label profitLabel = new Label("Profit bill: " + receipt.getProfit());
+        Label purchaseDateLabel = new Label("Order time:");
+        Label purchaseDateData = new Label(formattedPurchaseDate);
 
+        Label totalLabel = new Label("Total bill:");
+        Label totalData = new Label(String.valueOf(receipt.getTotal()));
+
+        Label profitLabel = new Label("Profit bill:");
+        Label profitData = new Label(String.valueOf(receipt.getProfit()));
+
+        // Add CSS classes to labels and data
+        customerLabel.getStyleClass().add("label-popup");
+        customerData.getStyleClass().add("data-popup");
+
+        phoneLabel.getStyleClass().add("label-popup");
+        phoneData.getStyleClass().add("data-popup");
+
+        storeLabel.getStyleClass().add("label-popup");
+        storeData.getStyleClass().add("data-popup");
+
+        managerLabel.getStyleClass().add("label-popup");
+        managerData.getStyleClass().add("data-popup");
+
+        cashierLabel.getStyleClass().add("label-popup");
+        cashierData.getStyleClass().add("data-popup");
+
+        purchaseDateLabel.getStyleClass().add("label-popup");
+        purchaseDateData.getStyleClass().add("data-popup");
+
+        totalLabel.getStyleClass().add("label-popup");
+        totalData.getStyleClass().add("data-popup");
+
+        profitLabel.getStyleClass().add("label-popup");
+        profitData.getStyleClass().add("data-popup");
+
+        // Add labels and data to the grid
+        grid.add(customerLabel, 0, 0);
+        grid.add(customerData, 1, 0);
+
+        grid.add(phoneLabel, 0, 1);
+        grid.add(phoneData, 1, 1);
+
+        grid.add(storeLabel, 0, 2);
+        grid.add(storeData, 1, 2);
+
+        grid.add(managerLabel, 0, 3);
+        grid.add(managerData, 1, 3);
+
+        grid.add(cashierLabel, 0, 4);
+        grid.add(cashierData, 1, 4);
+
+        grid.add(purchaseDateLabel, 0, 5);
+        grid.add(purchaseDateData, 1, 5);
+
+        grid.add(totalLabel, 0, 6);
+        grid.add(totalData, 1, 6);
+
+        grid.add(profitLabel, 0, 7);
+        grid.add(profitData, 1, 7);
+
+        // Create a table for products in the receipt
         TableView<ProductReceipt> productTable = new TableView<>();
         configureProductTable(productTable, receipt.getId());
 
+        // Close button
         Button closeButton = new Button("Close");
         closeButton.setOnAction(e -> detailStage.close());
         closeButton.getStyleClass().add("button-pagination");
+
+        // Add grid and table to the VBox
+        VBox detailLayout = new VBox(10, grid, productTable, closeButton);
         detailLayout.getStyleClass().add("vbox");
-        detailLayout.getChildren().addAll(customerLabel, phoneLabel, storeLabel, managerLabel, cashierLabel, purchaseDateLabel, totalLabel, profitLabel, productTable, closeButton);
+
         Scene detailScene = new Scene(detailLayout, 830, 600);
         detailScene.getStylesheets().add(getClass().getResource("/view/director.css").toExternalForm());
         detailStage.initModality(Modality.APPLICATION_MODAL);
         detailStage.setScene(detailScene);
         detailStage.show();
     }
+
 
     public void configureProductTable(TableView<ProductReceipt> productTable, int receiptId) {
 
