@@ -228,7 +228,7 @@ public class GeneralModel {
         return calculateTotalStock();
     }
 
-    public Map<Integer, Map<String, BigDecimal>> getFinancialDataByYear() {
+    public Map<Integer, Map<String, BigDecimal>> getFinancialData() {
         Map<Integer, Map<String, BigDecimal>> financialData = new HashMap<>();
         String query = "SELECT YEAR(date) AS year, SUM(turnover) AS totalTurnover, " +
                 "SUM(capital) AS totalCapital, SUM(profit) AS totalProfit " +
@@ -258,7 +258,7 @@ public class GeneralModel {
         return financialData;
     }
 
-    public Map<Integer, Map<String, BigDecimal>> getFinancialDataByMonth(int year) {
+    public Map<Integer, Map<String, BigDecimal>> getFinancialDataByYear(int year) {
         Map<Integer, Map<String, BigDecimal>> financialData = new HashMap<>();
         String query = "SELECT MONTH(date) AS month, " +
                 "SUM(turnover) AS totalTurnover, " +
@@ -270,7 +270,7 @@ public class GeneralModel {
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, year);  // Set the year parameter
+            stmt.setInt(1, year);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -296,7 +296,7 @@ public class GeneralModel {
         return financialData;
     }
 
-    public Map<Integer, Map<String, BigDecimal>> getFinancialDataByDay(int year, int month) {
+    public Map<Integer, Map<String, BigDecimal>> getFinancialDataByMonth(int year, int month) {
         Map<Integer, Map<String, BigDecimal>> financialData = new HashMap<>();
         String query = "SELECT DAY(date) AS day, " +
                 "SUM(turnover) AS totalTurnover, " +
@@ -334,6 +334,82 @@ public class GeneralModel {
 
         return financialData;
     }
+
+    public Map<String, BigDecimal> getTurnoverStoreData() {
+        Map<String, BigDecimal> turnoverData = new HashMap<>();
+        String query = "SELECT s.name AS storeName, SUM(sf.turnover) AS totalTurnover " +
+                "FROM store_financial sf " +
+                "JOIN stores s ON sf.id_store = s.id " +
+                "GROUP BY s.name";
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String storeName = rs.getString("storeName");
+                BigDecimal totalTurnover = rs.getBigDecimal("totalTurnover");
+                turnoverData.put(storeName, totalTurnover);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return turnoverData;
+    }
+
+
+    // Lấy tổng doanh thu theo tháng và từng cửa hàng trong một năm cụ thể
+    public Map<String, BigDecimal> getTurnoverStoreDataByYear(int year) {
+        Map<String, BigDecimal> turnoverData = new HashMap<>();
+        String query = "SELECT s.name AS storeName, SUM(sf.turnover) AS totalTurnover " +
+                "FROM store_financial sf " +
+                "JOIN stores s ON sf.id_store = s.id " +
+                "WHERE YEAR(sf.date) = ? " +
+                "GROUP BY s.name";
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, year);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String storeName = rs.getString("storeName");
+                    BigDecimal totalTurnover = rs.getBigDecimal("totalTurnover");
+                    turnoverData.put(storeName, totalTurnover);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return turnoverData;
+    }
+
+
+    public Map<String, BigDecimal> getTurnoverStoreDataByMonth(int year, int month) {
+        Map<String, BigDecimal> turnoverData = new HashMap<>();
+        String query = "SELECT s.name AS storeName, SUM(sf.turnover) AS totalTurnover " +
+                "FROM store_financial sf " +
+                "JOIN stores s ON sf.id_store = s.id " +
+                "WHERE YEAR(sf.date) = ? AND MONTH(sf.date) = ? " +
+                "GROUP BY s.name";
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, year);
+            stmt.setInt(2, month);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String storeName = rs.getString("storeName");
+                    BigDecimal totalTurnover = rs.getBigDecimal("totalTurnover");
+                    turnoverData.put(storeName, totalTurnover);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return turnoverData;
+    }
+
 
     public List<Integer> getAvailableYears() {
         List<Integer> years = new ArrayList<>();
