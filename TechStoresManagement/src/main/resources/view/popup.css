@@ -78,15 +78,15 @@
 }
 .reload-button{
 
--fx-background-color: #ffffff;
--fx-text-fill: #ffd94b;
--fx-font-family: 'Arial';
--fx-font-size: 14px;
--fx-border-color: #ffd94b;
--fx-border-width: 2px;
--fx-border-radius: 5px;
--fx-background-radius: 5px;
--fx-padding: 8px 15px;
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #ffd94b;
+    -fx-font-family: 'Arial';
+    -fx-font-size: 14px;
+    -fx-border-color: #ffd94b;
+    -fx-border-width: 2px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 15px;
 }
 
 .reload-button:hover {
@@ -111,10 +111,17 @@
     -fx-text-fill: #333; /* Dark text color */
 }
 
-/* Label styles */
-.popup-label {
-    -fx-font-size: 14px; /* Font size for labels */
-    -fx-text-fill: #555; /* Medium gray text color */
+.label-popup {
+    -fx-font-size: 14;
+    -fx-text-fill: #000000;
+    -fx-font-weight: bold;
+    -fx-padding: 0 20;
+
+}
+.data-popup {
+    -fx-text-fill: #4AD4DD;
+    -fx-font-weight: bold;
+    -fx-font-size: 14;
 }
 
 /* Input field styles */
@@ -142,4 +149,25 @@
     -fx-text-fill: red; /* Red text for error messages */
     -fx-font-size: 12px; /* Smaller font size for error messages */
     -fx-padding: 5; /* Padding around error messages */
+}
+/* Đặt kiểu cho RadioButton */
+.radio-button-account {
+    -fx-font-size: 14px; /* Kích thước chữ */
+    -fx-text-fill: #333; /* Màu chữ */
+}
+
+/* Đặt kiểu cho RadioButton khi được chọn */
+.radio-button-account:selected {
+    -fx-text-fill: #4AD4DD; /* Màu chữ khi chọn */
+}
+
+
+/* Đặt kiểu cho RadioButton khi di chuột qua */
+.radio-button-account:hover {
+    -fx-text-fill: white; /* Màu chữ khi di chuột qua */
+}
+
+/* Kiểu cho nhóm RadioButton */
+.radio-group-account {
+    -fx-spacing: 10; /* Khoảng cách giữa các RadioButton */
 }

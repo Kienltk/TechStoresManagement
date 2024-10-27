@@ -7,6 +7,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -34,11 +35,20 @@ public class EmployeeManagementView extends VBox {
     private ObservableList<Employee> employeeList;
     private EmployeeModel employeeModel;
     private TextField searchField;
+    private int currentPage = 1;
+    private final int itemsPerPage = 12;
+    private int totalPages;
+    private final Label pageLabel = new Label();
+
 
     public EmployeeManagementView() {
         employeeModel = new EmployeeModel();
         employeeList = FXCollections.observableArrayList();
         loadEmployees();
+        // Title Label
+        Label titleLabel = new Label("Employee Management");
+        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+
 
         tableView = new TableView<>();
         tableView.setItems(employeeList);
@@ -46,58 +56,120 @@ public class EmployeeManagementView extends VBox {
 
         searchField = new TextField();
         searchField.setPromptText("Search by Name");
+        searchField.getStyleClass().add("search-box");
         searchField.textProperty().addListener((observable, oldValue, newValue) -> searchEmployees(newValue));
 
+        HBox searchBar = new HBox(searchField);
+        searchBar.setAlignment(Pos.CENTER_RIGHT);
+        searchBar.setStyle(" -fx-padding:0 10 10 620;");
+
         Button addButton = new Button("Add Employee");
+        addButton.getStyleClass().add("button-pagination");
         addButton.setOnAction(e -> openAddEmployeeDialog());
 
-        HBox searchBox = new HBox(10, searchField, addButton);
-        searchBox.setPadding(new Insets(10));
+        HBox topControls = new HBox(10);
+        topControls.setStyle("-fx-min-width: 1000");
+        topControls.getChildren().addAll( addButton,searchBar);
 
-        VBox vbox = new VBox(searchBox, tableView);
+
+
+        Button prevButton = new Button("<-");
+        prevButton.getStyleClass().add("button-pagination");
+        Button nextButton = new Button("->");
+        nextButton.getStyleClass().add("button-pagination");
+        pageLabel.getStyleClass().add("text-pagination");
+
+        prevButton.setOnAction(e -> {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTableData();
+            }
+        });
+
+        nextButton.setOnAction(e -> {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTableData();
+            }
+        });
+
+        HBox paginationBox = new HBox(10, prevButton, pageLabel, nextButton);
+        paginationBox.setAlignment(Pos.CENTER);
+        paginationBox.setSpacing(30);
+        paginationBox.setStyle("-fx-padding: 8");
+
+        // Add everything to main layout
+        this.getStyleClass().add("vbox");
+        VBox vbox = new VBox(titleLabel,topControls, tableView,paginationBox);
         vbox.setPadding(new Insets(10));
-
-
         this.getChildren().addAll(vbox);
     }
 
 
     private void configureTableView() {
         TableColumn<Employee, Number> sttCol = new TableColumn<>("No.");
+        sttCol.setStyle("-fx-alignment: center;");
+        sttCol.setMinWidth(70);
+        sttCol.getStyleClass().add("column");
         sttCol.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(tableView.getItems().indexOf(cellData.getValue()) + 1));
         sttCol.setSortable(false);
 
         TableColumn<Employee, String> fullNameCol = new TableColumn<>("Full Name");
+        fullNameCol.setMinWidth(250);
+        fullNameCol.getStyleClass().add("column");
         fullNameCol.setCellValueFactory(data -> data.getValue().firstNameProperty().concat(" ").concat(data.getValue().lastNameProperty()));
 
         TableColumn<Employee, String> genderCol = new TableColumn<>("Gender");
+        genderCol.setMinWidth(100);
+        genderCol.getStyleClass().add("column");
         genderCol.setCellValueFactory(data -> {
             boolean isMale = data.getValue().isGender();
             return new SimpleStringProperty(isMale ? "Male" : "Female");
         });
         TableColumn<Employee, LocalDate> dobCol = new TableColumn<>("Date of Birth");
+        dobCol.setMinWidth(100);
+        dobCol.getStyleClass().add("column");
         dobCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getDob().toLocalDate()));
 
         TableColumn<Employee, String> emailCol = new TableColumn<>("Email");
+        emailCol.setMinWidth(200);
+        emailCol.getStyleClass().add("column");
         emailCol.setCellValueFactory(data -> data.getValue().emailProperty());
 
         TableColumn<Employee, String> phoneCol = new TableColumn<>("Phone Number");
+        phoneCol.setMinWidth(200);
+        phoneCol.getStyleClass().add("column");
         phoneCol.setCellValueFactory(data -> data.getValue().phoneNumberProperty());
 
         TableColumn<Employee, String> roleCol = new TableColumn<>("Role");
+        roleCol.setMinWidth(220);
+        roleCol.getStyleClass().add("column");
         roleCol.setCellValueFactory(data -> data.getValue().roleProperty());
 
         TableColumn<Employee, String> workplaceCol = new TableColumn<>("Workplace");
+        workplaceCol.setMinWidth(220);
+        workplaceCol.getStyleClass().add("column");
         workplaceCol.setCellValueFactory(data -> data.getValue().workplaceProperty());
 
         TableColumn<Employee, Double> salaryCol = new TableColumn<>("Salary");
+        salaryCol.setMinWidth(100);
+        salaryCol.getStyleClass().add("column");
         salaryCol.setCellValueFactory(data -> data.getValue().salaryProperty().asObject());
 
         TableColumn<Employee, String> actionCol = new TableColumn<>("Action");
+        actionCol.setMinWidth(185);
+        actionCol.setStyle("-fx-alignment: center");
+
         actionCol.setCellFactory(col -> new TableCell<Employee, String>() {
             private final Button viewButton = new Button("View");
             private final Button editButton = new Button("Edit");
             private final Button deleteButton = new Button("Delete");
+
+            {
+                editButton.setStyle("-fx-background-color: yellow; ");
+                deleteButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+                viewButton.setStyle("-fx-background-color: #4AD4DD; -fx-text-fill: white; ");
+            }
 
 
             protected void updateItem(String item, boolean empty) {
@@ -126,7 +198,15 @@ public class EmployeeManagementView extends VBox {
         try {
             employeeList.clear(); // Xóa danh sách cũ
             List<Employee> employees = employeeModel.getAllEmployees();
-            employeeList.addAll(employees);
+            totalPages = (int) Math.ceil((double) employees.size() / itemsPerPage);
+
+            // Get the sublist for the current page
+            int fromIndex = (currentPage - 1) * itemsPerPage;
+            int toIndex = Math.min(fromIndex + itemsPerPage, employees.size());
+            List<Employee> paginatedEmployees = employees.subList(fromIndex, toIndex);
+
+            employeeList.addAll(paginatedEmployees);
+            pageLabel.setText("Page " + currentPage + " / " + totalPages); // Update the page label
         } catch (Exception e) {
             showError("Failed to load employees: " + e.getMessage());
         }
@@ -136,22 +216,36 @@ public class EmployeeManagementView extends VBox {
         employeeList.clear();
         try {
             List<Employee> employees = employeeModel.searchEmployeesByName(name);
-            employeeList.addAll(employees);
+            totalPages = (int) Math.ceil((double) employees.size() / itemsPerPage);
+
+            // Get the sublist for the current page
+            int fromIndex = (currentPage - 1) * itemsPerPage;
+            int toIndex = Math.min(fromIndex + itemsPerPage, employees.size());
+            List<Employee> paginatedEmployees = employees.subList(fromIndex, toIndex);
+
+            employeeList.addAll(paginatedEmployees);
+            pageLabel.setText("Page " + currentPage + " / " + totalPages); // Update the page label
         } catch (SQLException e) {
             showError("Failed to search employees: " + e.getMessage());
         }
     }
 
+    private void updateTableData() {
+        loadEmployees(); // Load employees for the current page
+    };
     private void openAddEmployeeDialog() {
         Stage dialog = new Stage();
         dialog.setTitle("Add Employee");
         dialog.initModality(Modality.APPLICATION_MODAL);
 
-        VBox dialogLayout = new VBox(10);
+        GridPane dialogLayout = new GridPane();
         dialogLayout.setPadding(new Insets(10));
+        dialogLayout.setVgap(10);
+        dialogLayout.setHgap(10);
 
         // Khai báo các trường nhập liệu
         TextField firstNameField = new TextField();
+        firstNameField.getStyleClass().add("text-field-account");
         firstNameField.setPromptText("First Name");
         Label firstNameError = new Label();
         firstNameError.setTextFill(Color.RED);
@@ -159,6 +253,7 @@ public class EmployeeManagementView extends VBox {
         firstNameError.managedProperty().bind(firstNameError.visibleProperty());
 
         TextField lastNameField = new TextField();
+        lastNameField.getStyleClass().add("text-field-account");
         lastNameField.setPromptText("Last Name");
         Label lastNameError = new Label();
         lastNameError.setTextFill(Color.RED);
@@ -167,11 +262,15 @@ public class EmployeeManagementView extends VBox {
 
         ToggleGroup genderGroup = new ToggleGroup();
         RadioButton maleRadio = new RadioButton("Male");
+        maleRadio.getStyleClass().add("radio-button-account");
+
         RadioButton femaleRadio = new RadioButton("Female");
+        femaleRadio.getStyleClass().add("radio-button-account");
         maleRadio.setToggleGroup(genderGroup);
         femaleRadio.setToggleGroup(genderGroup);
 
         TextField dobField = new TextField();
+        dobField.getStyleClass().add("text-field-account");
         dobField.setPromptText("DD/MM/YYYY");
         Label dobError = new Label();
         dobError.setTextFill(Color.RED);
@@ -186,6 +285,7 @@ public class EmployeeManagementView extends VBox {
         });
 
         TextField emailField = new TextField();
+        emailField.getStyleClass().add("text-field-account");
         emailField.setPromptText("Email");
         Label emailError = new Label();
         emailError.setTextFill(Color.RED);
@@ -193,6 +293,7 @@ public class EmployeeManagementView extends VBox {
         emailError.managedProperty().bind(emailError.visibleProperty());
 
         TextField phoneField = new TextField();
+        phoneField.getStyleClass().add("text-field-account");
         phoneField.setPromptText("Phone Number");
         Label phoneError = new Label();
         phoneError.setTextFill(Color.RED);
@@ -200,9 +301,11 @@ public class EmployeeManagementView extends VBox {
         phoneError.managedProperty().bind(phoneError.visibleProperty());
 
         TextField addressField = new TextField();
+        addressField.getStyleClass().add("text-field-account");
         addressField.setPromptText("Address");
 
         TextField salaryField = new TextField();
+        salaryField.getStyleClass().add("text-field-account");
         salaryField.setPromptText("Salary");
         Label salaryError = new Label();
         salaryError.setTextFill(Color.RED);
@@ -294,8 +397,11 @@ public class EmployeeManagementView extends VBox {
         });
 
         ComboBox<Pair<Integer, String>> roleComboBox = new ComboBox<>();
+        roleComboBox.getStyleClass().add("combo-box-account");
         ComboBox<Pair<Integer, String>> storeComboBox = new ComboBox<>();
+        storeComboBox.getStyleClass().add("combo-box-account");
         ComboBox<Pair<Integer, String>> warehouseComboBox = new ComboBox<>();
+        warehouseComboBox.getStyleClass().add("combo-box-account");
 
         // Load roles từ cơ sở dữ liệu
         loadRoles(roleComboBox);
@@ -318,13 +424,14 @@ public class EmployeeManagementView extends VBox {
                 storeComboBox.setVisible(false);
                 warehouseComboBox.setVisible(true);
                 loadWarehouses(warehouseComboBox); // Load warehouses
-            }else {
+            } else {
                 storeComboBox.setVisible(false);
                 warehouseComboBox.setVisible(false);
             }
         });
 
         Button submitButton = new Button("Submit");
+        submitButton.getStyleClass().add("button-account");
         submitButton.setOnAction(e -> {
             firstNameError.setVisible(false);
             lastNameError.setVisible(false);
@@ -455,44 +562,164 @@ public class EmployeeManagementView extends VBox {
         });
 
         Button cancelButton = new Button("Cancel");
+        cancelButton.getStyleClass().add("button-cancel-account");
         cancelButton.setOnAction(e -> dialog.close());
 
-        dialogLayout.getChildren().addAll(firstNameField, firstNameError, lastNameField, lastNameError, maleRadio, femaleRadio,
-                dobField, dobError, emailField, emailError, phoneField, phoneError, addressField, salaryField, salaryError,
-                roleComboBox, storeComboBox, warehouseComboBox, submitButton, cancelButton);
+        // Add fields to the grid
+        dialogLayout.add(new Label("First Name:"), 0, 0);
+        dialogLayout.add(firstNameField, 1, 0);
+        dialogLayout.add(firstNameError, 1, 1);
 
-        Scene dialogScene = new Scene(dialogLayout, 400, 500);
+        dialogLayout.add(new Label("Last Name:"), 0, 2);
+        dialogLayout.add(lastNameField, 1, 2);
+        dialogLayout.add(lastNameError, 1, 3);
+
+        dialogLayout.add(new Label("Gender:"), 0, 4);
+        dialogLayout.add(maleRadio, 1, 4);
+        dialogLayout.add(femaleRadio, 1, 5);
+
+        dialogLayout.add(new Label("Date of Birth:"), 0, 6);
+        dialogLayout.add(dobField, 1, 6);
+        dialogLayout.add(dobError, 1, 7);
+
+        dialogLayout.add(new Label("Email:"), 0, 8);
+        dialogLayout.add(emailField, 1, 8);
+        dialogLayout.add(emailError, 1, 9);
+
+        dialogLayout.add(new Label("Phone Number:"), 0, 10);
+        dialogLayout.add(phoneField, 1, 10);
+        dialogLayout.add(phoneError, 1, 11);
+
+        dialogLayout.add(new Label("Address:"), 0, 12);
+        dialogLayout.add(addressField, 1, 12);
+
+        dialogLayout.add(new Label("Salary:"), 0, 13);
+        dialogLayout.add(salaryField, 1, 13);
+        dialogLayout.add(salaryError, 1, 14);
+
+        dialogLayout.add(new Label("Role:"), 0, 15);
+        dialogLayout.add(roleComboBox, 1, 15);
+
+        dialogLayout.add(new Label("Store:"), 0, 16);
+        dialogLayout.add(storeComboBox, 1, 16);
+
+        dialogLayout.add(new Label("Warehouse:"), 0, 17);
+        dialogLayout.add(warehouseComboBox, 1, 17);
+
+        dialogLayout.add(submitButton, 0, 18);
+        dialogLayout.add(cancelButton, 1, 18);
+
+        Scene dialogScene = new Scene(dialogLayout, 400, 630);
+        dialogScene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
         dialog.setScene(dialogScene);
         dialog.show();
     }
-
 
     private void openViewEmployeeDialog(Employee employee) {
         Stage dialog = new Stage();
         dialog.setTitle("View Employee");
         dialog.initModality(Modality.APPLICATION_MODAL);
 
-        VBox dialogLayout = new VBox(10);
-        dialogLayout.setPadding(new Insets(10));
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(10));
+        grid.setVgap(10);
+        grid.setHgap(10);
 
-        Label firstNameLabel = new Label("First Name: " + employee.getFirstName());
-        Label lastNameLabel = new Label("Last Name: " + employee.getLastName());
-        Label genderLabel = new Label("Gender: " + (employee.isGender() ? "Male" : "Female"));
-        Label dobLabel = new Label("Date of Birth: " + employee.getDob());
-        Label emailLabel = new Label("Email: " + employee.getEmail());
-        Label phoneLabel = new Label("Phone Number: " + employee.getPhoneNumber());
-        Label addressLabel = new Label("Address: " + employee.getAddress());
-        Label salaryLabel = new Label("Salary: " + employee.getSalary());
-        Label roleLabel = new Label("Role: " + employee.getRole());
-        Label workplaceLabel = new Label("Workplace: " + employee.getWorkplace());
+        // Create Labels with the variable data
+        Label firstNameLabel = new Label("First Name:");
+        Label firstNameData = new Label(employee.getFirstName());
+        firstNameLabel.getStyleClass().add("label-popup");
+        firstNameData.getStyleClass().add("data-popup");
 
+        Label lastNameLabel = new Label("Last Name:");
+        Label lastNameData = new Label(employee.getLastName());
+        lastNameLabel.getStyleClass().add("label-popup");
+        lastNameData.getStyleClass().add("data-popup");
+
+        Label genderLabel = new Label("Gender:");
+        Label genderData = new Label(employee.isGender() ? "Male" : "Female");
+        genderLabel.getStyleClass().add("label-popup");
+        genderData.getStyleClass().add("data-popup");
+
+        Label dobLabel = new Label("Date of Birth:");
+        Label dobData = new Label(employee.getDob().toString()); // Chuyển đổi sang chuỗi
+        dobLabel.getStyleClass().add("label-popup");
+        dobData.getStyleClass().add("data-popup");
+
+        Label emailLabel = new Label("Email:");
+        Label emailData = new Label(employee.getEmail());
+        emailLabel.getStyleClass().add("label-popup");
+        emailData.getStyleClass().add("data-popup");
+
+        Label phoneLabel = new Label("Phone Number:");
+        Label phoneData = new Label(employee.getPhoneNumber());
+        phoneLabel.getStyleClass().add("label-popup");
+        phoneData.getStyleClass().add("data-popup");
+
+        Label addressLabel = new Label("Address:");
+        Label addressData = new Label(employee.getAddress());
+        addressLabel.getStyleClass().add("label-popup");
+        addressData.getStyleClass().add("data-popup");
+
+        Label salaryLabel = new Label("Salary:");
+        Label salaryData = new Label(String.valueOf(employee.getSalary()));
+        salaryLabel.getStyleClass().add("label-popup");
+        salaryData.getStyleClass().add("data-popup");
+
+        Label roleLabel = new Label("Role:");
+        Label roleData = new Label(employee.getRole());
+        roleLabel.getStyleClass().add("label-popup");
+        roleData.getStyleClass().add("data-popup");
+
+        Label workplaceLabel = new Label("Workplace:");
+        Label workplaceData = new Label(employee.getWorkplace());
+        workplaceLabel.getStyleClass().add("label-popup");
+        workplaceData.getStyleClass().add("data-popup");
+        // Add labels and data to the grid
+        grid.add(firstNameLabel, 0, 0);
+        grid.add(firstNameData, 1, 0);
+
+        grid.add(lastNameLabel, 0, 1);
+        grid.add(lastNameData, 1, 1);
+
+        grid.add(genderLabel, 0, 2);
+        grid.add(genderData, 1, 2);
+
+        grid.add(dobLabel, 0, 3);
+        grid.add(dobData, 1, 3);
+
+        grid.add(emailLabel, 0, 4);
+        grid.add(emailData, 1, 4);
+
+        grid.add(phoneLabel, 0, 5);
+        grid.add(phoneData, 1, 5);
+
+        grid.add(addressLabel, 0, 6);
+        grid.add(addressData, 1, 6);
+
+        grid.add(salaryLabel, 0, 7);
+        grid.add(salaryData, 1, 7);
+
+        grid.add(roleLabel, 0, 8);
+        grid.add(roleData, 1, 8);
+
+        grid.add(workplaceLabel, 0, 9);
+        grid.add(workplaceData, 1, 9);
+
+        // Close button
         Button closeButton = new Button("Close");
+        closeButton.setAlignment(Pos.CENTER_RIGHT);
+        closeButton.getStyleClass().add("button-pagination");
         closeButton.setOnAction(e -> dialog.close());
 
-        dialogLayout.getChildren().addAll(firstNameLabel, lastNameLabel, genderLabel, dobLabel, emailLabel,
-                phoneLabel, addressLabel, salaryLabel, roleLabel, workplaceLabel, closeButton);
+        // Add the grid and button to the VBox
+        VBox vbox = new VBox(grid, closeButton);
+        vbox.setSpacing(10);
+        vbox.setPadding(new Insets(15));
 
-        Scene dialogScene = new Scene(dialogLayout, 300, 400);
+        Scene dialogScene = new Scene(vbox);
+        dialogScene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
+        dialogScene.getStylesheets().add(getClass().getResource("/view/director.css").toExternalForm());
         dialog.setScene(dialogScene);
         dialog.show();
     }
@@ -502,15 +729,23 @@ public class EmployeeManagementView extends VBox {
         dialog.setTitle("Edit Employee");
         dialog.initModality(Modality.APPLICATION_MODAL);
 
-        VBox dialogLayout = new VBox(10);
+        GridPane dialogLayout = new GridPane();
         dialogLayout.setPadding(new Insets(10));
+        dialogLayout.setVgap(10);
+        dialogLayout.setHgap(10);
 
         TextField firstNameField = new TextField(employee.getFirstName());
+        firstNameField.getStyleClass().add("text-field-account");
+
         TextField lastNameField = new TextField(employee.getLastName());
+        lastNameField.getStyleClass().add("text-field-account");
 
         ToggleGroup genderGroup = new ToggleGroup();
         RadioButton maleRadio = new RadioButton("Male");
+        maleRadio.getStyleClass().add("radio-button-account");
+
         RadioButton femaleRadio = new RadioButton("Female");
+        femaleRadio.getStyleClass().add("radio-button-account");
         if (employee.isGender()) {
             maleRadio.setSelected(true);
         } else {
@@ -520,14 +755,26 @@ public class EmployeeManagementView extends VBox {
         femaleRadio.setToggleGroup(genderGroup);
 
         DatePicker dobPicker = new DatePicker(employee.getDob().toLocalDate());
+        dobPicker.getStyleClass().add("text-field-account");
+
         TextField emailField = new TextField(employee.getEmail());
+        emailField.getStyleClass().add("text-field-account");
+
         TextField phoneField = new TextField(employee.getPhoneNumber());
+        phoneField.getStyleClass().add("text-field-account");
+
         TextField addressField = new TextField(employee.getAddress());
+        addressField.getStyleClass().add("text-field-account");
+
         TextField salaryField = new TextField(String.valueOf(employee.getSalary()));
+        salaryField.getStyleClass().add("text-field-account");
 
         ComboBox<Pair<Integer, String>> roleComboBox = new ComboBox<>();
+        roleComboBox.getStyleClass().add("combo-box-account");
         ComboBox<Pair<Integer, String>> storeComboBox = new ComboBox<>();
+        storeComboBox.getStyleClass().add("combo-box-account");
         ComboBox<Pair<Integer, String>> warehouseComboBox = new ComboBox<>();
+        warehouseComboBox.getStyleClass().add("combo-box-account");
 
         // Load roles from the database
         loadRoles(roleComboBox);
@@ -558,6 +805,7 @@ public class EmployeeManagementView extends VBox {
         roleComboBox.fireEvent(new ActionEvent());
 
         Button submitButton = new Button("Submit");
+        submitButton.getStyleClass().add("button-account");
         submitButton.setOnAction(e -> {
             // Form validation
             if (firstNameField.getText().isEmpty() || lastNameField.getText().isEmpty() ||
@@ -591,7 +839,7 @@ public class EmployeeManagementView extends VBox {
             int selectedStoreId = storeComboBox.getValue() != null ? storeComboBox.getValue().getKey() : 0;
             int selectedWarehouseId = warehouseComboBox.getValue() != null ? warehouseComboBox.getValue().getKey() : 0;
 
-            employee.setIdStore(selectedStoreId);
+            employee.setIdStore(selectedStoreId );
             employee.setIdWarehouse(selectedWarehouseId);
 
             try {
@@ -607,12 +855,49 @@ public class EmployeeManagementView extends VBox {
         });
 
         Button cancelButton = new Button("Cancel");
+        cancelButton.getStyleClass().add("button-cancel-account");
         cancelButton.setOnAction(e -> dialog.close());
 
-        dialogLayout.getChildren().addAll(firstNameField, lastNameField, maleRadio, femaleRadio, dobPicker,
-                emailField, phoneField, addressField, salaryField, roleComboBox, storeComboBox, warehouseComboBox, submitButton, cancelButton);
+        // Add fields to the grid
+        dialogLayout.add(new Label("First Name:"), 0, 0);
+        dialogLayout.add(firstNameField, 1, 0);
 
-        Scene dialogScene = new Scene(dialogLayout, 400, 500);
+        dialogLayout.add(new Label("Last Name:"), 0, 1);
+        dialogLayout.add(lastNameField, 1, 1);
+
+        dialogLayout.add(new Label("Gender:"), 0, 2);
+        dialogLayout.add(maleRadio, 1, 2);
+        dialogLayout.add(femaleRadio, 1, 3);
+
+        dialogLayout.add(new Label("Date of Birth:"), 0, 4);
+        dialogLayout.add(dobPicker, 1, 4);
+
+        dialogLayout.add(new Label("Email:"), 0, 5);
+        dialogLayout.add(emailField, 1, 5);
+
+        dialogLayout.add(new Label("Phone Number:"), 0, 6);
+        dialogLayout.add(phoneField, 1, 6);
+
+        dialogLayout.add(new Label("Address:"), 0, 7);
+        dialogLayout.add(addressField, 1, 7);
+
+        dialogLayout.add(new Label("Salary:"), 0, 8);
+        dialogLayout.add(salaryField, 1, 8);
+
+        dialogLayout.add(new Label("Role:"), 0, 9);
+        dialogLayout.add(roleComboBox, 1, 9);
+
+        dialogLayout.add(new Label("Store:"), 0, 10);
+        dialogLayout.add(storeComboBox, 1, 10);
+
+        dialogLayout.add(new Label("Warehouse:"), 0, 11);
+        dialogLayout.add(warehouseComboBox, 1, 11);
+
+        dialogLayout.add(submitButton, 0, 12);
+        dialogLayout.add(cancelButton, 1, 12);
+
+        Scene dialogScene = new Scene(dialogLayout, 400, 630);
+        dialogScene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
         dialog.setScene(dialogScene);
         dialog.show();
     }

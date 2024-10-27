@@ -75,13 +75,16 @@ public class CashierController {
         // Tên khách hàng
         Label nameLabel = new Label("Customer Name:");
         TextField nameInput = new TextField();
+        nameInput.getStyleClass().add("text-field-account");
 
         // Số điện thoại
         Label phoneLabel = new Label("Phone Number:");
         TextField phoneInput = new TextField();
+        phoneInput.getStyleClass().add("text-field-account");
 
         // Nút submit để thêm khách hàng
         Button submitButton = new Button("Submit");
+        submitButton.getStyleClass().add("button-account");
         submitButton.setOnAction(e -> {
             String name = nameInput.getText();
             String phoneNumber = phoneInput.getText();
@@ -91,7 +94,8 @@ public class CashierController {
 
         layout.getChildren().addAll(nameLabel, nameInput, phoneLabel, phoneInput, submitButton);
 
-        Scene scene = new Scene(layout, 300, 200);
+        Scene scene = new Scene(layout, 300, 250);
+        scene.getStylesheets().add(CashierController.class.getResource("/view/popup.css").toExternalForm());
         stage.setScene(scene);
         stage.show();
     }

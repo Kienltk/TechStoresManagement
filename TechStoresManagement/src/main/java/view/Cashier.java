@@ -148,16 +148,18 @@ public class Cashier extends Application {
         stockColumn.setCellValueFactory(cellData -> cellData.getValue().stockProperty().asObject());
 
         TableColumn<Product, Double> salePriceColumn = new TableColumn<>("salePrice");
-        salePriceColumn.setPrefWidth(130);
+        salePriceColumn.setPrefWidth(120);
         salePriceColumn.setCellValueFactory(cellData -> cellData.getValue().salePriceProperty().asObject());
 
         TableColumn<Product, HBox> actionColumn = new TableColumn<>("Action");
-        actionColumn.setPrefWidth(120);
+        actionColumn.setPrefWidth(125);
         actionColumn.setCellValueFactory(cellData -> {
             Product product = cellData.getValue();
             HBox actionBox = new HBox(5);  // HBox để chứa các nút
             Button addButton = new Button("Add");
+            addButton.getStyleClass().add("category-button");
             Button viewDetailsButton = new Button("View");
+            viewDetailsButton.getStyleClass().add("category-button");
 
             addButton.setOnAction(e -> {
                 int productId = product.getId();
@@ -385,7 +387,9 @@ public class Cashier extends Application {
 
 // Khách hàng
         Label customerLabel = new Label("Customer:");
+        customerLabel.getStyleClass().add("label-popup");
         TextField customerPhoneInput = new TextField();
+        customerPhoneInput.getStyleClass().add("text-field-account");
         customerPhoneInput.setPromptText("Enter customer phone number");
 
 // ListView để hiển thị tên khách hàng
@@ -464,14 +468,21 @@ public class Cashier extends Application {
 
 // Nút thêm khách hàng mới
         Button addCustomerButton = new Button("Add Customer");
+        addCustomerButton.getStyleClass().add("button-account");
         addCustomerButton.setOnAction(e -> CashierController.showAddCustomerScreen());
 
 // Tổng tiền đơn hàng
-        Label totalPriceLabel = new Label("Total: $" + String.format("%.2f", totalSalePrice));
+        Label totalPriceLabel = new Label("Total: ");
+        totalPriceLabel.getStyleClass().add("label-popup");
+        totalPriceLabel.setStyle("-fx-padding: 20 ;");
+        Label totalPrice = new Label("$"+ String.format("%.2f", totalSalePrice));
+        totalPrice.getStyleClass().add("data-popup");
 
 // Tiền khách trả
-        Label paymentLabel = new Label("Customer payment:");
+        Label paymentLabel = new Label("Customer\n payment:");
+        paymentLabel.getStyleClass().add("label-popup");
         TextField paymentInput = new TextField();
+        paymentInput.getStyleClass().add("text-field-account");
         paymentInput.setPromptText("Enter customer payment");
 
 // Label cảnh báo nếu tiền trả ít hơn tổng tiền
@@ -502,6 +513,7 @@ public class Cashier extends Application {
 
 // Nút xác nhận thanh toán
         Button submitButton = new Button("Submit");
+        submitButton.getStyleClass().add("button-account");
         submitButton.setOnAction(e -> {
             double total = totalSalePrice;
             try {
@@ -553,7 +565,8 @@ public class Cashier extends Application {
         gridPane.add(customerNameLabel, 1, 0); // Hiển thị tên khách hàng
         gridPane.add(changeCustomerButton, 2, 0); // Nút đổi
         gridPane.add(addCustomerButton, 0, 3, 2, 1); // Chiếm 2 cột cho nút thêm
-        gridPane.add(totalPriceLabel, 0, 4, 2, 1); // Chiếm 2 cột cho tổng tiền
+        gridPane.add(totalPriceLabel, 0, 4);// Chiếm 2 cột cho tổng tiền
+        gridPane.add(totalPrice, 1, 4);
         gridPane.add(paymentLabel, 0, 5);
         gridPane.add(paymentInput, 1, 5);
         gridPane.add(warningLabel, 0, 6, 2, 1); // Chiếm 2 cột cho cảnh báo
@@ -564,7 +577,8 @@ public class Cashier extends Application {
         layout.getChildren().addAll(titleLabel, gridPane);
 
 // Thiết lập layout cho scene
-        Scene scene = new Scene(layout, 400, 400);
+        Scene scene = new Scene(layout, 450, 450);
+        scene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
         stage.setScene(scene);
         stage.show();
 
