@@ -44,9 +44,9 @@ public class GeneralView extends VBox {
     private Map<Integer, Map<String, BigDecimal>> financialData;
 
     private Map<String, BigDecimal> turnoverStoreData;
-    private PieChart pieChart;
-    private Label label;
-    private BorderPane root;
+    private PieChart pieChartTurnoverStore;
+    private Label labelTurnoverStore;
+    private BorderPane rootTurnoverStore;
 
 
 
@@ -101,14 +101,14 @@ public class GeneralView extends VBox {
         VBox comboBox = new VBox(10);
         comboBox.getChildren().addAll(new Label("Choose Criteria:"), criteriaComboBox, monthComboBox, yearComboBox);
 
-        HBox charts = new HBox(20, comboBox, createBarChart(), createPieChart());
+        HBox charts = new HBox(20, comboBox, createBarChart(), createPieChartTurnoverStore());
 
         this.getChildren().addAll(vbox, charts);
 
         controller.handleReload();
         updateData();
         updateBarChart(barChart);
-        updatePieChart();
+        updatePieChartTurnoverStore();
     }
 
     private StackPane createInfoPane(Text label) {
@@ -206,13 +206,13 @@ public class GeneralView extends VBox {
                     turnoverStoreData = model.getTurnoverStoreDataByYear(yearComboBox.getValue());
                     System.out.println(financialData);
                     updateBarChart(barChart);
-                    updatePieChart();
+                    updatePieChartTurnoverStore();
                 });
                 financialData = model.getFinancialDataByYear(yearComboBox.getValue());
                 turnoverStoreData = model.getTurnoverStoreDataByYear(yearComboBox.getValue());
                 System.out.println(financialData);
                 updateBarChart(barChart);
-                updatePieChart();
+                updatePieChartTurnoverStore();
             }
             case "Total" -> {
                 monthComboBox.setVisible(false); // Ẩn ComboBox tháng
@@ -222,7 +222,7 @@ public class GeneralView extends VBox {
                 turnoverStoreData = model.getTurnoverStoreData();
                 System.out.println(financialData);
                 updateBarChart(barChart);
-                updatePieChart();
+                updatePieChartTurnoverStore();
             }
             case "Month" -> {
                 monthComboBox.setVisible(true); // Hiện ComboBox tháng
@@ -236,7 +236,7 @@ public class GeneralView extends VBox {
                     turnoverStoreData = model.getTurnoverStoreDataByMonth(yearComboBox.getValue(), monthComboBox.getValue());
                     System.out.println(financialData);
                     updateBarChart(barChart);
-                    updatePieChart();
+                    updatePieChartTurnoverStore();
                 });
                 monthComboBox.setOnAction(event -> {
                     System.out.println("Tiêu chí: Ngày - Tháng: " + monthComboBox.getValue() + " - Năm: " + yearComboBox.getValue());
@@ -244,7 +244,7 @@ public class GeneralView extends VBox {
                     turnoverStoreData = model.getTurnoverStoreDataByMonth(yearComboBox.getValue(), monthComboBox.getValue());
                     System.out.println(financialData);
                     updateBarChart(barChart);
-                    updatePieChart();
+                    updatePieChartTurnoverStore();
                 });
 
                 // Gọi lại khi khởi chạy để lấy dữ liệu ngay lập tức
@@ -252,7 +252,7 @@ public class GeneralView extends VBox {
                 turnoverStoreData = model.getTurnoverStoreDataByMonth(yearComboBox.getValue(), monthComboBox.getValue());
                 System.out.println(financialData);
                 updateBarChart(barChart);
-                updatePieChart();
+                updatePieChartTurnoverStore();
             }
         }
     }
@@ -292,17 +292,17 @@ public class GeneralView extends VBox {
         barChart.getData().addAll(seriesTurnover, seriesCapital, seriesProfit);
     }
 
-    private BorderPane createPieChart() {
+    private BorderPane createPieChartTurnoverStore() {
         ObservableList<PieChart.Data> details = FXCollections.observableArrayList(); // Danh sách dữ liệu cho biểu đồ
         turnoverStoreData = model.getTurnoverStoreDataByYear(yearComboBox.getValue()); // Lấy dữ liệu doanh thu theo năm
 
         // Khởi tạo layout
-        root = new BorderPane();
+        rootTurnoverStore = new BorderPane();
 
         // Tạo tiêu đề cho biểu đồ
         Label chartTitle = new Label("Turnover Data by Store");
         chartTitle.setFont(Font.font("SanSerif", FontWeight.BOLD, 15)); // Cài đặt font cho tiêu đề
-        root.setTop(chartTitle); // Đặt tiêu đề vào trên cùng layout
+        rootTurnoverStore.setTop(chartTitle); // Đặt tiêu đề vào trên cùng layout
 
         // Kiểm tra xem turnoverStoreData có dữ liệu hay không
         if (turnoverStoreData.isEmpty()) {
@@ -310,8 +310,8 @@ public class GeneralView extends VBox {
             Label noDataLabel = new Label("Không có dữ liệu");
             noDataLabel.setFont(Font.font("SanSerif", FontWeight.BOLD, 15)); // Cài đặt font cho label
             noDataLabel.setTextFill(Color.RED); // Đặt màu cho chữ
-            root.setCenter(noDataLabel); // Đặt thông báo vào giữa layout
-            return root; // Trả về layout chứa thông báo
+            rootTurnoverStore.setCenter(noDataLabel); // Đặt thông báo vào giữa layout
+            return rootTurnoverStore; // Trả về layout chứa thông báo
         }
 
         // Nếu có dữ liệu, tiếp tục xử lý
@@ -326,51 +326,51 @@ public class GeneralView extends VBox {
         // Tính tổng giá trị của biểu đồ
         double totalValue = details.stream().mapToDouble(PieChart.Data::getPieValue).sum();
 
-        pieChart = new PieChart(); // Tạo biểu đồ hình tròn
-        pieChart.setData(details); // Gán dữ liệu cho biểu đồ
+        pieChartTurnoverStore = new PieChart(); // Tạo biểu đồ hình tròn
+        pieChartTurnoverStore.setData(details); // Gán dữ liệu cho biểu đồ
 
         // Đặt biểu đồ vào giữa layout
-        root.setCenter(pieChart);
+        rootTurnoverStore.setCenter(pieChartTurnoverStore);
 
-        label = new Label(); // Khởi tạo label để hiển thị thông tin
-        label.setFont(Font.font("SanSerif", FontWeight.BOLD, 15)); // Cài đặt font cho label
+        labelTurnoverStore = new Label(); // Khởi tạo label để hiển thị thông tin
+        labelTurnoverStore.setFont(Font.font("SanSerif", FontWeight.BOLD, 15)); // Cài đặt font cho label
 
         // Thêm sự kiện cho từng phần của biểu đồ
-        pieChart.getData().forEach(data -> {
+        pieChartTurnoverStore.getData().forEach(data -> {
             // Sự kiện cho khi chuột vào vùng của phần dữ liệu
             data.getNode().addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
                 double percentage = (data.getPieValue() / totalValue) * 100; // Tính tỷ lệ phần trăm
-                label.setText(data.getName() + " Revenue: " + (int) data.getPieValue() +
+                labelTurnoverStore.setText(data.getName() + " Revenue: " + (int) data.getPieValue() +
                         "\nPercentage: " + String.format("%.2f", percentage) + "%"); // Cập nhật thông tin cho label
             });
 
             // Sự kiện cho khi chuột rời khỏi vùng của phần dữ liệu
             data.getNode().addEventHandler(MouseEvent.MOUSE_EXITED, e -> {
-                label.setText(""); // Xóa nội dung của label khi chuột rời khỏi vùng
+                labelTurnoverStore.setText(""); // Xóa nội dung của label khi chuột rời khỏi vùng
             });
         });
 
-        root.setBottom(label); // Đặt label vào dưới cùng layout
-        BorderPane.setMargin(label, new Insets(0, 0, 10, 120));
+        rootTurnoverStore.setBottom(labelTurnoverStore); // Đặt label vào dưới cùng layout
+        BorderPane.setMargin(labelTurnoverStore, new Insets(0, 0, 10, 120));
 
-        return root; // Trả về layout chứa biểu đồ
+        return rootTurnoverStore; // Trả về layout chứa biểu đồ
     }
 
-    private void updatePieChart() {
+    private void updatePieChartTurnoverStore() {
         ObservableList<PieChart.Data> details = FXCollections.observableArrayList();
 
-        if (pieChart == null) {
-            label = new Label();
-            label.setText("Không có dữ liệu"); // Thêm biểu đ�� vào giữa layout
+        if (pieChartTurnoverStore == null) {
+            labelTurnoverStore = new Label();
+            labelTurnoverStore.setText("Không có dữ liệu"); // Thêm biểu đ�� vào giữa layout
             return; // Kết thúc phương thức nếu chưa tồn tại biểu đ��
         }
 
         if (turnoverStoreData.isEmpty()) {
-            pieChart.setData(FXCollections.observableArrayList()); // Xóa dữ liệu biểu đồ
-            label.setText("Không có dữ liệu"); // Cập nhật thông báo
+            pieChartTurnoverStore.setData(FXCollections.observableArrayList()); // Xóa dữ liệu biểu đồ
+            labelTurnoverStore.setText("Không có dữ liệu"); // Cập nhật thông báo
             return; // Kết thúc phương thức nếu không có dữ liệu
         } else {
-            label.setText(""); // Nếu có dữ liệu, xóa thông báo
+            labelTurnoverStore.setText(""); // Nếu có dữ liệu, xóa thông báo
         }
 
         // Cập nhật dữ liệu biểu đồ
@@ -383,23 +383,23 @@ public class GeneralView extends VBox {
         }
 
         // Cập nhật dữ liệu cho biểu đồ
-        pieChart.setData(details);
+        pieChartTurnoverStore.setData(details);
 
         // Tính tổng giá trị của biểu đồ
         double totalValue = details.stream().mapToDouble(PieChart.Data::getPieValue).sum();
 
         // Cập nhật sự kiện cho từng phần của biểu đồ
-        pieChart.getData().forEach(data -> {
+        pieChartTurnoverStore.getData().forEach(data -> {
             // Sự kiện cho khi chuột vào vùng của phần dữ liệu
             data.getNode().addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
                 double percentage = (data.getPieValue() / totalValue) * 100; // Tính tỷ lệ phần trăm
-                label.setText(data.getName() + " Revenue: " + (int) data.getPieValue() +
+                labelTurnoverStore.setText(data.getName() + " Revenue: " + (int) data.getPieValue() +
                         "\nPercentage: " + String.format("%.2f", percentage) + "%"); // Cập nhật thông tin cho label
             });
 
             // Sự kiện cho khi chuột rời khỏi vùng của phần dữ liệu
             data.getNode().addEventHandler(MouseEvent.MOUSE_EXITED, e -> {
-                label.setText(""); // Xóa nội dung của label khi chuột rời khỏi vùng
+                labelTurnoverStore.setText(""); // Xóa nội dung của label khi chuột rời khỏi vùng
             });
         });
     }
