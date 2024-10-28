@@ -41,7 +41,7 @@ public class CashierController {
     // Xử lý đơn hàng
     public static void processOrder(String customerPhone, Map<Integer, Integer> cartItems, double total, String employeeName, int idStore) {
         int customerId = CashierModel.getCustomerIdByPhone(customerPhone);
-        System.out.println(customerId);
+        System.out.println(customerPhone);
         if (customerId == -1) {
             System.out.println("Customer not found");
             return;

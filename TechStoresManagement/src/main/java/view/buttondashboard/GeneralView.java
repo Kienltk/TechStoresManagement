@@ -357,9 +357,14 @@ public class GeneralView extends VBox {
     }
 
     private void updatePieChart() {
-        ObservableList<PieChart.Data> details = FXCollections.observableArrayList(); // Danh sách dữ liệu cho biểu đồ
+        ObservableList<PieChart.Data> details = FXCollections.observableArrayList();
 
-        // Kiểm tra xem turnoverStoreData có dữ liệu hay không
+        if (pieChart == null) {
+            label = new Label();
+            label.setText("Không có dữ liệu"); // Thêm biểu đ�� vào giữa layout
+            return; // Kết thúc phương thức nếu chưa tồn tại biểu đ��
+        }
+
         if (turnoverStoreData.isEmpty()) {
             pieChart.setData(FXCollections.observableArrayList()); // Xóa dữ liệu biểu đồ
             label.setText("Không có dữ liệu"); // Cập nhật thông báo
@@ -398,8 +403,4 @@ public class GeneralView extends VBox {
             });
         });
     }
-
-
-
-
 }

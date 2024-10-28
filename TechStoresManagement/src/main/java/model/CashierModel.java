@@ -186,7 +186,6 @@ public class CashierModel implements ICommon<Product> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return customers;
     }
 
@@ -271,6 +270,7 @@ public class CashierModel implements ICommon<Product> {
 
         return customerId;  // Nếu không tìm thấy, trả về -1
     }
+
 
 
     public static Product getOne(int productId) {

@@ -25,6 +25,6 @@ public class Customer {
 
     @Override
     public String toString() {
-        return name; // Hiển thị tên khách hàng trong dropdown
+        return " " + name + " - " + phoneNumber;
     }
 }

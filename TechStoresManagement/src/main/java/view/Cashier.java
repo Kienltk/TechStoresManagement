@@ -434,6 +434,7 @@ public class Cashier extends Application {
                 // Ẩn input và list
                 customerPhoneInput.setVisible(false); // Ẩn ô nhập
                 customerPhoneInput.setManaged(false); // Không quản lý không gian hiển thị
+                customerPhoneInput.setText(newValue.getPhoneNumber()); //
 
                 customerListView.setVisible(false); // Ẩn danh sách khách hàng
                 customerListView.setManaged(false); // Không quản lý không gian hiển thị
@@ -522,6 +523,7 @@ public class Cashier extends Application {
                     if (customerPhoneInput.getText() == null || customerPhoneInput.getText().isEmpty()) {
                         customerPhoneInput.setText("1234567890");
                     }
+                    System.out.println(customerPhoneInput.getText());
                     CashierController.processOrder(customerPhoneInput.getText(), cartItems, total, employeeName, idStore);
                     Alert alert = new Alert(Alert.AlertType.INFORMATION, "Payment successful!");
                     alert.showAndWait();

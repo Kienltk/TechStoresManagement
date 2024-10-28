@@ -63,14 +63,14 @@ public class GeneralModel {
                 double turnover = turnoverResult.getDouble("turnover");
                 double profit = turnoverResult.getDouble("profit");
 
-                // Lấy capital từ map
                 double capital = capitalMap.getOrDefault(idStore, 0.0); // Mặc định capital là 0 nếu không tìm thấy trong import_store
 
                 // Kiểm tra giá trị có giống nhau không
+                System.out.println(turnover + " " + lastTurnoverMap.getOrDefault(idStore, 0.0));
                 if (lastTurnoverMap.getOrDefault(idStore, 0.0) == turnover &&
                         lastCapitalMap.getOrDefault(idStore, 0.0) == capital &&
                         lastProfitMap.getOrDefault(idStore, 0.0) == profit) {
-                    continue; // Không thực hiện insert nếu giống
+                    return; // Không thực hiện insert nếu giống
                 }
 
                 // Chèn vào store_financial
