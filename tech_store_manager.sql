@@ -68,6 +68,7 @@ CREATE TABLE import_warehouse
     name varchar(50),
     total               decimal(12,2),
     product_import_date datetime,
+	status varchar(50),
     foreign key (id_warehouse) references warehouses (id)
 );
 
@@ -110,6 +111,7 @@ CREATE TABLE import_store
     id_warehouse int,
     total         decimal(10, 2),
     received_date datetime,
+    status varchar(50),
     foreign key (id_warehouse) references warehouses (id),
     foreign key (id_store) references stores (id)
 );
