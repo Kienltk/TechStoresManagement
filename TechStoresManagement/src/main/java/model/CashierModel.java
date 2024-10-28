@@ -207,7 +207,6 @@ public class CashierModel implements ICommon<Product> {
     // Xử lý mua hàng, cập nhật số lượng trong kho
     public static void handlePurchase(int productId, int quantity, int storeId) {
         String query = "UPDATE products_store SET quantity = quantity - ? WHERE id_product = ? AND id_store = ?";
-        System.out.println(storeId);
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {

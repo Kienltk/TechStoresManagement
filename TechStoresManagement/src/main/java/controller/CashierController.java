@@ -41,7 +41,6 @@ public class CashierController {
     // Xử lý đơn hàng
     public static void processOrder(String customerPhone, Map<Integer, Integer> cartItems, double total, String employeeName, int idStore) {
         int customerId = CashierModel.getCustomerIdByPhone(customerPhone);
-        System.out.println(customerPhone);
         if (customerId == -1) {
             System.out.println("Customer not found");
             return;
@@ -50,8 +49,7 @@ public class CashierController {
         double profit = total - getTotalPurchasePrice(cartItems);
 
         // Tạo hóa đơn
-        int receiptId = CashierModel.createReceipt(customerId, idStore, employeeName, total, profit, cartItems);
-        System.out.println(receiptId);
+        CashierModel.createReceipt(customerId, idStore, employeeName, total, profit, cartItems);
 
         // Cập nhật số lượng sản phẩm trong kho và làm trống giỏ hàng
         for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {

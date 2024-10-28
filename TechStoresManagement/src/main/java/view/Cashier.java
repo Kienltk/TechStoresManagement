@@ -46,6 +46,7 @@ public class Cashier extends Application {
     private final ListView<HBox> orderListView = new ListView<>();
     private final Label totalLabel = new Label("Total:                                                                        $0.00");
     private double totalSalePrice = 0;
+    private String phoneNumber;
     private final Map<Integer, Integer> cartItems = new HashMap<>();
     CashierModel cm = new CashierModel();
 
@@ -434,7 +435,7 @@ public class Cashier extends Application {
                 // Ẩn input và list
                 customerPhoneInput.setVisible(false); // Ẩn ô nhập
                 customerPhoneInput.setManaged(false); // Không quản lý không gian hiển thị
-                customerPhoneInput.setText(newValue.getPhoneNumber()); //
+                phoneNumber = newValue.getPhoneNumber();
 
                 customerListView.setVisible(false); // Ẩn danh sách khách hàng
                 customerListView.setManaged(false); // Không quản lý không gian hiển thị
@@ -517,25 +518,20 @@ public class Cashier extends Application {
         submitButton.getStyleClass().add("button-account");
         submitButton.setOnAction(e -> {
             double total = totalSalePrice;
+            String phone = phoneNumber;
             try {
                 double payment = Double.parseDouble(paymentInput.getText());
                 if (payment >= total) {
                     if (customerPhoneInput.getText() == null || customerPhoneInput.getText().isEmpty()) {
-                        customerPhoneInput.setText("1234567890");
+                        phone = "1234567890";
                     }
-                    System.out.println(customerPhoneInput.getText());
-                    CashierController.processOrder(customerPhoneInput.getText(), cartItems, total, employeeName, idStore);
+                    CashierController.processOrder(phone, cartItems, total, employeeName, idStore);
                     Alert alert = new Alert(Alert.AlertType.INFORMATION, "Payment successful!");
                     alert.showAndWait();
                     for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
                         int productId = entry.getKey();
                         int quantity = entry.getValue();
                         CashierModel.handlePurchase(productId, quantity, idStore); // Xử lý giao dịch
-//                        Product product = cm.getOne(idStore, productId); // Lấy sản phẩm theo ID
-//                        if (product != null) {
-//                            int newStock = product.getStock() - quantity; // Tính số lượng mới
-//                            product.setStock(newStock); // Cập nhật số lượng sản phẩm
-//                        }
                     }
 
                     cartItems.clear();
