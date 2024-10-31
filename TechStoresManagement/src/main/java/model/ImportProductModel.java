@@ -56,7 +56,7 @@ public class ImportProductModel {
         }
     }
 
-    private ArrayList<Import> getAllImportWarehouse() {
+    public ArrayList<Import> getAllImportWarehouse() {
         ArrayList<Import> list = new ArrayList<Import>();
         String sql = "SELECT import_warehouse.name as import_name, warehouses.name, total, " +
                 "product_import_date, status " +
@@ -71,7 +71,7 @@ public class ImportProductModel {
         return list;
     }
 
-    private ArrayList<Import> getAllImportStore() {
+    public ArrayList<Import> getAllImportStore() {
         ArrayList<Import> list = new ArrayList<Import>();
         String sql = "SELECT import_store.name as import_name, stores.name, warehouses.name, total, " +
                 "received_date, status " +
@@ -87,7 +87,7 @@ public class ImportProductModel {
         return list;
     }
 
-    private Import getOneFromWarehouse(int importId) {
+    public Import getOneFromWarehouse(int importId) {
         Import imp = new Import();
         String sql = "SELECT import_warehouse.name as import_name, warehouses.name, total, " +
                 "product_import_date, status " +
@@ -109,7 +109,7 @@ public class ImportProductModel {
         return null;
     }
 
-    private boolean createInvoiceForWarehouse(Import imp, Map<Integer, Integer> importItems, int idWarehouse) {
+    public boolean createInvoiceForWarehouse(Import imp, Map<Integer, Integer> importItems, int idWarehouse) {
         String sql = "INSERT INTO import_warehouse (id_warehouse, name, total, product_import_date, status)" +
                 "VALUES (?, ?, ?, ?, ?)";
         String sqlDetails = "INSERT INTO import_warehouse_details (id_import, id_product, quantity, total)" +
@@ -126,7 +126,7 @@ public class ImportProductModel {
                 int productId = entry.getKey();
                 int quantity = entry.getValue();
                 Product product = getOne(productId);
-                if (product!= null) {
+                if (product != null) {
                     psDetails.setInt(1, getFinalIdFromImportWarehouse());
                     psDetails.setInt(2, product.getId());
                     psDetails.setInt(3, quantity);
@@ -143,7 +143,7 @@ public class ImportProductModel {
         return false;
     }
 
-    private boolean createInvoiceForStore(Import imp, Map<Integer, Integer> importItems, int idWarehouse, int idStore) {
+    public boolean createInvoiceForStore(Import imp, Map<Integer, Integer> importItems, int idWarehouse, int idStore) {
         String sql = "INSERT INTO import_store (name, id_store, id_warehouse, total, received_date, status)" +
                 "VALUES (?, ?, ?, ?, ?, ?)";
         String sqlDetails = "INSERT INTO import_store_details (id_import, id_product, quantity, total)" +
@@ -161,7 +161,7 @@ public class ImportProductModel {
                 int productId = entry.getKey();
                 int quantity = entry.getValue();
                 Product product = getOne(productId);
-                if (product!= null) {
+                if (product != null) {
                     psDetails.setInt(1, getFinalIdFromImportStore());
                     psDetails.setInt(2, product.getId());
                     psDetails.setInt(3, quantity);
@@ -176,6 +176,52 @@ public class ImportProductModel {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public ArrayList<Product> getAllImportWarehouseProducts(int importId) {
+        ArrayList<Product> list = new ArrayList<>();
+        String sql = "SELECT id_product" +
+                "FROM import_warehouse_details " +
+                "JOIN products ON import_warehouse_details.id_product = products.id" +
+                "WHERE id_import =?;";
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, importId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                int productId = rs.getInt("id_product");
+                Product product = getOne(productId);
+                if (product!= null) {
+                    list.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public ArrayList<Product> getAllImportStoreProducts(int importId) {
+        ArrayList<Product> list = new ArrayList<>();
+        String sql = "SELECT id_product" +
+                "FROM import_Store_details " +
+                "JOIN products ON import_warehouse_details.id_product = products.id" +
+                "WHERE id_import =?;";
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, importId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                int productId = rs.getInt("id_product");
+                Product product = getOne(productId);
+                if (product!= null) {
+                    list.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
     private ArrayList<Product> getAllProducts() {
@@ -195,6 +241,7 @@ public class ImportProductModel {
         }
         return list;
     }
+
 
     public int getFinalIdFromImportWarehouse() {
         String sql = "SELECT MAX(id) AS max_id FROM import_warehouse";
