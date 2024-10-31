@@ -42,6 +42,16 @@ public class Product {
     public Product(int id, String image, String name, String brand, double purchasePrice, double salePrice) {
         this(id, image, name, brand, 0, salePrice, purchasePrice, ""); // Default image and category to empty strings
     }
+
+    // Constructor for Invoice
+    public Product(int id, String image, String name, String brand, double purchasePrice) {
+        this.id = new SimpleIntegerProperty(id);
+        this.image = new SimpleStringProperty(image);
+        this.name = new SimpleStringProperty(name);
+        this.brand = new SimpleStringProperty(brand);
+        this.purchasePrice = new SimpleDoubleProperty(purchasePrice);
+    }
+
     public Product(int id, String name, String brand, int stock, int soldQuantity, double profit) {
         this.id = new SimpleIntegerProperty(id);
         this.image = new SimpleStringProperty(""); // Giá trị mặc định cho image
