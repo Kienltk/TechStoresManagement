@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Map;
 
+import static model.CashierModel.getOne;
+
 public class ImportProductModel {
 
     private Import getImportForWarehouse(ResultSet rs) throws SQLException {
@@ -107,7 +109,7 @@ public class ImportProductModel {
         return null;
     }
 
-    private boolean createInvoiceForWarehouse(Import imp, Map<Integer, Integer> importItems) {
+    private boolean createInvoiceForWarehouse(Import imp, Map<Integer, Integer> importItems, int idWarehouse) {
         String sql = "INSERT INTO import_warehouse (id_warehouse, name, total, product_import_date, status)" +
                 "VALUES (?, ?, ?, ?, ?)";
         String sqlDetails = "INSERT INTO import_warehouse_details (id_import, id_product, quantity, total)" +
@@ -115,14 +117,61 @@ public class ImportProductModel {
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              PreparedStatement psDetails = conn.prepareStatement(sqlDetails);) {
-            ps.setInt(1, importItems.size());
+            ps.setInt(1, idWarehouse);
             ps.setString(2, imp.getImportName());
             ps.setDouble(3, imp.getTotal());
             ps.setObject(4, imp.getDate());
             ps.setString(5, imp.getStatus());
             for (Map.Entry<Integer, Integer> entry : importItems.entrySet()) {
-
+                int productId = entry.getKey();
+                int quantity = entry.getValue();
+                Product product = getOne(productId);
+                if (product!= null) {
+                    psDetails.setInt(1, getFinalIdFromImportWarehouse());
+                    psDetails.setInt(2, product.getId());
+                    psDetails.setInt(3, quantity);
+                    psDetails.setDouble(4, product.getPurchasePrice() * quantity);
+                    psDetails.addBatch();
+                }
             }
+            ps.executeUpdate();
+            psDetails.executeBatch();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private boolean createInvoiceForStore(Import imp, Map<Integer, Integer> importItems, int idWarehouse, int idStore) {
+        String sql = "INSERT INTO import_store (name, id_store, id_warehouse, total, received_date, status)" +
+                "VALUES (?, ?, ?, ?, ?, ?)";
+        String sqlDetails = "INSERT INTO import_store_details (id_import, id_product, quantity, total)" +
+                "Values (?, ?, ?, ?);";
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             PreparedStatement psDetails = conn.prepareStatement(sqlDetails);) {
+            ps.setString(1, imp.getImportName());
+            ps.setInt(2, idStore);
+            ps.setInt(3, idWarehouse);
+            ps.setDouble(4, imp.getTotal());
+            ps.setObject(5, imp.getDate());
+            ps.setString(6, imp.getStatus());
+            for (Map.Entry<Integer, Integer> entry : importItems.entrySet()) {
+                int productId = entry.getKey();
+                int quantity = entry.getValue();
+                Product product = getOne(productId);
+                if (product!= null) {
+                    psDetails.setInt(1, getFinalIdFromImportStore());
+                    psDetails.setInt(2, product.getId());
+                    psDetails.setInt(3, quantity);
+                    psDetails.setDouble(4, product.getPurchasePrice() * quantity);
+                    psDetails.addBatch();
+                }
+            }
+            ps.executeUpdate();
+            psDetails.executeBatch();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -147,4 +196,33 @@ public class ImportProductModel {
         return list;
     }
 
+    public int getFinalIdFromImportWarehouse() {
+        String sql = "SELECT MAX(id) AS max_id FROM import_warehouse";
+        try (Connection con = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                int maxId = rs.getInt("max_id");
+                return maxId;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public int getFinalIdFromImportStore() {
+        String sql = "SELECT MAX(id) AS max_id FROM import_store";
+        try (Connection con = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                int maxId = rs.getInt("max_id");
+                return maxId;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
 }
