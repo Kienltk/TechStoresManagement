@@ -23,7 +23,6 @@ public class StoreModel {
             stmt.setString(1, "%" + search + "%");
             stmt.setString(2, "%" + search + "%");
             ResultSet rs = stmt.executeQuery();
-
             while (rs.next()) {
                 Store store = new Store(
                         rs.getInt("id"),

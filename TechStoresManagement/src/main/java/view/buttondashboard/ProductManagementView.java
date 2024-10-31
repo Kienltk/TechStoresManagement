@@ -277,7 +277,6 @@ public class ProductManagementView extends VBox {
             fromIndex = 0;
             toIndex = Math.min(itemsPerPage, sourceList.size());
         }
-
         ObservableList<Product> paginatedList = FXCollections.observableArrayList(sourceList.subList(fromIndex, toIndex));
         productTable.setItems(paginatedList);
     }

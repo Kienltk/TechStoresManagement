@@ -38,10 +38,27 @@ public class Product {
         this(id, image, name, brand, 0, salePrice, 0.0, category); // Default stock and purchasePrice to 0
     }
 
+
     // Constructor without image and category, for minimal product creation
     public Product(int id, String image, String name, String brand, double purchasePrice, double salePrice) {
         this(id, image, name, brand, 0, salePrice, purchasePrice, ""); // Default image and category to empty strings
     }
+
+    public void setPurchasePrice(double purchasePrice) {
+        this.purchasePrice.set(purchasePrice);
+    }
+
+    // Constructor for Invoice
+    public Product(int id, String image, String name, String brand, double purchasePrice) {
+        this.id = new SimpleIntegerProperty(id);
+        this.image = new SimpleStringProperty(image);
+        this.name = new SimpleStringProperty(name);
+        this.brand = new SimpleStringProperty(brand);
+        this.purchasePrice = new SimpleDoubleProperty(purchasePrice);
+    }
+
+
+
     public Product(int id, String name, String brand, int stock, int soldQuantity, double profit) {
         this.id = new SimpleIntegerProperty(id);
         this.image = new SimpleStringProperty(""); // Giá trị mặc định cho image
@@ -54,6 +71,7 @@ public class Product {
         this.soldQuantity = new SimpleIntegerProperty(soldQuantity);
         this.profit = new SimpleDoubleProperty(profit);
     }
+
 
     public Product(int id, String name, String brand, int stock) {
         this.id = new SimpleIntegerProperty(id);
@@ -146,17 +164,5 @@ public class Product {
         return category;
     }
 
-    @Override
-    public String toString() {
-        return "Product{" +
-                "id=" + id +
-                ", image=" + image +
-                ", name=" + name +
-                ", brand=" + brand +
-                ", stock=" + stock +
-                ", salePrice=" + salePrice +
-                ", purchasePrice=" + purchasePrice +
-                ", category=" + category +
-                '}';
-    }
+
 }

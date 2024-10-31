@@ -71,4 +71,9 @@
     -fx-font-weight: bold;
     -fx-font-size: 14;
 }
-
+.button-selected {
+    -fx-background-color: #4AD4DD; /* Chọn màu nền tùy ý */
+    -fx-text-fill: white;
+    -fx-border-color: #2A9CB1; /* Viền cho rõ ràng hơn */
+    -fx-border-width: 2px;
+}
