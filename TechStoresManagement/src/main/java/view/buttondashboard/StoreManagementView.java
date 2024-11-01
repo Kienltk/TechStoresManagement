@@ -2,7 +2,6 @@ package view.buttondashboard;
 
 import controller.StoreController;
 import entity.*;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -14,16 +13,12 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import model.StoreModel;
 import view.stage.AdditionSuccess;
 import view.stage.DeletionFailed;
 import view.stage.DeletionSuccess;
 import view.stage.EditSuccess;
-
 import java.util.List;
-import java.util.Optional;
-
 public class StoreManagementView extends VBox {
     private TableView<Store> tableView;
     private StoreController storeController;
@@ -59,7 +54,7 @@ public class StoreManagementView extends VBox {
         Button createWarehouseButton = new Button("Create Warehouse");
         createWarehouseButton.setOnAction(e -> showCreateStoreDialog());
         createWarehouseButton.getStyleClass().add("button-pagination");
-        createWarehouseButton.setAlignment(Pos.CENTER_LEFT); // Đặt nút ở bên trái
+        createWarehouseButton.setAlignment(Pos.CENTER_LEFT);
 
         // Thêm nút Create Warehouse bên dưới ô search
         HBox topControls = new HBox(10);
@@ -170,14 +165,13 @@ public class StoreManagementView extends VBox {
         List<Store> stores = storeController.getStores(search);
         totalPages = (int) Math.ceil((double) stores.size() / itemsPerPage);
 
-        // Get the sublist for the current page
         int fromIndex = (currentPage - 1) * itemsPerPage;
         int toIndex = Math.min(fromIndex + itemsPerPage, stores.size());
         List<Store> paginatedStores = stores.subList(fromIndex, toIndex);
 
         ObservableList<Store> observableStores = FXCollections.observableArrayList(paginatedStores);
         tableView.setItems(observableStores);
-        pageLabel.setText("Page " + currentPage + " / " + totalPages); // Update the page label
+        pageLabel.setText("Page " + currentPage + " / " + totalPages);
     };
     private void showCreateStoreDialog() {
         Stage dialog = new Stage();
@@ -221,7 +215,6 @@ public class StoreManagementView extends VBox {
         });
 
         cancelButton.setOnAction(e -> dialog.close());
-
         Scene dialogScene = new Scene(grid);
         dialogScene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
         dialog.setScene(dialogScene);

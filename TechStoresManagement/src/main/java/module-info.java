@@ -17,5 +17,4 @@ module techstoresmanagement {
     opens model to javafx.fxml;
     exports view to javafx.graphics;
     opens view to javafx.fxml;
-
 }

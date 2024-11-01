@@ -30,7 +30,6 @@ public class Director extends Application {
         primaryStage.setTitle("Dashboard");
         primaryStage.setScene(scene);
         primaryStage.show();
-
         primaryStage.setOnCloseRequest(event -> {
             DirectorController.deleteTempProductImage();
         });

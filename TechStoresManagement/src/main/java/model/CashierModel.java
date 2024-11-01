@@ -30,7 +30,6 @@ public class CashierModel implements ICommon<Product> {
         int stock = rs.getInt("quantity");
         double price = rs.getDouble("sale_price");
 
-        // Lấy giá trị của thuộc tính category từ bảng product_categories và categories
         String category = getCategory(productId);
 
         return new Product(productId, image, productName, brand, stock, price, category);
