@@ -107,6 +107,7 @@ CREATE TABLE products_store
 CREATE TABLE import_store
 (
     id            int auto_increment primary key,
+    name varchar(255),
     id_store      int,
     id_warehouse int,
     total         decimal(10, 2),
@@ -1018,3 +1019,11 @@ VALUES
 ('2024-10-21', 900.00, 500.00, 400.00),
 ('2024-10-22', 0.00, 0.00, 0.00),
 ('2024-10-23', 1100.00, 1200.00, -100.00);
+
+INSERT INTO import_warehouse (id_warehouse, name, total, product_import_date, status)
+                VALUES
+(1, "test", 12999, now(), "Pending Approval");
+
+INSERT INTO import_warehouse (id_store, id_warehouse, name, total, product_import_date, status)
+                VALUES
+                (1, 1, "test", 12999, now(), "Pending Approval")
