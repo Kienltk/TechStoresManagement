@@ -25,7 +25,7 @@ public class Import {
         this.status.set(status);
     }
 
-    // Constructor no Store
+    // Constructor no StoreManager
     public Import(String importName, String warehouseName, double total, LocalDateTime date, String status) {
         this.importName.set(importName);
         this.warehouseName.set(warehouseName);
