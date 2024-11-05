@@ -17,7 +17,7 @@ public class StoreModel {
             String query = "SELECT s.id, s.name, s.address, " +
                     "CONCAT(e.first_name, ' ', e.last_name) AS managerName " +
                     "FROM stores s " +
-                    "LEFT JOIN employees e ON s.id = e.id_store AND e.id_role = (SELECT id FROM role WHERE role = 'Store Management') " +
+                    "LEFT JOIN employees e ON s.id = e.id_store AND e.id_role = (SELECT id FROM role WHERE role = 'StoreManager Management') " +
                     "WHERE s.name LIKE ? OR s.address LIKE ?";
             PreparedStatement stmt = connection.prepareStatement(query);
             stmt.setString(1, "%" + search + "%");
@@ -91,7 +91,7 @@ public class StoreModel {
             // Cập nhật người quản lý nếu managerId không null
             if (newManagerId != null) {
                 // Lấy ID của người quản lý hiện tại
-                String currentManagerQuery = "SELECT id FROM employees WHERE id_store = ? AND id_role = (SELECT id FROM role WHERE role = 'Store Management')";
+                String currentManagerQuery = "SELECT id FROM employees WHERE id_store = ? AND id_role = (SELECT id FROM role WHERE role = 'StoreManager Management')";
                 Integer currentManagerId = null;
                 try (PreparedStatement currentManagerStmt = connection.prepareStatement(currentManagerQuery)) {
                     currentManagerStmt.setInt(1, storeId);
@@ -112,8 +112,8 @@ public class StoreModel {
                     }
                 }
 
-                // Cập nhật vai trò của người quản lý mới thành "Store Management" và đặt id_store cho họ
-                String updateNewManagerQuery = "UPDATE employees SET id_store = ?, id_role = (SELECT id FROM role WHERE role = 'Store Management') WHERE id = ?";
+                // Cập nhật vai trò của người quản lý mới thành "StoreManager Management" và đặt id_store cho họ
+                String updateNewManagerQuery = "UPDATE employees SET id_store = ?, id_role = (SELECT id FROM role WHERE role = 'StoreManager Management') WHERE id = ?";
                 try (PreparedStatement updateNewManagerStmt = connection.prepareStatement(updateNewManagerQuery)) {
                     updateNewManagerStmt.setInt(1, storeId);
                     updateNewManagerStmt.setInt(2, newManagerId);

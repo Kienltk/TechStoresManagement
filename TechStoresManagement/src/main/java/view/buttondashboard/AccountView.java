@@ -6,6 +6,8 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -42,13 +44,13 @@ public class AccountView extends VBox {
 
         HBox searchBar = new HBox(searchField);
         searchBar.setAlignment(Pos.CENTER_RIGHT);
-        searchBar.setStyle(" -fx-padding:0 10 10 620;");
+        searchBar.setStyle(" -fx-padding:0 620 10 0;");
         
         searchField.getStyleClass().add("search-box");
 
         HBox topControls = new HBox(10);
         topControls.setStyle("-fx-min-width: 1000");
-        topControls.getChildren().addAll( newAccountButton,searchBar);
+        topControls.getChildren().addAll(searchBar ,newAccountButton);
 
         // TableView for Account Data
         TableView<Account> accountTable = new TableView<>();
@@ -56,7 +58,6 @@ public class AccountView extends VBox {
         TableColumn<Account, Integer> idColumn = new TableColumn<>("ID");
         idColumn.setMinWidth(85);
         idColumn.getStyleClass().add("column");
-        idColumn.setStyle("-fx-alignment: CENTER;");
         idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
 
         TableColumn<Account, String> nameColumn = new TableColumn<>("Name");
@@ -70,19 +71,38 @@ public class AccountView extends VBox {
         usernameColumn.setCellValueFactory(cellData -> cellData.getValue().usernameProperty());
 
         TableColumn<Account, String> emailColumn = new TableColumn<>("Email");
-        emailColumn.setMinWidth(300);
+        emailColumn.setMinWidth(290);
         emailColumn.getStyleClass().add("column");
         emailColumn.setCellValueFactory(cellData -> cellData.getValue().emailProperty());
 
-        TableColumn<Account, Void> optionColumn = new TableColumn<>("Option");
+        TableColumn<Account, Void> optionColumn = new TableColumn<>("      Option");
         optionColumn.setMinWidth(150);
+        optionColumn.getStyleClass().add("column");
         optionColumn.setCellFactory(col -> new TableCell<>() {
-            final Button editButton = new Button("Edit");
-            final Button deleteButton = new Button("Delete");
+            private final Button editButton = new Button();
+            private final Button deleteButton = new Button();
 
             {
-                editButton.setStyle("-fx-background-color: yellow;");
-                deleteButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+                // Tạo ImageView cho các icon
+                ImageView editIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/edit.png")));
+                ImageView deleteIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/delete.png")));
+
+                // Đặt kích thước ban đầu cho icon
+                setIconSize(editIcon, 20);
+                setIconSize(deleteIcon, 20);
+
+                // Thêm icon vào nút
+                editButton.setGraphic(editIcon);
+                deleteButton.setGraphic(deleteIcon);
+
+                // Đặt style cho nút
+                String defaultStyle = "-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 6;";
+                editButton.setStyle(defaultStyle);
+                deleteButton.setStyle(defaultStyle);
+
+                // Thêm sự kiện phóng to khi hover và giảm padding
+                addHoverEffect(editButton, editIcon);
+                addHoverEffect(deleteButton, deleteIcon);
             }
 
             @Override
@@ -93,7 +113,6 @@ public class AccountView extends VBox {
                 } else {
                     HBox optionBox = new HBox(editButton, deleteButton);
                     optionBox.setSpacing(20);
-                    optionBox.setStyle("-fx-alignment: CENTER;");
                     setGraphic(optionBox);
 
                     editButton.setOnAction(event -> {
@@ -107,6 +126,23 @@ public class AccountView extends VBox {
                         confirmDelete(account);
                     });
                 }
+            }
+            private void setIconSize(ImageView icon, int size) {
+                icon.setFitWidth(size);
+                icon.setFitHeight(size);
+            }
+
+            // Phương thức thêm hiệu ứng hover
+            private void addHoverEffect(Button button, ImageView icon) {
+                button.setOnMouseEntered(e -> {
+                    setIconSize(icon, 25); // Phóng to khi hover
+                    button.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 3.2;"); // Giảm padding khi hover
+                });
+
+                button.setOnMouseExited(e -> {
+                    setIconSize(icon, 20); // Trở lại kích thước ban đầu khi rời chuột
+                    button.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 6;"); // Khôi phục padding ban đầu
+                });
             }
         });
 

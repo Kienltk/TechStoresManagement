@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="768.0" prefWidth="1366.0" stylesheets="@dashboard.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DashboardWarehouseController">
+    <children>
+        <AnchorPane layoutX="-1.0" prefHeight="768.0" prefWidth="277.0" styleClass="sidebar">
+            <children>
+                <HBox fx:id="general" alignment="CENTER_LEFT" layoutX="30.0" layoutY="170.0" onMouseClicked="#showGeneralWarehouse" prefHeight="30.0" prefWidth="180.0" style="-fx-background-color: transparent;" styleClass="sidebar-btn-text">
+                    <children>
+                        <ImageView fitHeight="18.0" fitWidth="19.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/Home.png" />
+                            </image>
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </ImageView>
+                        <Label fx:id="titleLabel" style="-fx-text-fill: black;" text="General" textFill="#a2bee8">
+                            <font>
+                                <Font name="Cambria" size="14.0" />
+                            </font>
+                        </Label>
+                    </children>
+                    <padding>
+                        <Insets left="5.0" />
+                    </padding>
+                </HBox>
+                <HBox fx:id="employee" alignment="CENTER_LEFT" layoutX="30.0" layoutY="207.0" onMouseClicked="#showEmployeeWarehouse" prefHeight="38.0" prefWidth="208.0" style="-fx-background-color: transparent;" styleClass="sidebar-btn-text">
+                    <children>
+                        <ImageView fitHeight="18.0" fitWidth="19.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/ThreeUser.png" />
+                            </image>
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </ImageView>
+                        <Label fx:id="titleLabel1" style="-fx-text-fill: black;" text="Employee Management" textFill="#a2bee8">
+                            <font>
+                                <Font name="Cambria" size="14.0" />
+                            </font>
+                        </Label>
+                    </children>
+                    <padding>
+                        <Insets left="5.0" />
+                    </padding>
+                </HBox>
+                <HBox fx:id="product" alignment="CENTER_LEFT" layoutX="30.0" layoutY="283.0" onMouseClicked="#showProductWarehouse" prefHeight="30.0" prefWidth="180.0" style="-fx-background-color: transparent;" styleClass="sidebar-btn-text">
+                    <children>
+                        <ImageView fitHeight="18.0" fitWidth="19.0" pickOnBounds="true" preserveRatio="true">
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                            <image>
+                                <Image url="@../images/gridicons_product.png" />
+                            </image>
+                        </ImageView>
+                        <Label fx:id="titleLabel2" style="-fx-text-fill: black;" text="Product Management" textFill="#a2bee8">
+                            <font>
+                                <Font name="Cambria" size="14.0" />
+                            </font>
+                        </Label>
+                    </children>
+                    <padding>
+                        <Insets left="5.0" />
+                    </padding>
+                </HBox>
+                <HBox fx:id="logout" alignment="CENTER_LEFT" layoutX="30.0" layoutY="321.0" onMouseClicked="#showLogoutWarehouse" prefHeight="30.0" prefWidth="180.0" style="-fx-background-color: transparent;" styleClass="sidebar-btn-text">
+                    <children>
+                        <ImageView fitHeight="18.0" fitWidth="19.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/Logout.png" />
+                            </image>
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </ImageView>
+                        <Label fx:id="titleLabel5" style="-fx-text-fill: black;" text="Logout" textFill="#a2bee8">
+                            <font>
+                                <Font name="Cambria" size="14.0" />
+                            </font>
+                        </Label>
+                    </children>
+                    <padding>
+                        <Insets left="5.0" />
+                    </padding>
+                </HBox>
+
+                <HBox fx:id="importProduct" alignment="CENTER_LEFT" layoutX="30.0" layoutY="245.0" onMouseClicked="#showImportWarehouse" prefHeight="30.0" prefWidth="180.0" style="-fx-background-color: transparent;" styleClass="sidebar-btn-text">
+                    <children>
+                        <ImageView fitHeight="18.0" fitWidth="19.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/ImportProduct.png" />
+                            </image>
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </ImageView>
+                        <Label fx:id="titleLabel42" style="-fx-text-fill: black;" text=" Import product " textFill="#a2bee8">
+                            <font>
+                                <Font name="Cambria" size="14.0" />
+                            </font>
+                        </Label>
+                    </children>
+                    <padding>
+                        <Insets left="5.0" />
+                    </padding>
+                </HBox>
+                <Label fx:id="employeeNameLabel" layoutX="78.0" layoutY="76.0" prefHeight="21.0" prefWidth="91.0" text="Employye Name" />
+                <Label fx:id="titleLabel7" layoutX="58.0" layoutY="47.0" prefHeight="18.0" prefWidth="129.0" style="-fx-text-fill: black;" text="Warehouse Manager" textFill="#a2bee8">
+                    <font>
+                        <Font name="Cambria" size="14.0" />
+                    </font>
+                </Label>
+            </children>
+        </AnchorPane>
+
+        <AnchorPane fx:id="mainContent" layoutX="277.0" layoutY="0.0" prefHeight="768.0" prefWidth="1089.0">
+            <!-- Nội dung sẽ được thay thế ở đây -->
+        </AnchorPane>
+    </children>
+</AnchorPane>

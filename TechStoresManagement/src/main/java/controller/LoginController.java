@@ -70,7 +70,7 @@ public class LoginController {
             // Điều hướng dựa trên role
             try { switch (role) {
                 case "General Director" -> new Director().start(new Stage());
-                case "Store Management" -> new StoreManager().start(new Stage());
+                case "StoreManager Management" -> new StoreManager().start(new Stage());
                 case "Warehouse Management" -> new WarehouseManager().start(new Stage());
                 case "Cashier" -> new Cashier().start(new Stage());
                 default -> System.out.println("Unknown role");

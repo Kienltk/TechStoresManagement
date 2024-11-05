@@ -53,6 +53,7 @@ public class GeneralView extends VBox {
     public GeneralView() {
         // Tiêu đề "Dashboard"
         Text title = new Text("Dashboard");
+        title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
         // Các ô hình chữ nhật với thông tin turnover, capital, profit, stock
         StackPane turnoverPane = createInfoPane(turnoverLabel);
@@ -98,12 +99,17 @@ public class GeneralView extends VBox {
         vbox.setPadding(new Insets(20));
         vbox.setAlignment(Pos.CENTER);
 
-        VBox comboBox = new VBox(10);
+        HBox comboBox = new HBox(30);
         comboBox.getChildren().addAll(new Label("Choose Criteria:"), criteriaComboBox, monthComboBox, yearComboBox);
+        comboBox.setAlignment(Pos.CENTER);
 
-        HBox charts = new HBox(20, comboBox, createBarChart(), createPieChartTurnoverStore());
+        HBox charts = new HBox(20,  createBarChart(), createPieChartTurnoverStore());
 
-        this.getChildren().addAll(vbox, charts);
+        VBox layout = new VBox(20);
+        layout.getChildren().addAll(vbox,comboBox, charts);
+
+        this.getChildren().addAll(layout);
+        this.getStyleClass().add("vbox");
 
         controller.handleReload();
         updateData();
@@ -114,14 +120,23 @@ public class GeneralView extends VBox {
     private StackPane createInfoPane(Text label) {
         // Tạo hình chữ nhật kích thước 235x50
         Rectangle rectangle = new Rectangle(200, 50);
-        rectangle.setFill(Color.LIGHTGRAY);
-        rectangle.setStroke(Color.BLACK);
+        rectangle.setFill(Color.web("#4AD4DD")); // Đặt màu nền
+        rectangle.setArcWidth(7); // Bo góc
+        rectangle.setArcHeight(7); // Bo góc
+        label.setFill(Color.web("#ffffff"));
 
         // Gói text vào StackPane để canh giữa
         StackPane pane = new StackPane();
         pane.getChildren().addAll(rectangle, label);
+
+        // Áp dụng CSS cho label
+        label.setStyle("-fx-text-fill: #ffffff;" +
+                "-fx-font-size: 14px;" +
+                "-fx-font-weight: bold;");
+
         return pane;
     }
+
 
     private void updateData() {
         turnoverLabel.setText("Turnover: $" + controller.getTurnover());
@@ -300,7 +315,7 @@ public class GeneralView extends VBox {
         rootTurnoverStore = new BorderPane();
 
         // Tạo tiêu đề cho biểu đồ
-        Label chartTitle = new Label("Turnover Data by Store");
+        Label chartTitle = new Label("Turnover Data by StoreManager");
         chartTitle.setFont(Font.font("SanSerif", FontWeight.BOLD, 15)); // Cài đặt font cho tiêu đề
         rootTurnoverStore.setTop(chartTitle); // Đặt tiêu đề vào trên cùng layout
 

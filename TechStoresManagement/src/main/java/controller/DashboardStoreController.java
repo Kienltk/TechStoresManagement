@@ -1,56 +1,47 @@
 package controller;
 
-import javafx.animation.PauseTransition;
-import javafx.util.Duration;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import view.Login;
-import view.buttondashboard.*;
+import view.StoreManager;
+import view.buttondashboardstore.*;
 import view.stage.LogoutFailed;
 import view.stage.LogoutSuccess;
 
-import java.util.Collection;
+public class DashboardStoreController {
+    StoreManager store = new StoreManager();
 
-public class DashBoardController {
 
     @FXML
     private AnchorPane mainContent; // Khung chính để hiển thị nội dung
 
     @FXML
-    private HBox hBoxGeneral; // HBox cho General
+    private HBox general; // HBox cho General
     @FXML
-    private HBox hBoxEmployeeManagement; // HBox cho Employee Management
+    private HBox employee; // HBox cho Employee Management
     @FXML
-    private HBox hBoxProductManagement; // HBox cho Product Management
-    @FXML
-    private HBox hBoxStoreManagement; // HBox cho StoreManager Management
-    @FXML
-    private HBox hBoxAccount; // HBox cho Account
+    private HBox product; // HBox cho Product Management
 
     @FXML
-    private HBox hboxLogout;
-    @FXML
-    private HBox hboxWareHouse;
-    @FXML
-    private HBox hboxImport;
-    @FXML
-    private HBox hboxHistory;
+    private HBox logout;
 
-
+    @FXML
+    private HBox importProduct;
+    @FXML
+    private HBox history;
+    @FXML
+    private Label employeeNameLabel;
 
     private void clearActive() {
-        hBoxGeneral.getStyleClass().remove("active");
-        hBoxEmployeeManagement.getStyleClass().remove("active");
-        hBoxProductManagement.getStyleClass().remove("active");
-        hBoxStoreManagement.getStyleClass().remove("active");
-        hBoxAccount.getStyleClass().remove("active");
-        hboxLogout.getStyleClass().remove("active");
-        hboxImport.getStyleClass().remove("active");
-        hboxWareHouse.getStyleClass().remove("active");
-        hboxHistory.getStyleClass().remove("active");
+        general.getStyleClass().remove("active");
+        employee.getStyleClass().remove("active");
+        product.getStyleClass().remove("active");
+        logout.getStyleClass().remove("active");
+        importProduct.getStyleClass().remove("active");
+        history.getStyleClass().remove("active");
     }
 
     public void showLogout() {
@@ -92,70 +83,50 @@ public class DashBoardController {
         }
     }
 
-    public void showHistory() {
+    public void showHistory1() {
         clearActive();
-        hboxHistory.getStyleClass().add("active");
+        history.getStyleClass().add("active");
         HistoryView historyView = new HistoryView();
         mainContent.getChildren().setAll(historyView);
     }
 
-    public void showGeneral() {
+    public void showGeneral1() {
         clearActive();
-        hBoxGeneral.getStyleClass().add("active");
+        general.getStyleClass().add("active");
         GeneralView generalView = new GeneralView();
         mainContent.getChildren().setAll(generalView);
     }
 
-    public void showImportProduct() {
+    public void showImport() {
         clearActive();
-        hboxImport.getStyleClass().add("active");
-        ImportProductView importView = new ImportProductView();
+        importProduct.getStyleClass().add("active");
+        ImportView importView = new ImportView();
         mainContent.getChildren().setAll(importView);
     }
-
-    public void showWareHouse() {
-        clearActive();
-        hboxWareHouse.getStyleClass().add("active");
-        WarehouseManagementView warehouseManagement = new WarehouseManagementView();
-        mainContent.getChildren().setAll(warehouseManagement);
-    }
-
     // Các phương thức hiển thị tab khác tương tự
 
 
-    public void showEmployeeManagement() {
+    public void showEmployee() {
         clearActive();
-        hBoxEmployeeManagement.getStyleClass().add("active");
-        EmployeeManagementView employeeManagementView = new EmployeeManagementView();
+        employee.getStyleClass().add("active");
+        EmployeeView employeeManagementView = new EmployeeView();
 
         mainContent.getChildren().setAll(employeeManagementView);
     }
 
-    public void showProductManagement() {
+    public void showProduct() {
         clearActive();
-        hBoxProductManagement.getStyleClass().add("active");
-        ProductManagementView productManagementView = new ProductManagementView();
+        product.getStyleClass().add("active");
+        ProductView productManagementView = new ProductView();
         mainContent.getChildren().setAll(productManagementView);
     }
 
-    public void showStoreManagement() {
-        clearActive();
-        hBoxStoreManagement.getStyleClass().add("active");
-        StoreManagementView storeManagementView = new StoreManagementView();
-        mainContent.getChildren().setAll(storeManagementView);
-    }
-
-    public void showAccount() {
-        clearActive();
-        hBoxAccount.getStyleClass().add("active");
-        AccountView accountView = new AccountView();
-        mainContent.getChildren().setAll(accountView);
-    }
 
     // Phương thức khởi tạo (initialize) sẽ được gọi khi controller được tạo
     @FXML
     public void initialize() {
-        // Gọi showGeneral() để mặc định tab General được active
-        showGeneral();
+        System.out.println(store.getEmployeeName());
+        employeeNameLabel.setText(store.getEmployeeName());
+        showGeneral1();
     }
 }

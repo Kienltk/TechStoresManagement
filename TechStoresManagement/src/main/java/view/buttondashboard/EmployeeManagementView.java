@@ -12,6 +12,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import entity.Employee;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -52,6 +54,7 @@ public class EmployeeManagementView extends VBox {
 
         tableView = new TableView<>();
         tableView.setItems(employeeList);
+        tableView.getStyleClass().add("table-view");
         configureTableView();
 
         searchField = new TextField();
@@ -61,7 +64,7 @@ public class EmployeeManagementView extends VBox {
 
         HBox searchBar = new HBox(searchField);
         searchBar.setAlignment(Pos.CENTER_RIGHT);
-        searchBar.setStyle(" -fx-padding:0 10 10 620;");
+        searchBar.setStyle(" -fx-padding:0 610 10 0;");
 
         Button addButton = new Button("Add Employee");
         addButton.getStyleClass().add("button-pagination");
@@ -69,7 +72,7 @@ public class EmployeeManagementView extends VBox {
 
         HBox topControls = new HBox(10);
         topControls.setStyle("-fx-min-width: 1000");
-        topControls.getChildren().addAll( addButton,searchBar);
+        topControls.getChildren().addAll(searchBar, addButton);
 
 
 
@@ -101,21 +104,19 @@ public class EmployeeManagementView extends VBox {
         // Add everything to main layout
         this.getStyleClass().add("vbox");
         VBox vbox = new VBox(titleLabel,topControls, tableView,paginationBox);
-        vbox.setPadding(new Insets(10));
         this.getChildren().addAll(vbox);
     }
 
 
     private void configureTableView() {
         TableColumn<Employee, Number> sttCol = new TableColumn<>("No.");
-        sttCol.setStyle("-fx-alignment: center;");
         sttCol.setMinWidth(70);
         sttCol.getStyleClass().add("column");
         sttCol.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(tableView.getItems().indexOf(cellData.getValue()) + 1));
         sttCol.setSortable(false);
 
         TableColumn<Employee, String> fullNameCol = new TableColumn<>("Full Name");
-        fullNameCol.setMinWidth(250);
+        fullNameCol.setMinWidth(235);
         fullNameCol.getStyleClass().add("column");
         fullNameCol.setCellValueFactory(data -> data.getValue().firstNameProperty().concat(" ").concat(data.getValue().lastNameProperty()));
 
@@ -156,40 +157,85 @@ public class EmployeeManagementView extends VBox {
         salaryCol.getStyleClass().add("column");
         salaryCol.setCellValueFactory(data -> data.getValue().salaryProperty().asObject());
 
-        TableColumn<Employee, String> actionCol = new TableColumn<>("Action");
-        actionCol.setMinWidth(185);
-        actionCol.setStyle("-fx-alignment: center");
+        TableColumn<Employee, String> actionCol = new TableColumn<>("        Action");
+        actionCol.getStyleClass().add("column");
+        actionCol.setMinWidth(200);
 
         actionCol.setCellFactory(col -> new TableCell<Employee, String>() {
-            private final Button viewButton = new Button("View");
-            private final Button editButton = new Button("Edit");
-            private final Button deleteButton = new Button("Delete");
+            private final Button viewButton = new Button();
+            private final Button editButton = new Button();
+            private final Button deleteButton = new Button();
 
             {
-                editButton.setStyle("-fx-background-color: yellow; ");
-                deleteButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
-                viewButton.setStyle("-fx-background-color: #4AD4DD; -fx-text-fill: white; ");
+                // Tạo ImageView cho các icon
+                ImageView viewIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/view.png")));
+                ImageView editIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/edit.png")));
+                ImageView deleteIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/delete.png")));
+
+                // Đặt kích thước ban đầu cho icon
+                setIconSize(viewIcon, 20);
+                setIconSize(editIcon, 20);
+                setIconSize(deleteIcon, 20);
+
+                // Thêm icon vào nút
+                viewButton.setGraphic(viewIcon);
+                editButton.setGraphic(editIcon);
+                deleteButton.setGraphic(deleteIcon);
+
+                // Đặt style cho nút
+                String defaultStyle = "-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 6;";
+                viewButton.setStyle(defaultStyle);
+                editButton.setStyle(defaultStyle);
+                deleteButton.setStyle(defaultStyle);
+
+                // Thêm sự kiện phóng to khi hover và giảm padding
+                addHoverEffect(viewButton, viewIcon);
+                addHoverEffect(editButton, editIcon);
+                addHoverEffect(deleteButton, deleteIcon);
             }
 
-
+            @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
 
                 if (empty || getIndex() < 0 || getIndex() >= getTableView().getItems().size()) {
-                    setGraphic(null);  // Nếu hàng trống hoặc chỉ số không hợp lệ, không hiển thị gì
+                    setGraphic(null); // Không hiển thị gì nếu hàng trống
                 } else {
                     Employee employee = getTableView().getItems().get(getIndex());
+
+                    // Đặt hành động cho nút
                     viewButton.setOnAction(e -> openViewEmployeeDialog(employee));
                     editButton.setOnAction(e -> openEditEmployeeDialog(employee));
                     deleteButton.setOnAction(e -> deleteEmployee(employee));
 
                     HBox buttons = new HBox(viewButton, editButton, deleteButton);
+                    buttons.setStyle("-fx-alignment: CENTER_LEFT; -fx-spacing: 10;");
                     setGraphic(buttons);
                 }
             }
 
+            // Phương thức thiết lập kích thước cho ImageView
+            private void setIconSize(ImageView icon, int size) {
+                icon.setFitWidth(size);
+                icon.setFitHeight(size);
+            }
 
+            // Phương thức thêm hiệu ứng hover
+            private void addHoverEffect(Button button, ImageView icon) {
+                button.setOnMouseEntered(e -> {
+                    setIconSize(icon, 25); // Phóng to khi hover
+                    button.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 3.2;"); // Giảm padding khi hover
+                });
+
+                button.setOnMouseExited(e -> {
+                    setIconSize(icon, 20); // Trở lại kích thước ban đầu khi rời chuột
+                    button.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 6;"); // Khôi phục padding ban đầu
+                });
+            }
         });
+
+
+
 
         tableView.getColumns().addAll(sttCol, fullNameCol, genderCol, roleCol, workplaceCol, actionCol);
     }
@@ -416,7 +462,7 @@ public class EmployeeManagementView extends VBox {
         roleComboBox.setOnAction(event -> {
             String selectedRole = roleComboBox.getValue() != null ? roleComboBox.getValue().getValue() : null;
 
-            if ("Store Management".equals(selectedRole) || "Cashier".equals(selectedRole)) {
+            if ("StoreManager Management".equals(selectedRole) || "Cashier".equals(selectedRole)) {
                 storeComboBox.setVisible(true);
                 warehouseComboBox.setVisible(false);
                 loadStores(storeComboBox); // Load stores
@@ -600,7 +646,7 @@ public class EmployeeManagementView extends VBox {
         dialogLayout.add(new Label("Role:"), 0, 15);
         dialogLayout.add(roleComboBox, 1, 15);
 
-        dialogLayout.add(new Label("Store:"), 0, 16);
+        dialogLayout.add(new Label("StoreManager:"), 0, 16);
         dialogLayout.add(storeComboBox, 1, 16);
 
         dialogLayout.add(new Label("Warehouse:"), 0, 17);
@@ -785,7 +831,7 @@ public class EmployeeManagementView extends VBox {
         // Thay đổi ComboBox hiển thị theo vai trò
         roleComboBox.setOnAction(event -> {
             String selectedRole = roleComboBox.getValue() != null ? roleComboBox.getValue().getValue() : null;
-            if ("Store Management".equals(selectedRole)) {
+            if ("StoreManager Management".equals(selectedRole)) {
                 storeComboBox.setVisible(true);
                 warehouseComboBox.setVisible(false);
                 loadStores(storeComboBox); // Load stores
@@ -887,7 +933,7 @@ public class EmployeeManagementView extends VBox {
         dialogLayout.add(new Label("Role:"), 0, 9);
         dialogLayout.add(roleComboBox, 1, 9);
 
-        dialogLayout.add(new Label("Store:"), 0, 10);
+        dialogLayout.add(new Label("StoreManager:"), 0, 10);
         dialogLayout.add(storeComboBox, 1, 10);
 
         dialogLayout.add(new Label("Warehouse:"), 0, 11);

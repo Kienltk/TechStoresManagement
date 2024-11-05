@@ -1,27 +1,30 @@
 package view;
 
+import controller.DirectorController;
 import controller.Session;
 import javafx.application.Application;
-import javafx.geometry.Insets;
+import javafx.fxml.FXMLLoader;
+
 import javafx.scene.Scene;
-import javafx.scene.layout.HBox;
+
 import javafx.stage.Stage;
 
+import java.util.Objects;
+
 public class StoreManager extends Application {
-    public static void main(String[] args) {
-        launch(args);
+    private final int idStore;
+    private final String employeeName;
+
+    public String getEmployeeName() {
+        return employeeName;
     }
-    private int idStore;
-    private String employeeName;
 
     public StoreManager() {
-        // Lấy thông tin từ Session
         this.idStore = Session.getIdStore();
         this.employeeName = Session.getEmployeeName();
     }
-
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage)throws Exception {
         if (!Session.isLoggedIn()) {
             try {
                 new Login().start(new Stage());
@@ -31,20 +34,16 @@ public class StoreManager extends Application {
             primaryStage.close();
             return;
         }
-
         System.out.println("Logged in as: " + employeeName + " at store ID: " + idStore);
-
-        HBox root = new HBox();
-        root.setPadding(new Insets(10, 50, 10, 50));
-        root.setSpacing(20);
-
-        Scene scene = new Scene(root, 1366, 768);
-        scene.getStylesheets().add(getClass().getResource("cashier.css").toExternalForm());
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Store Management App");
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("DashboardStore.fxml"));
+        Scene scene = new Scene(loader.load());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("director.css")).toExternalForm());
         primaryStage.setResizable(false);
-        primaryStage.setWidth(1366);
-        primaryStage.setHeight(768);
+        primaryStage.setTitle("Dashboard");
+        primaryStage.setScene(scene);
         primaryStage.show();
+        primaryStage.setOnCloseRequest(event -> {
+            DirectorController.deleteTempProductImage();
+        });
     }
 }

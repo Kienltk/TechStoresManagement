@@ -1,7 +1,7 @@
 .category-button {
-    -fx-background-color: white;
-    -fx-text-fill: #4AD4DD;
-    -fx-border-radius: 10px;
+    -fx-background-color: #4AD4DD;  /* Màu nền xanh 4AD4DD khi được chọn */
+    -fx-text-fill: white;
+    -fx-border-radius: 5px;
     -fx-background-radius: 15px;
     -fx-border-color: #4AD4DD;
     -fx-border-width: 2px;
@@ -9,8 +9,8 @@
     -fx-font-weight: bold;
 }
 .category-button.selected {
-    -fx-background-color: #4AD4DD;  /* Màu nền xanh 4AD4DD khi được chọn */
-    -fx-text-fill: white;           /* Màu chữ trắng khi được chọn */
+    -fx-background-color: white;
+    -fx-text-fill: #4AD4DD;         /* Màu chữ trắng khi được chọn */
     -fx-border-color: #4AD4DD;      /* Đổi viền cùng màu với nền */
 }
 /* Kiểu cho thanh tìm kiếm */
@@ -18,8 +18,8 @@
     -fx-max-width: 650px;          /* Chiều rộng tối đa của TextField */
     -fx-background-color: white;  /* Màu nền trắng */
     -fx-border-color: #4AD4DD;    /* Viền màu xanh 4AD4DD */
-    -fx-border-radius: 12px;      /* Bo tròn viền */
-    -fx-background-radius: 12px;  /* Bo tròn nền */
+    -fx-border-radius: 5px;      /* Bo tròn viền */
+    -fx-background-radius: 5px;  /* Bo tròn nền */
     -fx-padding: 8 15;            /* Khoảng cách giữa văn bản và viền */
     -fx-font-size: 14px;          /* Kích thước font chữ */
     -fx-text-fill: #007ACC;       /* Màu chữ mặc định */
@@ -32,7 +32,7 @@
     -fx-background-color: #E6F7FF; /* Màu nền nhạt khi nhấn vào */
 }
 .increase-button, .decrease-button {
-    -fx-background-color: white; /* Nền trắng */
+    -fx-background-color: #4AD4DD; /* Nền trắng */
     -fx-border-color: #4AD4DD; /* Viền xanh */
     -fx-border-radius: 50%; /* Đường viền tròn hoàn toàn */
     -fx-background-radius: 50%; /* Đường viền nền tròn hoàn toàn */
@@ -40,7 +40,7 @@
     -fx-min-height: 20px; /* Chiều cao tối thiểu */
     -fx-pref-width: 20px; /* Chiều rộng ưu tiên */
     -fx-pref-height: 20px; /* Chiều cao ưu tiên */
-    -fx-text-fill: #4AD4DD; /* Màu chữ xanh */
+    -fx-text-fill: #ffffff; /* Màu chữ xanh */
     -fx-font-size: 14px; /* Kích thước chữ */
 }
 /* Loại bỏ viền ngoài cho ListView */

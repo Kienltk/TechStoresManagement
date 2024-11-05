@@ -11,3 +11,6 @@
     -fx-background-color: white  !important;
     -fx-background-radius: 5px;
 }
+#AnchorPane{
+    -fx-background-color: #ffffff;
+}

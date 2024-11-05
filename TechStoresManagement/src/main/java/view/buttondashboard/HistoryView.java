@@ -13,6 +13,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -49,8 +51,8 @@ public class HistoryView extends VBox {
         });
 
         searchBox.getChildren().addAll(searchField);
-        searchBox.setAlignment(Pos.CENTER_RIGHT);
-        searchBox.setStyle("-fx-padding: 0 10 10 10;");
+        searchBox.setAlignment(Pos.CENTER_LEFT);
+        searchBox.setStyle("-fx-padding: 0 0 10 10;");
 
         receiptTable = new TableView<>();
         configureReceiptTable();
@@ -112,13 +114,13 @@ public class HistoryView extends VBox {
         customerNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCustomerName()));
         customerNameCol.getStyleClass().add("column");
 
-        TableColumn<Receipt, String> storeNameCol = new TableColumn<>("Store name");
-        storeNameCol.setPrefWidth(200); // Chiều rộng cột Store Name
+        TableColumn<Receipt, String> storeNameCol = new TableColumn<>("StoreManager name");
+        storeNameCol.setPrefWidth(200); // Chiều rộng cột StoreManager Name
         storeNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getStoreName()));
         storeNameCol.getStyleClass().add("column");
 
         TableColumn<Receipt, String> purchaseDateCol = new TableColumn<>("Order time");
-        purchaseDateCol.setPrefWidth(200); // Chiều rộng cột Order Time
+        purchaseDateCol.setPrefWidth(195); // Chiều rộng cột Order Time
         purchaseDateCol.setCellValueFactory(cellData -> {
             LocalDateTime purchaseDate = cellData.getValue().getPurchaseDate();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -138,9 +140,30 @@ public class HistoryView extends VBox {
 
         TableColumn<Receipt, Void> viewCol = new TableColumn<>("View");
         viewCol.setPrefWidth(100); // Chiều rộng cột View
-        viewCol.setStyle("-fx-alignment: center");
+        viewCol.getStyleClass().add("column");
         viewCol.setCellFactory(col -> new TableCell<Receipt, Void>() {
-            private final Button viewButton = new Button("View");
+            private final Button viewButton = new Button();
+
+            {
+                // Tạo ImageView cho các icon
+                ImageView viewIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/view.png")));
+
+
+                // Đặt kích thước ban đầu cho icon
+                setIconSize(viewIcon, 20);
+
+
+                // Thêm icon vào nút
+                viewButton.setGraphic(viewIcon);
+
+
+                // Đặt style cho nút
+                String defaultStyle = "-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 6;";
+                viewButton.setStyle(defaultStyle);
+
+                // Thêm sự kiện phóng to khi hover và giảm padding
+                addHoverEffect(viewButton, viewIcon);
+            }
 
 
             @Override
@@ -150,12 +173,28 @@ public class HistoryView extends VBox {
                     setGraphic(null);
                 } else {
                     setGraphic(viewButton);
-                    viewButton.setStyle("-fx-background-color: #4AD4DD; -fx-text-fill: white;");
                     viewButton.setOnAction(e -> {
                         Receipt receipt = getTableView().getItems().get(getIndex());
                         showReceiptDetails(receipt);
                     });
                 }
+            }
+            private void setIconSize(ImageView icon, int size) {
+                icon.setFitWidth(size);
+                icon.setFitHeight(size);
+            }
+
+            // Phương thức thêm hiệu ứng hover
+            private void addHoverEffect(Button button, ImageView icon) {
+                button.setOnMouseEntered(e -> {
+                    setIconSize(icon, 25); // Phóng to khi hover
+                    button.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 3.2;"); // Giảm padding khi hover
+                });
+
+                button.setOnMouseExited(e -> {
+                    setIconSize(icon, 20); // Trở lại kích thước ban đầu khi rời chuột
+                    button.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 6;"); // Khôi phục padding ban đầu
+                });
             }
         });
 
@@ -179,10 +218,10 @@ public class HistoryView extends VBox {
         Label phoneLabel = new Label("Phone number:");
         Label phoneData = new Label(controller.getCustomerPhone(receipt.getCustomerName()));
 
-        Label storeLabel = new Label("Store name:");
+        Label storeLabel = new Label("StoreManager name:");
         Label storeData = new Label(receipt.getStoreName());
 
-        Label managerLabel = new Label("Store Manager:");
+        Label managerLabel = new Label("StoreManager Manager:");
         Label managerData = new Label(controller.getStoreManager(receipt.getStoreName()));
 
         Label cashierLabel = new Label("Cashier:");

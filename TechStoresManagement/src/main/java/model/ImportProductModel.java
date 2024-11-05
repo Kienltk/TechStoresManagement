@@ -226,7 +226,7 @@ public class ImportProductModel {
 
     private ArrayList<Product> getAllProducts() {
         ArrayList<Product> list = new ArrayList<Product>();
-        String sql = "SELECT id, img_address, product_name, brand, purchase_price category FROM products;";
+        String sql = "SELECT id, img_address, product_name, brand, purchase_price  FROM products;";
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {

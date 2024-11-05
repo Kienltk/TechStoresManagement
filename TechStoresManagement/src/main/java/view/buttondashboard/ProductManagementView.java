@@ -77,11 +77,11 @@ public class ProductManagementView extends VBox {
 
         HBox searchBar = new HBox(searchField);
         searchBar.setAlignment(Pos.CENTER_RIGHT);
-        searchBar.setStyle(" -fx-padding:0 10 10 620;");
+        searchBar.setStyle(" -fx-padding:0 620 10 10;");
 
         HBox topControls = new HBox(10);
         topControls.setStyle("-fx-min-width: 1000");
-        topControls.getChildren().addAll( newProductButton,searchBar);
+        topControls.getChildren().addAll( searchBar,newProductButton);
 
         // TableView for Product Data
 
@@ -91,7 +91,6 @@ public class ProductManagementView extends VBox {
         // Table Columns
         TableColumn<Product, Number> idColumn = new TableColumn<>("No.");
         idColumn.setMinWidth(80);
-        idColumn.setStyle("-fx-alignment: center");
         idColumn.getStyleClass().add("column");
         idColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Product, Number>, ObservableValue<Number>>() {
             @Override
@@ -101,12 +100,13 @@ public class ProductManagementView extends VBox {
         });
 
         TableColumn<Product, HBox> nameColumn = new TableColumn<>("Name");
-        nameColumn.setPrefWidth(400);
+        nameColumn.setPrefWidth(380);
         nameColumn.getStyleClass().add("column");
         nameColumn.setCellValueFactory(cellData -> {
             Product product = cellData.getValue();
             Label nameLabel = new Label(product.getName());
             HBox hBox = new HBox(10);
+            hBox.setAlignment(Pos.CENTER_LEFT);
             hBox.getChildren().addAll(nameLabel);
             return new SimpleObjectProperty<>(hBox);
         });
@@ -127,15 +127,34 @@ public class ProductManagementView extends VBox {
         salePriceColumn.setCellValueFactory(cellData -> cellData.getValue().salePriceProperty().asObject());
 
         // Option Column with Edit and Delete buttons
-        TableColumn<Product, Void> optionColumn = new TableColumn<>("Option");
-        optionColumn.setMinWidth(135);
+        TableColumn<Product, Void> optionColumn = new TableColumn<>("        Option");
+        optionColumn.setMinWidth(145);
+        optionColumn.getStyleClass().add("column");
         optionColumn.setCellFactory(col -> new TableCell<>() {
-            final Button editButton = new Button("Edit");
-            final Button deleteButton = new Button("Delete");
+            private final Button editButton = new Button();
+            private final Button deleteButton = new Button();
 
             {
-                editButton.setStyle("-fx-background-color: yellow;");
-                deleteButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+                // Tạo ImageView cho các icon
+                ImageView editIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/edit.png")));
+                ImageView deleteIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/delete.png")));
+
+                // Đặt kích thước ban đầu cho icon
+                setIconSize(editIcon, 20);
+                setIconSize(deleteIcon, 20);
+
+                // Thêm icon vào nút
+                editButton.setGraphic(editIcon);
+                deleteButton.setGraphic(deleteIcon);
+
+                // Đặt style cho nút
+                String defaultStyle = "-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 6;";
+                editButton.setStyle(defaultStyle);
+                deleteButton.setStyle(defaultStyle);
+
+                // Thêm sự kiện phóng to khi hover và giảm padding
+                addHoverEffect(editButton, editIcon);
+                addHoverEffect(deleteButton, deleteIcon);
             }
 
             @Override
@@ -197,9 +216,27 @@ public class ProductManagementView extends VBox {
                     });
 
                     HBox optionBox = new HBox(editButton, deleteButton);
+                    optionBox.setAlignment(Pos.CENTER);
                     optionBox.setSpacing(10);
                     setGraphic(optionBox);
                 }
+            }
+            private void setIconSize(ImageView icon, int size) {
+                icon.setFitWidth(size);
+                icon.setFitHeight(size);
+            }
+
+            // Phương thức thêm hiệu ứng hover
+            private void addHoverEffect(Button button, ImageView icon) {
+                button.setOnMouseEntered(e -> {
+                    setIconSize(icon, 25); // Phóng to khi hover
+                    button.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 3.2;"); // Giảm padding khi hover
+                });
+
+                button.setOnMouseExited(e -> {
+                    setIconSize(icon, 20); // Trở lại kích thước ban đầu khi rời chuột
+                    button.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 6;"); // Khôi phục padding ban đầu
+                });
             }
         });
 
@@ -295,25 +332,20 @@ public class ProductManagementView extends VBox {
         // Create input fields for the product form
         TextField nameField = new TextField();
         nameField.setPromptText("Product Name");
-        nameField.getStyleClass().add("popup-text-field"); // Add CSS class
+        nameField.getStyleClass().add("text-field-account");
 
         TextField brandField = new TextField();
         brandField.setPromptText("Brand");
-        brandField.getStyleClass().add("popup-text-field"); // Add CSS class
+        brandField.getStyleClass().add("text-field-account");
 
         TextField purchasePriceField = new TextField();
         purchasePriceField.setPromptText("Purchase Price");
-        purchasePriceField.getStyleClass().add("popup-text-field"); // Add CSS class
+        purchasePriceField.getStyleClass().add("text-field-account");
 
         TextField salePriceField = new TextField();
         salePriceField.setPromptText("Sale Price");
-        salePriceField.getStyleClass().add("popup-text-field"); // Add CSS class
+        salePriceField.getStyleClass().add("text-field-account");
 
-        // Create Save and Cancel buttons
-        Button saveButton = new Button("Save");
-        saveButton.getStyleClass().add("popup-button"); // Add CSS class
-        Button cancelButton = new Button("Cancel");
-        cancelButton.getStyleClass().add("popup-button"); // Add CSS class
         // Error messages for CRUD
         messageLabel.put("name", new Label());
         messageLabel.put("brand", new Label());
@@ -324,20 +356,14 @@ public class ProductManagementView extends VBox {
             value.setManaged(false);
         });
 
-        // Clear the message label
-        newProductStage.setOnCloseRequest(event -> {
-            messageLabel.clear();
-        });
-
-        // Create an ImageView for displaying the uploaded image
+        // Image upload section
         ImageView imageView = new ImageView();
-        imageView.setFitWidth(100); // Set the desired width
-        imageView.setFitHeight(100); // Set the desired height
-        imageView.setPreserveRatio(true); // Preserve aspect ratio
+        imageView.setFitWidth(150);
+        imageView.setFitHeight(150);
+        imageView.setPreserveRatio(true);
 
-
-        // Create a button for uploading an image
         Button uploadButton = new Button("Upload Image");
+        uploadButton.getStyleClass().add("button-account");
         final File[] tempImageFile = new File[1];
         final Image[] uploadedImage = new Image[1];
 
@@ -351,7 +377,7 @@ public class ProductManagementView extends VBox {
                     Image image = new Image(new FileInputStream(file));
                     imageView.setImage(image);
 
-                    // Store the uploaded image reference
+                    // StoreManager the uploaded image reference
                     uploadedImage[0] = image;
 
                     // Destination
@@ -365,7 +391,7 @@ public class ProductManagementView extends VBox {
                     // Copy the file to the destination
                     Files.copy(file.toPath(), tempPath, StandardCopyOption.REPLACE_EXISTING);
 
-                    // Store the temporary file reference
+                    // StoreManager the temporary file reference
                     tempImageFile[0] = new File(tempPath.toString());
 
                 } catch (Exception e) {
@@ -373,6 +399,12 @@ public class ProductManagementView extends VBox {
                 }
             }
         });
+        // Create buttons for Save and Cancel
+        Button saveButton = new Button("Save");
+        saveButton.getStyleClass().add("button-account");
+
+        Button cancelButton = new Button("Cancel");
+        cancelButton.getStyleClass().add("button-cancel-account");
 
         // Save button action
         saveButton.setOnAction(event -> {
@@ -451,42 +483,46 @@ public class ProductManagementView extends VBox {
             newProductStage.close();
         });
 
-        // Layout for the form using HBox
-        HBox formLayout = new HBox(20); // Spacing between elements
-        formLayout.setPadding(new Insets(20));
-        formLayout.setAlignment(Pos.CENTER_LEFT);
 
-        // Create a VBox for the input fields
-        VBox inputFields = new VBox(10); // Spacing between input fields
-        inputFields.setAlignment(Pos.CENTER_LEFT);
+        // Layout using GridPane
+        GridPane gridPane = new GridPane();
+        gridPane.setHgap(10);
+        gridPane.setVgap(15);
+        gridPane.setPadding(new Insets(40));
 
-        // Add input fields and labels to the inputFields VBox
-        inputFields.getChildren().addAll(
-                new Label("Product Name:") {{ getStyleClass().add("popup-label"); }},
-                nameField, messageLabel.get("name"),
-                new Label("Brand:") {{ getStyleClass().add("popup-label"); }},
-                brandField, messageLabel.get("brand"),
-                new Label("Purchase Price:") {{ getStyleClass().add("popup-label"); }},
-                purchasePriceField, messageLabel.get("purchasePrice"),
-                new Label("Sale Price:") {{ getStyleClass().add("popup-label"); }},
-                salePriceField, messageLabel.get("salePrice"),
-                new HBox(10, saveButton, cancelButton) // Buttons in a horizontal box
-        );
+        // Add components to the grid
+        gridPane.add(new Label("Product Name:"), 0, 0);
+        gridPane.add(nameField, 1, 0);
+        gridPane.add(messageLabel.get("name"), 2, 0);
 
+        gridPane.add(new Label("Brand:"), 0, 1);
+        gridPane.add(brandField, 1, 1);
+        gridPane.add(messageLabel.get("brand"), 2, 1);
 
-        // Create a VBox for the image upload section
-        VBox imageUploadSection = new VBox(10);
-        imageUploadSection.setAlignment(Pos.CENTER); // Center the image and upload button
-        imageUploadSection.getChildren().addAll(imageView, uploadButton);
+        gridPane.add(new Label("Purchase Price:"), 0, 2);
+        gridPane.add(purchasePriceField, 1, 2);
+        gridPane.add(messageLabel.get("purchasePrice"), 2, 2);
 
-        // Add the input fields and the image upload section to the main form layout
-        formLayout.getChildren().addAll(inputFields, imageUploadSection);
+        gridPane.add(new Label("Sale Price:"), 0, 3);
+        gridPane.add(salePriceField, 1, 3);
+        gridPane.add(messageLabel.get("salePrice"), 2, 3);
 
-        // Create the scene and set it to the stage
-        Scene scene = new Scene(formLayout, 800, 600);
-        scene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());// Adjust size as needed
+        // Image upload section in GridPane
+        VBox imageUploadBox = new VBox(10, imageView, uploadButton);
+        imageUploadBox.setAlignment(Pos.CENTER);
+        gridPane.add(imageUploadBox, 1, 4);
+
+        // Save and Cancel buttons
+        HBox buttonBox = new HBox(15, saveButton, cancelButton);
+        buttonBox.setAlignment(Pos.CENTER);
+        gridPane.add(buttonBox, 1, 5);
+
+        // Create scene and apply CSS
+        Scene scene = new Scene(gridPane, 500, 600);
+        scene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
         newProductStage.setScene(scene);
         newProductStage.show();
+
     }
 
     private void showProductEditor(Product product) {
@@ -495,9 +531,9 @@ public class ProductManagementView extends VBox {
 
         // Create layout for showing product editor
         GridPane grid = new GridPane();
-        grid.setPadding(new Insets(10));
+        grid.setPadding(new Insets(40));
         grid.setHgap(10);
-        grid.setVgap(10);
+        grid.setVgap(15);
 
         // Error messages for CRUD
         messageLabel.put("name", new Label());
@@ -511,20 +547,14 @@ public class ProductManagementView extends VBox {
 
         // Create input fields and labels
         TextField nameField = new TextField(product.getName());
-        nameField.getStyleClass().add("popup-text-field"); // Add CSS class
+        nameField.getStyleClass().add("text-field-account"); // Add CSS class
 
         TextField brandField = new TextField(product.getBrand());
-        brandField.getStyleClass().add("popup-text-field"); // Add CSS class
+        brandField.getStyleClass().add("text-field-account"); // Add CSS class
         TextField purchasePriceField = new TextField(String.valueOf(product.getPurchasePrice()));
-        purchasePriceField.getStyleClass().add("popup-text-field"); // Add CSS class
+        purchasePriceField.getStyleClass().add("text-field-account"); // Add CSS class
         TextField salePriceField = new TextField(String.valueOf(product.getSalePrice()));
-        salePriceField.getStyleClass().add("popup-text-field"); // Add CSS class
-
-        // Old Data
-        final String oldName = nameField.getText();
-        final String oldBrand = brandField.getText();
-        final double oldPurchasePrice = Double.parseDouble(purchasePriceField.getText());
-        final double oldSalePrice = Double.parseDouble(salePriceField.getText());
+        salePriceField.getStyleClass().add("text-field-account"); // Add CSS class
 
         // Create an ImageView for displaying the uploaded image
         ImageView imageView = new ImageView();
@@ -543,8 +573,6 @@ public class ProductManagementView extends VBox {
         Button uploadButton = new Button("Upload Image");
         final File[] tempImageFile = new File[1];
         final Image[] uploadedImage = new Image[1];
-        Image tempImage;
-
 
         uploadButton.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
@@ -556,7 +584,7 @@ public class ProductManagementView extends VBox {
                     Image image = new Image(new FileInputStream(file));
                     imageView.setImage(image);
 
-                    // Store the uploaded image reference
+                    // StoreManager the uploaded image reference
                     uploadedImage[0] = image;
 
                     // Destination
@@ -570,7 +598,7 @@ public class ProductManagementView extends VBox {
                     // Copy the file to the destination
                     Files.copy(file.toPath(), tempPath, StandardCopyOption.REPLACE_EXISTING);
 
-                    // Store the temporary file reference
+                    // StoreManager the temporary file reference
                     tempImageFile[0] = new File(tempPath.toString());
 
                 } catch (Exception e) {
@@ -581,7 +609,7 @@ public class ProductManagementView extends VBox {
 
         // Save button to apply changes
         Button saveButton = new Button("Save");
-        saveButton.getStyleClass().add("popup-button"); // Add CSS class
+        saveButton.getStyleClass().add("button-account"); // Add CSS class
         saveButton.setOnAction(event -> {
             boolean flag = true; //TRUE = no error
 
@@ -592,7 +620,7 @@ public class ProductManagementView extends VBox {
                 showMessage(messageLabel.get("name"));
                 flag = false;
             }
-            if (!dm.ifUniqueProductName(name) && (!name.equals(oldName))) {
+            if (!dm.ifUniqueProductName(name) && (!name.equals(product.getName()))) {
                 messageLabel.get("name").setText(alertUniqueProductName());
                 showMessage(messageLabel.get("name"));
                 flag = false;
@@ -608,7 +636,7 @@ public class ProductManagementView extends VBox {
                 purchasePrice = Double.parseDouble(purchasePriceField.getText());
 
             } catch (NumberFormatException e) {
-                messageLabel.get("purchasePrice").setText(alertInvalidPurchasePrice());
+                messageLabel.get("purchase Price").setText(alertInvalidPurchasePrice());
                 showMessage(messageLabel.get("purchasePrice"));
                 flag = false;
             }
@@ -647,26 +675,20 @@ public class ProductManagementView extends VBox {
             editStage.close();
         });
 
-        // Add Temp image
-        tempImage = new Image("file:src/main/resources/view/images/img_temp_" + product.getImage());
-        if (!tempImage.isError()) {
-            imageView.setImage(tempImage);
-        }
-
         // Cancel button
         Button cancelButton = new Button("Cancel");
-        cancelButton.getStyleClass().add("popup-button"); // Add CSS class
-        cancelButton.setOnAction(event -> editStage.fireEvent(new WindowEvent(editStage, WindowEvent.WINDOW_CLOSE_REQUEST)));
+        cancelButton.getStyleClass().add("button-cancel-account"); // Add CSS class
+        cancelButton.setOnAction(event -> editStage.close());
 
         // Reset button
         Button resetButton = new Button("Reset");
-        resetButton.getStyleClass().add("popup-button"); // Add CSS class
+        resetButton.getStyleClass().add("button-account"); // Add CSS class
         resetButton.setOnAction(event -> {
             // Restore old values
-            nameField.setText(oldName);
-            brandField.setText(oldBrand);
-            purchasePriceField.setText(String.valueOf(oldPurchasePrice));
-            salePriceField.setText(String.valueOf(oldSalePrice));
+            nameField.setText(product.getName());
+            brandField.setText(product.getBrand());
+            purchasePriceField.setText(String.valueOf(product.getPurchasePrice()));
+            salePriceField.setText(String.valueOf(product.getSalePrice()));
 
             DirectorController.deleteTempProductImage();
             try {
@@ -676,39 +698,39 @@ public class ProductManagementView extends VBox {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            imageView.setImage(tempImage);
+            imageView.setImage(originalImage);
         });
 
-        // Layout for the form using HBox
-        HBox formLayout = new HBox(20); // Spacing between elements
-        formLayout.setPadding(new Insets(20));
-        formLayout.setAlignment(Pos.CENTER_LEFT);
+        // Add components to the grid
+        grid.add(new Label("Product Name:"), 0, 0);
+        grid.add(nameField, 1, 0);
+        grid.add(messageLabel.get("name"), 2, 0);
 
-        // Create a VBox for the input fields
-        VBox inputFields = new VBox(10); // Spacing between input fields
-        inputFields.setAlignment(Pos.CENTER_LEFT);
+        grid.add(new Label("Brand:"), 0, 1);
+        grid.add(brandField, 1, 1);
+        grid.add(messageLabel.get("brand"), 2, 1);
 
-        // Add input fields and labels to the inputFields VBox
-        inputFields.getChildren().addAll(
-                new Label("Product Name:"), nameField, messageLabel.get("name"),
-                new Label("Brand:"), brandField, messageLabel.get("brand"),
-                new Label("Purchase Price:"), purchasePriceField, messageLabel.get("purchasePrice"),
-                new Label("Sale Price:"), salePriceField, messageLabel.get("salePrice"),
-                new HBox(10, saveButton, resetButton, cancelButton) // Buttons in a horizontal box
-        );
+        grid.add(new Label("Purchase Price:"), 0, 2);
+        grid.add(purchasePriceField, 1, 2);
+        grid.add(messageLabel.get("purchasePrice"), 2, 2);
 
-        // Create a VBox for the image upload section
-        VBox imageUploadSection = new VBox(10);
-        imageUploadSection.setAlignment(Pos.CENTER); // Center the image and upload button
-        imageUploadSection.getChildren().addAll(imageView, uploadButton);
+        grid.add(new Label("Sale Price:"), 0, 3);
+        grid.add(salePriceField, 1, 3);
+        grid.add(messageLabel.get("salePrice"), 2, 3);
 
-        // Add the input fields and the image upload section to the main form layout
-        formLayout.getChildren().addAll(inputFields, imageUploadSection);
+        // Image upload section in GridPane
+        VBox imageUploadBox = new VBox(10, imageView, uploadButton);
+        imageUploadBox.setAlignment(Pos.CENTER);
+        grid.add(imageUploadBox, 1, 4);
 
-        // Create the scene and set it to the stage
-        Scene scene = new Scene(formLayout, 800, 600); // Adjust size as needed
+        // Save and Cancel buttons
+        HBox buttonBox = new HBox(15, saveButton, resetButton, cancelButton);
+        buttonBox.setAlignment(Pos.CENTER);
+        grid.add(buttonBox, 1, 5);
 
-        scene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());// Adjust size as needed
+        // Create scene and apply CSS
+        Scene scene = new Scene(grid, 500, 600);
+        scene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
         editStage.setScene(scene);
         editStage.show();
 

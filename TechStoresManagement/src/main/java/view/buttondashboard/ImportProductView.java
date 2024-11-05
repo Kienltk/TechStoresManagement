@@ -72,9 +72,9 @@ public class ImportProductView extends VBox {
         });
         filterWarehouseButton.getStyleClass().add("button-pagination");
 
-        filterStoreButton = new Button("Store");
+        filterStoreButton = new Button("StoreManager");
         filterStoreButton.setOnAction(e -> {
-            loadStores("Store");
+            loadStores("StoreManager");
             highlightButton(filterStoreButton);
         });
         filterStoreButton.getStyleClass().add("button-pagination");
@@ -228,8 +228,8 @@ public class ImportProductView extends VBox {
             currentPage = 1;
         }
 
-        // Xóa cột "Store Name" nếu đã tồn tại
-        tableView.getColumns().removeIf(column -> column.getText().equals("Store Name"));
+        // Xóa cột "StoreManager Name" nếu đã tồn tại
+        tableView.getColumns().removeIf(column -> column.getText().equals("StoreManager Name"));
 
         String search = searchField.getText().trim().toLowerCase();
         List<Import> filteredImports;
@@ -237,11 +237,11 @@ public class ImportProductView extends VBox {
         // Lọc theo loại hiện tại (currentFilter)
         if ("Warehouse".equals(currentFilter)) {
             filteredImports = importController.getAllImportedWarehouse("");
-        } else if ("Store".equals(currentFilter)) {
+        } else if ("StoreManager".equals(currentFilter)) {
             filteredImports = importController.getAllImportedStore("");
 
-            // Thêm cột "Store Name" vào khi filter là "Store"
-            TableColumn<Import, String> storeNameColumn = new TableColumn<>("Store Name");
+            // Thêm cột "StoreManager Name" vào khi filter là "StoreManager"
+            TableColumn<Import, String> storeNameColumn = new TableColumn<>("StoreManager Name");
             storeNameColumn.setCellValueFactory(cellData ->
                     new SimpleStringProperty(cellData.getValue().getStoreName()));
             storeNameColumn.setPrefWidth(150);

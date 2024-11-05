@@ -475,7 +475,7 @@ VALUES (2, 3, 20),
 
 INSERT INTO role (role)
 VALUES ('General Director'),
-       ('Store Management'),
+       ('StoreManager Management'),
        ('Warehouse Management'),
        ('Cashier'),
        ('Employee');
@@ -531,7 +531,7 @@ INTO accounts (username, password, id_person)
 VALUES
     ('director', 'password_director', 1);
 
--- Store Managers
+-- StoreManager Managers
 INSERT INTO accounts (username, password, id_person)
 VALUES ('managerStore1', 'password_manager1', 2),
        ('managerStore2', 'password_manager2', 3),

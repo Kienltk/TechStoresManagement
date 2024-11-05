@@ -12,6 +12,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -49,18 +51,18 @@ public class WarehouseManagementView extends VBox {
 
         HBox searchBar = new HBox(searchField);
         searchBar.setAlignment(Pos.CENTER_RIGHT);
-        searchBar.setStyle(" -fx-padding:0 10 10 595;");
+        searchBar.setStyle(" -fx-padding:0 595 10 10;");
 
         // Create warehouse button
         Button createWarehouseButton = new Button("Create Warehouse");
         createWarehouseButton.setOnAction(e -> showCreateWarehouseDialog());
         createWarehouseButton.getStyleClass().add("button-pagination");
-        createWarehouseButton.setAlignment(Pos.CENTER_LEFT); // Đặt nút ở bên trái
+        createWarehouseButton.setAlignment(Pos.CENTER_LEFT);
 
         // Thêm nút Create Warehouse bên dưới ô search
         HBox topControls = new HBox(10);
         topControls.setStyle("-fx-min-width: 1000");
-        topControls.getChildren().addAll( createWarehouseButton,searchBar);
+        topControls.getChildren().addAll(searchBar,createWarehouseButton);
         borderPane.setTop(topControls);
 
         // Table setup
@@ -113,7 +115,6 @@ public class WarehouseManagementView extends VBox {
         TableColumn<Warehouse, Integer> indexColumn = new TableColumn<>("STT");
         indexColumn.setCellValueFactory(cellData -> new SimpleIntegerProperty(tableView.getItems().indexOf(cellData.getValue()) + 1).asObject());
         indexColumn.setPrefWidth(40);
-        indexColumn.setStyle("-fx-alignment: center");
         indexColumn.getStyleClass().add("column");
 
         TableColumn<Warehouse, String> nameColumn = new TableColumn<>("Name");
@@ -131,16 +132,40 @@ public class WarehouseManagementView extends VBox {
         managerColumn.setPrefWidth(150);
         managerColumn.getStyleClass().add("column");
 
-        TableColumn<Warehouse, String> actionColumn = new TableColumn<>("Action");
-        actionColumn.setPrefWidth(190);
+        TableColumn<Warehouse, String> actionColumn = new TableColumn<>("        Action");
+        actionColumn.setMinWidth(189);
+        actionColumn.getStyleClass().add("column");
         actionColumn.setCellFactory(col -> new TableCell<Warehouse, String>() {
-            private final Button viewButton = new Button("View");
-            private final Button editButton = new Button("Edit");
-            private final Button deleteButton = new Button("Delete");
+            private final Button viewButton = new Button();
+            private final Button editButton = new Button();
+            private final Button deleteButton = new Button();
+
             {
-                editButton.setStyle("-fx-background-color: yellow;");
-                deleteButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
-                viewButton.setStyle("-fx-background-color: #4AD4DD; -fx-text-fill: white;");
+                // Tạo ImageView cho các icon
+                ImageView viewIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/view.png")));
+                ImageView editIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/edit.png")));
+                ImageView deleteIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/delete.png")));
+
+                // Đặt kích thước ban đầu cho icon
+                setIconSize(viewIcon, 20);
+                setIconSize(editIcon, 20);
+                setIconSize(deleteIcon, 20);
+
+                // Thêm icon vào nút
+                viewButton.setGraphic(viewIcon);
+                editButton.setGraphic(editIcon);
+                deleteButton.setGraphic(deleteIcon);
+
+                // Đặt style cho nút
+                String defaultStyle = "-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 6;";
+                viewButton.setStyle(defaultStyle);
+                editButton.setStyle(defaultStyle);
+                deleteButton.setStyle(defaultStyle);
+
+                // Thêm sự kiện phóng to khi hover và giảm padding
+                addHoverEffect(viewButton, viewIcon);
+                addHoverEffect(editButton, editIcon);
+                addHoverEffect(deleteButton, deleteIcon);
             }
 
             @Override
@@ -149,16 +174,35 @@ public class WarehouseManagementView extends VBox {
                 if (empty || getIndex() < 0) {
                     setGraphic(null);
                 } else {
-                    Warehouse warehouse = getTableView().getItems().get(getIndex());
-                    viewButton.setOnAction(e -> showWarehouseDetails(warehouse));
-                    editButton.setOnAction(e -> showEditWarehouseDialog(warehouse));
-                    deleteButton.setOnAction(e -> deleteWarehouse(warehouse));
+                    Warehouse Warehouse = getTableView().getItems().get(getIndex());
+                    viewButton.setOnAction(e -> showWarehouseDetails(Warehouse));
+                    editButton.setOnAction(e -> showEditWarehouseDialog(Warehouse));
+                    deleteButton.setOnAction(e -> deleteWarehouse(Warehouse));
+
                     HBox buttons = new HBox(viewButton, editButton, deleteButton);
-                    buttons.setSpacing(10);
+                    buttons.setStyle("-fx-alignment: CENTER_LEFT; -fx-spacing: 10;");
                     setGraphic(buttons);
                 }
             }
+            private void setIconSize(ImageView icon, int size) {
+                icon.setFitWidth(size);
+                icon.setFitHeight(size);
+            }
+
+            // Phương thức thêm hiệu ứng hover
+            private void addHoverEffect(Button button, ImageView icon) {
+                button.setOnMouseEntered(e -> {
+                    setIconSize(icon, 25); // Phóng to khi hover
+                    button.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 3.2;"); // Giảm padding khi hover
+                });
+
+                button.setOnMouseExited(e -> {
+                    setIconSize(icon, 20); // Trở lại kích thước ban đầu khi rời chuột
+                    button.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 6;"); // Khôi phục padding ban đầu
+                });
+            }
         });
+
 
 
         tableView.getColumns().addAll(indexColumn, nameColumn, addressColumn, managerColumn, actionColumn);
