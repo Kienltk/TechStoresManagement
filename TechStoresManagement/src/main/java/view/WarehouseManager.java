@@ -12,7 +12,7 @@ import javafx.stage.Stage;
 import java.util.Objects;
 
 public class WarehouseManager extends Application {
-    private final int idStore;
+    private final int idWarehouse;
     private final String employeeName;
 
     public String getEmployeeName() {
@@ -20,7 +20,7 @@ public class WarehouseManager extends Application {
     }
 
     public WarehouseManager() {
-        this.idStore = Session.getIdStore();
+        this.idWarehouse = Session.getIdWarehouse();
         this.employeeName = Session.getEmployeeName();
     }
     @Override
@@ -34,7 +34,7 @@ public class WarehouseManager extends Application {
             primaryStage.close();
             return;
         }
-        System.out.println("Logged in as: " + employeeName + " at store ID: " + idStore);
+        System.out.println("Logged in as: " + employeeName + " at store ID: " + idWarehouse);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("DashboardWarehouse.fxml"));
         Scene scene = new Scene(loader.load());
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("director.css")).toExternalForm());

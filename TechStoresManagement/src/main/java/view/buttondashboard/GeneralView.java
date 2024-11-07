@@ -376,8 +376,8 @@ public class GeneralView extends VBox {
 
         if (pieChartTurnoverStore == null) {
             labelTurnoverStore = new Label();
-            labelTurnoverStore.setText("Không có dữ liệu"); // Thêm biểu đ�� vào giữa layout
-            return; // Kết thúc phương thức nếu chưa tồn tại biểu đ��
+            labelTurnoverStore.setText("Không có dữ liệu");
+            return;
         }
 
         if (turnoverStoreData.isEmpty()) {
