@@ -1,6 +1,7 @@
 package view.buttondashboardstore;
 
 import controller.HistoryController;
+import controller.Session;
 import entity.ProductReceipt;
 import entity.Receipt;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -25,6 +26,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class HistoryView extends VBox {
+    private final int idStore = Session.getIdStore();
+
     private TableView<Receipt> receiptTable;
     private TextField searchField;
     private HistoryController controller = new HistoryController();
@@ -57,7 +60,7 @@ public class HistoryView extends VBox {
         mainLayout.setCenter(receiptTable);
 
         // Load all receipts initially
-        controller.loadReceipts(receiptTable, null, 1);
+        controller.loadReceiptsByStore(receiptTable, null, 1, idStore);
 
         // Load all receipts initially
         // Pagination controls
@@ -67,7 +70,7 @@ public class HistoryView extends VBox {
         nextButton.getStyleClass().add("button-pagination");
         pageLabel.getStyleClass().add("text-pagination");
 
-        totalPages = controller.getTotalPages(searchField.getText()); // Lấy tổng số trang
+        totalPages = controller.getTotalPagesByStore(searchField.getText(), idStore); // Lấy tổng số trang
 
         prevButton.setOnAction(e -> {
             if (currentPage > 1) {
@@ -93,8 +96,8 @@ public class HistoryView extends VBox {
     }
     // Hàm load receipts có phân trang
     private void loadReceiptsWithPagination() {
-        controller.loadReceipts(receiptTable, searchField.getText(), currentPage);
-        totalPages = controller.getTotalPages(searchField.getText());
+        controller.loadReceiptsByStore(receiptTable, searchField.getText(), currentPage, idStore);
+        totalPages = controller.getTotalPagesByStore(searchField.getText(), idStore);
         pageLabel.setText("Page " + currentPage + " / " + totalPages);
     }
 

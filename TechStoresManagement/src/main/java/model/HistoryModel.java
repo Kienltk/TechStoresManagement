@@ -53,6 +53,45 @@ public class HistoryModel {
         return receipts;
     }
 
+    public ObservableList<Receipt> getReceiptsByStore(String customerName, int idStore) {
+        ObservableList<Receipt> receipts = FXCollections.observableArrayList();
+        String sql = "SELECT r.id, c.name AS customer_name, s.name AS store_name, r.purchase_date, r.total, r.profit " +
+                "FROM receipts r " +
+                "JOIN customers c ON r.id_customer = c.id " +
+                "JOIN stores s ON r.id_store = s.id " +
+                "WHERE s.id = ?";
+
+        // Nếu customerName không phải là null, thêm điều kiện WHERE
+        if (customerName != null && !customerName.trim().isEmpty()) {
+            sql += " WHERE c.name LIKE ?";
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            if (customerName != null && !customerName.trim().isEmpty()) {
+                statement.setString(1, "%" + customerName + "%");
+            }
+            statement.setInt(1, idStore);
+
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                Receipt receipt = new Receipt(
+                        resultSet.getInt("id"),
+                        resultSet.getString("customer_name"),
+                        resultSet.getString("store_name"),
+                        resultSet.getTimestamp("purchase_date").toLocalDateTime(),
+                        resultSet.getDouble("total"),
+                        resultSet.getDouble("profit")
+                );
+                receipts.add(receipt);
+            }
+        } catch (Exception e) {
+            System.out.println("Database connection error: " + e.getMessage());
+        }
+
+        return receipts;
+    }
+
 
     public ObservableList<ProductReceipt> getProductReceipts(int receiptId) {
         ObservableList<ProductReceipt> productReceipts = FXCollections.observableArrayList();

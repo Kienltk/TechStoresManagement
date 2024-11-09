@@ -23,7 +23,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class EmployeeView extends VBox {
-    private final int idStore = Session.getIdWarehouse();
+    private final int idStore = Session.getIdStore();
 
     private TableView<Employee> tableView;
     private ObservableList<Employee> employeeList;
@@ -211,7 +211,7 @@ public class EmployeeView extends VBox {
     private void loadEmployees() {
         try {
             employeeList.clear(); // Xóa danh sách cũ
-            List<Employee> employees = employeeModel.getAllEmployeesByWarehouse(idStore);
+            List<Employee> employees = employeeModel.getAllEmployeesByStore(idStore);
             totalPages = (int) Math.ceil((double) employees.size() / itemsPerPage);
 
             // Get the sublist for the current page

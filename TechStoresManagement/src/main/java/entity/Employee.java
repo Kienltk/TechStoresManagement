@@ -41,8 +41,8 @@ public class Employee {
 
     // Parameterized constructor
     public Employee(int id, String firstName, String lastName, boolean gender, Date dob, String email,
-                    String phoneNumber, String address, double salary, int idRole, int idStore,
-                    int idWarehouse, String role, String workplace) {
+                    String phoneNumber, String address, double salary, int idRole, Integer idStore,
+                    Integer idWarehouse, String role, String workplace) {
         setId(id);
         setFirstName(firstName);
         setLastName(lastName);
@@ -53,26 +53,10 @@ public class Employee {
         setAddress(address);
         setSalary(salary);
         setIdRole(idRole);
-        setIdStore(idStore);
-        setIdWarehouse(idWarehouse);
-        setRole(role);
-        setWorkplace(workplace);
-    }
 
-    public Employee(int id, String firstName, String lastName, boolean gender, Date dob, String email,
-                    String phoneNumber, String address, double salary, int idRole, int idWarehouse, String role,
-                    String workplace) {
-        setId(id);
-        setFirstName(firstName);
-        setLastName(lastName);
-        setGender(gender);
-        setDob(dob);
-        setEmail(email);
-        setPhoneNumber(phoneNumber);
-        setAddress(address);
-        setSalary(salary);
-        setIdRole(idRole);
-        setIdWarehouse(idWarehouse);
+        setIdStore(idStore != null ? idStore : 0);
+        setIdWarehouse(idWarehouse != null ? idWarehouse : 0);
+
         setRole(role);
         setWorkplace(workplace);
     }

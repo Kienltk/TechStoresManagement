@@ -34,9 +34,30 @@ public class HistoryController {
         }
     }
 
+    public void loadReceiptsByStore(TableView<Receipt> receiptTable, String customerName, int currentPage, int idStore) {
+        ObservableList<Receipt> allReceipts = model.getReceiptsByStore(customerName, idStore);
+
+        // Tính toán số trang
+        int totalItems = allReceipts.size();
+        int totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
+
+        // Giới hạn dữ liệu trong trang hiện tại
+        int fromIndex = (currentPage - 1) * itemsPerPage;
+        int toIndex = Math.min(fromIndex + itemsPerPage, totalItems);
+
+        if (fromIndex <= toIndex) {
+            ObservableList<Receipt> paginatedReceipts = FXCollections.observableArrayList(allReceipts.subList(fromIndex, toIndex));
+            receiptTable.setItems(paginatedReceipts);
+        }
+    }
+
     // Hàm lấy số trang tổng cộng
     public int getTotalPages(String customerName) {
         ObservableList<Receipt> allReceipts = model.getReceipts(customerName);
+        return (int) Math.ceil((double) allReceipts.size() / itemsPerPage);
+    }
+    public int getTotalPagesByStore(String customerName, int idStore) {
+        ObservableList<Receipt> allReceipts = model.getReceiptsByStore(customerName, idStore);
         return (int) Math.ceil((double) allReceipts.size() / itemsPerPage);
     }
     public String getCustomerPhone(String customerName) {

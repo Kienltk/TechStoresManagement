@@ -56,7 +56,7 @@ public class EmployeeModel {
 
     public List<Employee> getAllEmployeesByWarehouse(int idWarehouse) {
         String sql = "SELECT e.id, e.first_name, e.last_name, e.gender, e.dob, e.email, e.phone_number, e.address, " +
-                "       e.salary, r.role, w.name AS workplace, e.id_role, e.id_warehouse " +
+                "       e.salary, r.role, w.name AS workplace, e.id_role, e.id_warehouse, e.id_store " +
                 "FROM employees e " +
                 "LEFT JOIN role r ON e.id_role = r.id " +
                 "LEFT JOIN warehouses w ON e.id_warehouse = w.id " +
@@ -78,7 +78,8 @@ public class EmployeeModel {
                             rs.getString("address"),
                             rs.getDouble("salary"),
                             rs.getInt("id_role"),
-                            rs.getInt("id_store"),
+                            rs.getObject("id_store") != null ? rs.getInt("id_store") : null,
+                            rs.getObject("id_warehouse") != null ? rs.getInt("id_warehouse") : null,
                             rs.getString("role"),
                             rs.getString("workplace")
                     );
@@ -93,7 +94,7 @@ public class EmployeeModel {
 
     public List<Employee> getAllEmployeesByStore(int idStore) {
         String sql = "SELECT e.id, e.first_name, e.last_name, e.gender, e.dob, e.email, e.phone_number, e.address, " +
-                "e.salary, r.role, s.nameAS workplace, e.id_role, e.id_store " +
+                "e.salary, r.role, s.name AS workplace, e.id_role, e.id_store, e.id_warehouse " +
                 "FROM employees e " +
                 "LEFT JOIN role r ON e.id_role = r.id " +
                 "LEFT JOIN stores s ON e.id_store = s.id " +
@@ -115,8 +116,8 @@ public class EmployeeModel {
                             rs.getString("address"),
                             rs.getDouble("salary"),
                             rs.getInt("id_role"),
-                            rs.getInt("id_store"),
-                            rs.getInt("id_warehouse"),
+                            rs.getObject("id_store") != null ? rs.getInt("id_store") : null,
+                            rs.getObject("id_warehouse") != null ? rs.getInt("id_warehouse") : null,
                             rs.getString("role"),
                             rs.getString("workplace")
                     );
@@ -128,6 +129,7 @@ public class EmployeeModel {
         }
         return employees;
     }
+
 
 
     public List<Employee> searchEmployeesByName(String name) throws SQLException {
