@@ -59,6 +59,26 @@ public class Employee {
         setWorkplace(workplace);
     }
 
+    public Employee(int id, String firstName, String lastName, boolean gender, Date dob, String email,
+                    String phoneNumber, String address, double salary, int idRole, int idWarehouse, String role,
+                    String workplace) {
+        setId(id);
+        setFirstName(firstName);
+        setLastName(lastName);
+        setGender(gender);
+        setDob(dob);
+        setEmail(email);
+        setPhoneNumber(phoneNumber);
+        setAddress(address);
+        setSalary(salary);
+        setIdRole(idRole);
+        setIdWarehouse(idWarehouse);
+        setRole(role);
+        setWorkplace(workplace);
+    }
+
+
+
     // Getters and property methods
     public int getId() { return id.get(); }
     public SimpleIntegerProperty idProperty() { return id; }

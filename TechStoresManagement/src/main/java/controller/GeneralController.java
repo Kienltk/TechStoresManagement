@@ -8,7 +8,7 @@ public class GeneralController {
 
     private GeneralModel model = new GeneralModel();
 
-    public void handleReload() {
+    public void handleReloadDirector() {
         try {
             model.insertStoreFinancialData();
             model.insertBusinessFinancialData();
@@ -18,6 +18,12 @@ public class GeneralController {
             e.printStackTrace();
         }
     }
+
+    public void handleReloadDWarehouse(int idWarehouse) {
+            model.getStockWarehouse(idWarehouse);
+            System.out.println("Reload complete. Data updated.");
+    }
+
 
     public double getTurnover() {
         try {
@@ -53,6 +59,10 @@ public class GeneralController {
             e.printStackTrace();
             return 0;
         }
+    }
+
+    public int getStockWarehouse(int idWarehouse) {
+        return model.getStockWarehouse(idWarehouse);
     }
 
 }

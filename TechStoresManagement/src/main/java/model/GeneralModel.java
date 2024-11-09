@@ -228,6 +228,24 @@ public class GeneralModel {
         return calculateTotalStock();
     }
 
+    public int getStockWarehouse(int idWarehouse) {
+        String warehouseStockQuery = "SELECT SUM(quantity) AS total_stock FROM products_warehouse WHERE id_warehouse = ?";
+        int totalStock = 0;
+
+        try (Connection conn = JDBCConnect.getJDBCConnection()) {
+            PreparedStatement warehouseStockStmt = conn.prepareStatement(warehouseStockQuery);
+            warehouseStockStmt.setInt(1, idWarehouse);
+            ResultSet warehouseStockResult = warehouseStockStmt.executeQuery();
+            if (warehouseStockResult.next()) {
+                totalStock += warehouseStockResult.getInt("total_stock");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error getting stock from warehouse: " + e.getMessage());
+        }
+        return totalStock;
+    }
+
     public Map<Integer, Map<String, BigDecimal>> getFinancialData() {
         Map<Integer, Map<String, BigDecimal>> financialData = new HashMap<>();
         String query = "SELECT YEAR(date) AS year, SUM(turnover) AS totalTurnover, " +
@@ -410,6 +428,29 @@ public class GeneralModel {
         return turnoverData;
     }
 
+    public Map<String, Integer> getProductsByAll(int idWarehouse, String rank) {
+        Map<String, Integer> productData = new HashMap<>();
+        String order = rank.equalsIgnoreCase("Highest") ? "DESC" : "ASC";
+        String query = " SELECT p.product_name, pw.quantity FROM products_warehouse pw " +
+                "JOIN products p ON pw.id_product = p.id " +
+                "WHERE pw.id_warehouse = ? " +
+                "ORDER BY pw.quantity " + order + " LIMIT 5";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, idWarehouse);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String productName = rs.getString("product_name");
+                    int quantity = rs.getInt("quantity");
+                    productData.put(productName, quantity);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return productData;
+    }
 
     public List<Integer> getAvailableYears() {
         List<Integer> years = new ArrayList<>();

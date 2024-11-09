@@ -111,7 +111,7 @@ public class GeneralView extends VBox {
         this.getChildren().addAll(layout);
         this.getStyleClass().add("vbox");
 
-        controller.handleReload();
+        controller.handleReloadDirector();
         updateData();
         updateBarChart(barChart);
         updatePieChartTurnoverStore();

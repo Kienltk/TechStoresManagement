@@ -17,6 +17,7 @@ public class EmployeeModel {
     public EmployeeModel() {
         this.conn = JDBCConnect.getJDBCConnection();
     }
+
     public List<Employee> getAllEmployees() {
         String sql = "SELECT e.id, e.first_name, e.last_name, e.gender, e.dob, e.email, e.phone_number, e.address, " +
                 "e.salary, r.role, IFNULL(IFNULL(s.name, w.name), 'Business') AS workplace, e.id_role, e.id_store, e.id_warehouse " +
@@ -46,6 +47,81 @@ public class EmployeeModel {
                         rs.getString("workplace")
                 );
                 employees.add(employee);
+            }
+        } catch (Exception e) {
+            System.out.println("Database connection error: " + e.getMessage());
+        }
+        return employees;
+    }
+
+    public List<Employee> getAllEmployeesByWarehouse(int idWarehouse) {
+        String sql = "SELECT e.id, e.first_name, e.last_name, e.gender, e.dob, e.email, e.phone_number, e.address, " +
+                "       e.salary, r.role, w.name AS workplace, e.id_role, e.id_warehouse " +
+                "FROM employees e " +
+                "LEFT JOIN role r ON e.id_role = r.id " +
+                "LEFT JOIN warehouses w ON e.id_warehouse = w.id " +
+                "WHERE e.id_warehouse = ?";
+
+        List<Employee> employees = new ArrayList<>();
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idWarehouse);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Employee employee = new Employee(
+                            rs.getInt("id"),
+                            rs.getString("first_name"),
+                            rs.getString("last_name"),
+                            rs.getBoolean("gender"),
+                            rs.getDate("dob"),
+                            rs.getString("email"),
+                            rs.getString("phone_number"),
+                            rs.getString("address"),
+                            rs.getDouble("salary"),
+                            rs.getInt("id_role"),
+                            rs.getInt("id_store"),
+                            rs.getString("role"),
+                            rs.getString("workplace")
+                    );
+                    employees.add(employee);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Database connection error: " + e.getMessage());
+        }
+        return employees;
+    }
+
+    public List<Employee> getAllEmployeesByStore(int idStore) {
+        String sql = "SELECT e.id, e.first_name, e.last_name, e.gender, e.dob, e.email, e.phone_number, e.address, " +
+                "e.salary, r.role, s.nameAS workplace, e.id_role, e.id_store " +
+                "FROM employees e " +
+                "LEFT JOIN role r ON e.id_role = r.id " +
+                "LEFT JOIN stores s ON e.id_store = s.id " +
+                "WHERE e.id_store = ?";
+
+        List<Employee> employees = new ArrayList<>();
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idStore);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Employee employee = new Employee(
+                            rs.getInt("id"),
+                            rs.getString("first_name"),
+                            rs.getString("last_name"),
+                            rs.getBoolean("gender"),
+                            rs.getDate("dob"),
+                            rs.getString("email"),
+                            rs.getString("phone_number"),
+                            rs.getString("address"),
+                            rs.getDouble("salary"),
+                            rs.getInt("id_role"),
+                            rs.getInt("id_store"),
+                            rs.getInt("id_warehouse"),
+                            rs.getString("role"),
+                            rs.getString("workplace")
+                    );
+                    employees.add(employee);
+                }
             }
         } catch (Exception e) {
             System.out.println("Database connection error: " + e.getMessage());
@@ -129,7 +205,7 @@ public class EmployeeModel {
         String query = "SELECT name FROM stores WHERE id = ?"; // Thay đổi tên bảng nếu cần
 
         try (
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+                PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, storeId);
             ResultSet rs = stmt.executeQuery();
 
@@ -148,7 +224,7 @@ public class EmployeeModel {
         String query = "SELECT name FROM warehouses WHERE id = ?"; // Thay đổi tên bảng nếu cần
 
         try (
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+                PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, warehouseId);
             ResultSet rs = stmt.executeQuery();
 
@@ -238,7 +314,7 @@ public class EmployeeModel {
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, employeeId);
             stmt.executeUpdate();
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Database connection error: " + e.getMessage());
         }
     }

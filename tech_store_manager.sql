@@ -475,7 +475,7 @@ VALUES (2, 3, 20),
 
 INSERT INTO role (role)
 VALUES ('General Director'),
-       ('StoreManager Management'),
+       ('Store Management'),
        ('Warehouse Management'),
        ('Cashier'),
        ('Employee');
@@ -531,7 +531,7 @@ INTO accounts (username, password, id_person)
 VALUES
     ('director', 'password_director', 1);
 
--- StoreManager Managers
+-- Store Managers
 INSERT INTO accounts (username, password, id_person)
 VALUES ('managerStore1', 'password_manager1', 2),
        ('managerStore2', 'password_manager2', 3),
@@ -1019,11 +1019,3 @@ VALUES
 ('2024-10-21', 900.00, 500.00, 400.00),
 ('2024-10-22', 0.00, 0.00, 0.00),
 ('2024-10-23', 1100.00, 1200.00, -100.00);
-
-INSERT INTO import_warehouse (id_warehouse, name, total, product_import_date, status)
-                VALUES
-(1, "test", 12999, now(), "Pending Approval");
-
-INSERT INTO import_warehouse (id_store, id_warehouse, name, total, product_import_date, status)
-                VALUES
-                (1, 1, "test", 12999, now(), "Pending Approval")
