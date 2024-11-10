@@ -34,9 +34,27 @@ public class GeneralController {
         }
     }
 
+    public double getTurnoverStore(int idStore) {
+        try {
+            return model.getTurnoverStore(idStore);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     public double getCapital() {
         try {
             return model.getCapital();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    public double getCapitalStore(int idStore) {
+        try {
+            return model.getCapitalStore(idStore);
         } catch (SQLException e) {
             e.printStackTrace();
             return 0;
@@ -52,6 +70,15 @@ public class GeneralController {
         }
     }
 
+    public double getProfitStore(int idStore) {
+        try {
+            return model.getProfitStore(idStore);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     public int getStock() {
         try {
             return model.getStock();
@@ -59,6 +86,10 @@ public class GeneralController {
             e.printStackTrace();
             return 0;
         }
+    }
+
+    public int getStockStore(int idStore) {
+        return model.getStockStore(idStore);
     }
 
     public int getStockWarehouse(int idWarehouse) {

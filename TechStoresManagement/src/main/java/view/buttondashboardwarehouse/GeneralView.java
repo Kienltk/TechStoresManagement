@@ -21,8 +21,6 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import model.GeneralModel;
 
-import java.math.BigDecimal;
-import java.util.Calendar;
 import java.util.Map;
 
 public class GeneralView extends VBox {
@@ -78,7 +76,7 @@ public class GeneralView extends VBox {
 
         controller.handleReloadDWarehouse(idWarehouse);
         updateData();
-        updatePieChartTurnoverStore();
+        updatePieChartStockWarehouse();
     }
 
     private StackPane createInfoPane(Text label) {
@@ -107,15 +105,13 @@ public class GeneralView extends VBox {
 
     public void handleCriteriaChange() {
         String selectedCriteria = rankComboBox.getValue();
-        stockProductData = model.getProductsByAll(idWarehouse, selectedCriteria);
-        updatePieChartTurnoverStore();
-
-
+        stockProductData = model.getRankWarehouseProduct(idWarehouse, selectedCriteria);
+        updatePieChartStockWarehouse();
     }
 
     private BorderPane createPieChartStockWarehouse() {
-        ObservableList<PieChart.Data> details = FXCollections.observableArrayList(); // Danh sách dữ liệu cho biểu đồ
-        stockProductData = model.getProductsByAll(idWarehouse, rankComboBox.getValue()); // Lấy dữ liệu doanh thu theo năm
+        ObservableList<PieChart.Data> details = FXCollections.observableArrayList();
+        stockProductData = model.getRankWarehouseProduct(idWarehouse, rankComboBox.getValue());
 
         // Khởi tạo layout
         rootStockProduct = new BorderPane();
@@ -177,7 +173,8 @@ public class GeneralView extends VBox {
         return rootStockProduct; // Trả về layout chứa biểu đồ
     }
 
-    private void updatePieChartTurnoverStore() {
+
+    private void updatePieChartStockWarehouse() {
         ObservableList<PieChart.Data> details = FXCollections.observableArrayList();
 
         if (pieChartStockProduct == null) {

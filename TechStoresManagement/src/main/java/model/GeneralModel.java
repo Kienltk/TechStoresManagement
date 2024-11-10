@@ -200,6 +200,20 @@ public class GeneralModel {
         return 0;
     }
 
+    public double getTurnoverStore(int idStore) throws SQLException {
+        String turnoverQuery = "SELECT SUM(turnover) AS total FROM store_financial Where id_store = ?";
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(turnoverQuery)) {
+            stmt.setInt(1, idStore);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("total");
+                }
+            }
+        }
+        return 0;
+    }
+
     public double getCapital() throws SQLException {
         String capitalQuery = "SELECT SUM(capital) AS total FROM business_financial";
         try (Connection conn = JDBCConnect.getJDBCConnection();
@@ -207,6 +221,20 @@ public class GeneralModel {
              ResultSet rs = stmt.executeQuery()) {
             if (rs.next()) {
                 return rs.getDouble("total");
+            }
+        }
+        return 0;
+    }
+
+    public double getCapitalStore(int idStore) throws SQLException {
+        String capitalQuery = "SELECT SUM(capital) AS total FROM store_financial Where id_store = ?";
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(capitalQuery)) {
+            stmt.setInt(1, idStore);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("total");
+                }
             }
         }
         return 0;
@@ -224,6 +252,20 @@ public class GeneralModel {
         return 0;
     }
 
+    public double getProfitStore(int idStore) throws SQLException {
+        String profitQuery = "SELECT SUM(profit) AS total FROM store_financial WHERE id_store =?";
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(profitQuery)) {
+            stmt.setInt(1, idStore);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("total");
+                }
+            }
+        }
+        return 0;
+    }
+
     public int getStock() throws SQLException {
         return calculateTotalStock();
     }
@@ -235,6 +277,24 @@ public class GeneralModel {
         try (Connection conn = JDBCConnect.getJDBCConnection()) {
             PreparedStatement warehouseStockStmt = conn.prepareStatement(warehouseStockQuery);
             warehouseStockStmt.setInt(1, idWarehouse);
+            ResultSet warehouseStockResult = warehouseStockStmt.executeQuery();
+            if (warehouseStockResult.next()) {
+                totalStock += warehouseStockResult.getInt("total_stock");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error getting stock from warehouse: " + e.getMessage());
+        }
+        return totalStock;
+    }
+
+    public int getStockStore(int idStore) {
+        String warehouseStockQuery = "SELECT SUM(quantity) AS total_stock FROM products_store WHERE id_store = ?";
+        int totalStock = 0;
+
+        try (Connection conn = JDBCConnect.getJDBCConnection()) {
+            PreparedStatement warehouseStockStmt = conn.prepareStatement(warehouseStockQuery);
+            warehouseStockStmt.setInt(1, idStore);
             ResultSet warehouseStockResult = warehouseStockStmt.executeQuery();
             if (warehouseStockResult.next()) {
                 totalStock += warehouseStockResult.getInt("total_stock");
@@ -268,6 +328,38 @@ public class GeneralModel {
 
                 // Put the year and the corresponding financial data into the map
                 financialData.put(year, yearData);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return financialData;
+    }
+
+    public Map<Integer, Map<String, BigDecimal>> getStoreFinancialData(int idStore) {
+        Map<Integer, Map<String, BigDecimal>> financialData = new HashMap<>();
+        String query = "SELECT YEAR(date) AS year, SUM(turnover) AS totalTurnover, " +
+                "SUM(capital) AS totalCapital, SUM(profit) AS totalProfit " +
+                "FROM store_financial WHERE id_store = ? GROUP BY YEAR(date)";
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, idStore);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int year = rs.getInt("year");
+                    BigDecimal totalTurnover = rs.getBigDecimal("totalTurnover");
+                    BigDecimal totalCapital = rs.getBigDecimal("totalCapital");
+                    BigDecimal totalProfit = rs.getBigDecimal("totalProfit");
+
+                    // Create a map for the year data
+                    Map<String, BigDecimal> yearData = new HashMap<>();
+                    yearData.put("turnover", totalTurnover);
+                    yearData.put("capital", totalCapital);
+                    yearData.put("profit", totalProfit);
+
+                    // Put the year and the corresponding financial data into the map
+                    financialData.put(year, yearData);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -314,6 +406,45 @@ public class GeneralModel {
         return financialData;
     }
 
+    public Map<Integer, Map<String, BigDecimal>> getStoreFinancialDataByYear(int year, int idStore) {
+        Map<Integer, Map<String, BigDecimal>> financialData = new HashMap<>();
+        String query = "SELECT MONTH(date) AS month, " +
+                "SUM(turnover) AS totalTurnover, " +
+                "SUM(capital) AS totalCapital, " +
+                "SUM(profit) AS totalProfit " +
+                "FROM store_financial " +
+                "WHERE YEAR(date) = ? AND id_store = ? " +
+                "GROUP BY MONTH(date)";
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, year);
+            stmt.setInt(2, idStore);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int month = rs.getInt("month");
+                    BigDecimal totalTurnover = rs.getBigDecimal("totalTurnover");
+                    BigDecimal totalCapital = rs.getBigDecimal("totalCapital");
+                    BigDecimal totalProfit = rs.getBigDecimal("totalProfit");
+
+                    // Create a map for the month data
+                    Map<String, BigDecimal> monthData = new HashMap<>();
+                    monthData.put("turnover", totalTurnover);
+                    monthData.put("capital", totalCapital);
+                    monthData.put("profit", totalProfit);
+
+                    // Put the month and the corresponding financial data into the map
+                    financialData.put(month, monthData);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return financialData;
+    }
+
     public Map<Integer, Map<String, BigDecimal>> getFinancialDataByMonth(int year, int month) {
         Map<Integer, Map<String, BigDecimal>> financialData = new HashMap<>();
         String query = "SELECT DAY(date) AS day, " +
@@ -328,6 +459,45 @@ public class GeneralModel {
 
             stmt.setInt(1, year);   // Set the year parameter
             stmt.setInt(2, month);  // Set the month parameter
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int day = rs.getInt("day");
+                    BigDecimal totalTurnover = rs.getBigDecimal("totalTurnover");
+                    BigDecimal totalCapital = rs.getBigDecimal("totalCapital");
+                    BigDecimal totalProfit = rs.getBigDecimal("totalProfit");
+
+                    // Create a map for the day data
+                    Map<String, BigDecimal> dayData = new HashMap<>();
+                    dayData.put("turnover", totalTurnover);
+                    dayData.put("capital", totalCapital);
+                    dayData.put("profit", totalProfit);
+
+                    // Put the day and the corresponding financial data into the map
+                    financialData.put(day, dayData);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return financialData;
+    }
+public Map<Integer, Map<String, BigDecimal>> getStoreFinancialDataByMonth(int year, int month, int idStore) {
+        Map<Integer, Map<String, BigDecimal>> financialData = new HashMap<>();
+        String query = "SELECT DAY(date) AS day, " +
+                "SUM(turnover) AS totalTurnover, " +
+                "SUM(capital) AS totalCapital, " +
+                "SUM(profit) AS totalProfit " +
+                "FROM store_financial " +
+                "WHERE YEAR(date) = ? AND MONTH(date) = ? AND id_store = ? " +
+                "GROUP BY DAY(date)";
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, year);   // Set the year parameter
+            stmt.setInt(2, month);  // Set the month parameter
+            stmt.setInt(3, idStore); // Set the store ID parameter
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -428,7 +598,7 @@ public class GeneralModel {
         return turnoverData;
     }
 
-    public Map<String, Integer> getProductsByAll(int idWarehouse, String rank) {
+    public Map<String, Integer> getRankWarehouseProduct(int idWarehouse, String rank) {
         Map<String, Integer> productData = new HashMap<>();
         String order = rank.equalsIgnoreCase("Highest") ? "DESC" : "ASC";
         String query = " SELECT p.product_name, pw.quantity FROM products_warehouse pw " +
@@ -439,6 +609,29 @@ public class GeneralModel {
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, idWarehouse);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String productName = rs.getString("product_name");
+                    int quantity = rs.getInt("quantity");
+                    productData.put(productName, quantity);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return productData;
+    }
+    public Map<String, Integer> getRankStoreProduct(int idStore, String rank) {
+        Map<String, Integer> productData = new HashMap<>();
+        String order = rank.equalsIgnoreCase("Highest") ? "DESC" : "ASC";
+        String query = " SELECT p.product_name, ps.quantity FROM products_store ps " +
+                "JOIN products p ON ps.id_product = p.id " +
+                "WHERE ps.id_store = ? " +
+                "ORDER BY ps.quantity " + order + " LIMIT 5";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, idStore);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     String productName = rs.getString("product_name");
