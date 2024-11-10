@@ -41,6 +41,12 @@ CREATE TABLE customers
     phone_number varchar(15)
 );
 
+CREATE TABLE import_status
+(
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    status_name VARCHAR(50)
+);
+
 -- FOREIGN KEY
 -- PRODUCT
 CREATE TABLE product_categories
@@ -67,9 +73,12 @@ CREATE TABLE import_warehouse
     id_warehouse        int,
     name varchar(50),
     total               decimal(12,2),
-    product_import_date datetime,
-	status varchar(50),
-    foreign key (id_warehouse) references warehouses (id)
+    created_at          DATETIME,
+    requested_date      DATETIME,
+    actual_import_date  DATETIME,
+	status_id           INT,
+    foreign key (id_warehouse) references warehouses (id),
+    FOREIGN KEY (status_id) REFERENCES import_status (id)
 );
 
 CREATE TABLE import_warehouse_details
@@ -111,10 +120,13 @@ CREATE TABLE import_store
     id_store      int,
     id_warehouse int,
     total         decimal(10, 2),
-    received_date datetime,
-    status varchar(50),
+    created_at          DATETIME,
+    requested_date      DATETIME,
+    actual_import_date  DATETIME,
+	status_id           INT,
     foreign key (id_warehouse) references warehouses (id),
-    foreign key (id_store) references stores (id)
+    foreign key (id_store) references stores (id),
+	FOREIGN KEY (status_id) REFERENCES import_status (id)
 );
 
 CREATE TABLE import_store_details
@@ -1019,3 +1031,41 @@ VALUES
 ('2024-10-21', 900.00, 500.00, 400.00),
 ('2024-10-22', 0.00, 0.00, 0.00),
 ('2024-10-23', 1100.00, 1200.00, -100.00);
+
+INSERT INTO import_status (status_name)
+VALUES 
+    ('Requested'),
+    ('Processing'),     
+    ('Imported'),  
+    ('Cancelled');
+    
+INSERT INTO import_warehouse (id_warehouse, name, total, created_at, requested_date, actual_import_date, status_id)
+VALUES 
+(1, 'Invoice 001', 1500.00, '2024-11-01 10:00:00', '2024-11-02 12:00:00', '2024-11-03 14:00:00', 1),
+(2, 'Invoice 002', 2500.50, '2024-11-01 11:00:00', '2024-11-02 13:00:00', '2024-11-03 15:00:00', 2),
+(3, 'Invoice 003', 3200.75, '2024-11-01 12:00:00', '2024-11-02 14:00:00', '2024-11-03 16:00:00', 1);
+
+INSERT INTO import_warehouse_details (id_import, id_product, quantity, total)
+VALUES 
+(1, 1, 10, 1000.00),
+(1, 2, 5, 500.00),
+(2, 3, 15, 1500.00),
+(2, 1, 8, 800.50),
+(3, 3, 12, 1200.75);
+
+-- Thêm dữ liệu vào bảng import_store
+INSERT INTO import_store (name, id_store, id_warehouse, total, created_at, requested_date, actual_import_date, status_id)
+VALUES 
+('Invoice A', 1, 1, 1000.50, '2024-11-01 10:30:00', '2024-11-05 09:00:00', '2024-11-06 15:45:00', 3),
+('Invoice B', 2, 2, 1500.75, '2024-11-02 11:15:00', '2024-11-07 09:00:00', '2024-11-08 16:30:00', 1),
+('Invoice C', 1, 2, 2000.00, '2024-11-03 14:20:00', '2024-11-09 09:00:00', NULL, 2);
+
+-- Thêm dữ liệu vào bảng import_store_details
+INSERT INTO import_store_details (id_import, id_product, quantity, total)
+VALUES 
+(1, 1, 10, 500.00),
+(1, 2, 5, 500.50),
+(2, 3, 20, 1000.00),
+(2, 4, 10, 500.75),
+(3, 1, 15, 750.00),
+(3, 3, 25, 1250.00);

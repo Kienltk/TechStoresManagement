@@ -146,8 +146,8 @@ public class HistoryModel {
     public String getStoreManager(String storeName) {
         String sql = "SELECT CONCAT(e.first_name, ' ', e.last_name) AS manager_name " +
                 "FROM employees e " +
-                "JOIN stores s ON e.id_store = s.id " + // Giả sử có mối liên hệ giữa bảng employees và stores
-                "WHERE s.name = ? AND e.id_role = (SELECT id FROM role WHERE role = 'StoreManager Management')";
+                "JOIN stores s ON e.id_store = s.id " +
+                "WHERE s.name = ? AND e.id_role = (SELECT id FROM role WHERE role = 'Store Management')";
 
         String managerName = null;
 
@@ -187,5 +187,6 @@ public class HistoryModel {
 
         return cashierName;
     }
+
 
 }

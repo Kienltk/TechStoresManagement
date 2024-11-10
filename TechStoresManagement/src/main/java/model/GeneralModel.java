@@ -21,7 +21,7 @@ public class GeneralModel {
 
     public void insertStoreFinancialData() throws SQLException {
         String storeTurnoverQuery = "SELECT id_store, SUM(total) AS turnover, SUM(profit) AS profit FROM receipts WHERE DATE(purchase_date) = CURDATE() GROUP BY id_store";
-        String storeCapitalQuery = "SELECT id_store, SUM(total) AS capital FROM import_store WHERE DATE(received_date) = CURDATE() GROUP BY id_store";
+        String storeCapitalQuery = "SELECT id_store, SUM(total) AS capital FROM import_store WHERE DATE(actual_import_date) = CURDATE() GROUP BY id_store";
         String lastStoreFinancialQuery = "SELECT id_store, turnover, capital, profit FROM store_financial WHERE date = CURDATE() ORDER BY id DESC";
         String insertStoreFinancialQuery = "INSERT INTO store_financial (id_store, date, turnover, capital, profit) VALUES (?, CURDATE(), ?, ?, ?)";
 
@@ -90,7 +90,7 @@ public class GeneralModel {
         String lastBusinessFinancialQuery = "SELECT turnover, capital, profit FROM business_financial WHERE date = CURDATE() ORDER BY id DESC LIMIT 1";
         String businessTurnoverQuery = "SELECT turnover FROM store_financial WHERE date = CURDATE() ORDER BY id DESC LIMIT 1";
         String businessProfitQuery = "SELECT profit FROM store_financial WHERE date = CURDATE() ORDER BY id DESC LIMIT 1";
-        String warehouseCapitalQuery = "SELECT total FROM import_warehouse WHERE DATE(product_import_date) = CURDATE() ORDER BY id DESC LIMIT 1";
+        String warehouseCapitalQuery = "SELECT total FROM import_warehouse WHERE DATE(actual_import_date) = CURDATE() ORDER BY id DESC LIMIT 1";
         String insertBusinessFinancialQuery = "INSERT INTO business_financial (date, turnover, capital, profit) VALUES (CURDATE(), ?, ?, ?)";
 
         double totalTurnover = 0;
@@ -151,7 +151,7 @@ public class GeneralModel {
 
     // Phương thức để lấy capital gần nhất từ import_warehouse
     private double getLastWarehouseCapital(Connection conn) throws SQLException {
-        String query = "SELECT SUM(total) AS capital FROM import_warehouse WHERE DATE(product_import_date) = CURDATE()";
+        String query = "SELECT SUM(total) AS capital FROM import_warehouse WHERE DATE(actual_import_date) = CURDATE()";
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             ResultSet resultSet = stmt.executeQuery();
             if (resultSet.next()) {
