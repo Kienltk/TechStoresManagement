@@ -77,4 +77,14 @@ public class Store {
     public void setTotalInventory(int totalInventory) {
         this.totalInventory = totalInventory;
     }
+
+    public Store(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

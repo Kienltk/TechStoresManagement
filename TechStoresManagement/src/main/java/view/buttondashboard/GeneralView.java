@@ -78,6 +78,9 @@ public class GeneralView extends VBox {
 
         // ComboBox cho năm, lấy từ cơ sở dữ liệu
         yearComboBox = new ComboBox<>();
+        yearComboBox.getStyleClass().add("combo-box-account");
+        monthComboBox.getStyleClass().add("combo-box-account");
+        criteriaComboBox.getStyleClass().add("combo-box-account");
         yearComboBox.getItems().addAll(model.getAvailableYears());
 
         // Đặt giá trị cho tháng và năm mặc định
@@ -100,7 +103,7 @@ public class GeneralView extends VBox {
         vbox.setAlignment(Pos.CENTER);
 
         HBox comboBox = new HBox(30);
-        comboBox.getChildren().addAll(new Label("Choose Criteria:"), criteriaComboBox, monthComboBox, yearComboBox);
+        comboBox.getChildren().addAll(criteriaComboBox, yearComboBox, monthComboBox);
         comboBox.setAlignment(Pos.CENTER);
 
         HBox charts = new HBox(20,  createBarChart(), createPieChartTurnoverStore());
@@ -110,6 +113,8 @@ public class GeneralView extends VBox {
 
         this.getChildren().addAll(layout);
         this.getStyleClass().add("vbox");
+        this.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
+
 
         controller.handleReloadDirector();
         updateData();

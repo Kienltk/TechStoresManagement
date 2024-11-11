@@ -12,13 +12,17 @@ import javafx.stage.Stage;
 import java.util.Objects;
 
 public class Director extends Application {
-
+    private final int idStore;
     private final String employeeName;
 
-    public Director() {
-        this.employeeName = Session.getEmployeeName();
+    public String getEmployeeName() {
+        return employeeName;
     }
 
+    public Director() {
+        this.idStore = Session.getIdStore();
+        this.employeeName = Session.getEmployeeName();
+    }
     @Override
     public void start(Stage primaryStage)throws Exception {
         if (!Session.isLoggedIn()) {
@@ -30,7 +34,7 @@ public class Director extends Application {
             primaryStage.close();
             return;
         }
-        System.out.println(employeeName);
+        System.out.println("Logged in as: " + employeeName + " at store ID: " + idStore);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("Dashboard.fxml"));
         Scene scene = new Scene(loader.load());
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("director.css")).toExternalForm());

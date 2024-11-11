@@ -43,6 +43,16 @@ public class Warehouse {
         this.managerName = managerName;
     }
 
+    public Warehouse(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
     public int getTotalInventory() {
         return totalInventory;
     }

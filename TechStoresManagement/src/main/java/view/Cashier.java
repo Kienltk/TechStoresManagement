@@ -90,7 +90,7 @@ public class Cashier extends Application {
         // Tạo nút Log Out, ban đầu ẩn
         Button logoutButton = new Button("Log Out");
         logoutButton.setVisible(false); // Ẩn nút Log Out lúc đầu
-        logoutButton.setStyle("-fx-background-color: #2ee59c; -fx-text-fill: white;");
+        logoutButton.setStyle("-fx-background-color: #4AD4DD; -fx-text-fill: white;");
 
         // Sự kiện khi nhấn vào tên nhân viên để hiển thị nút Log Out
         employeeNameLabel.setOnMouseClicked(event -> logoutButton.setVisible(!logoutButton.isVisible()));
@@ -127,40 +127,48 @@ public class Cashier extends Application {
 
         // Các cột của TableView
         TableColumn<Product, Integer> idColumn = new TableColumn<>("ID");
+        idColumn.getStyleClass().add("column");
         idColumn.setPrefWidth(40);
         idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
 
         TableColumn<Product, HBox> nameColumn = new TableColumn<>("Name");
+        nameColumn.getStyleClass().add("column");
         nameColumn.setPrefWidth(230);
         nameColumn.setCellValueFactory(cellData -> {
             Product product = cellData.getValue();
             Label nameLabel = new Label(product.getName());
             HBox hBox = new HBox(10);
+            hBox.setAlignment(Pos.CENTER_LEFT);
             hBox.getChildren().addAll(nameLabel);
             return new SimpleObjectProperty<>(hBox);
         });
 
         TableColumn<Product, String> brandColumn = new TableColumn<>("Brand");
+        brandColumn.getStyleClass().add("column");
         brandColumn.setPrefWidth(140);
         brandColumn.setCellValueFactory(cellData -> cellData.getValue().brandProperty());
 
         TableColumn<Product, Integer> stockColumn = new TableColumn<>("Stock");
+        stockColumn.getStyleClass().add("column");
         stockColumn.setPrefWidth(100);
         stockColumn.setCellValueFactory(cellData -> cellData.getValue().stockProperty().asObject());
 
         TableColumn<Product, Double> salePriceColumn = new TableColumn<>("salePrice");
+        salePriceColumn.getStyleClass().add("column");
         salePriceColumn.setPrefWidth(120);
         salePriceColumn.setCellValueFactory(cellData -> cellData.getValue().salePriceProperty().asObject());
 
         TableColumn<Product, HBox> actionColumn = new TableColumn<>("Action");
+        actionColumn.getStyleClass().add("column");
         actionColumn.setPrefWidth(125);
         actionColumn.setCellValueFactory(cellData -> {
             Product product = cellData.getValue();
-            HBox actionBox = new HBox(5);  // HBox để chứa các nút
+            HBox actionBox = new HBox(5);
+            actionBox.setAlignment(Pos.CENTER_LEFT);// HBox để chứa các nút
             Button addButton = new Button("Add");
-            addButton.getStyleClass().add("category-button");
+            addButton.getStyleClass().add("button-pagination");
             Button viewDetailsButton = new Button("View");
-            viewDetailsButton.getStyleClass().add("category-button");
+            viewDetailsButton.getStyleClass().add("button-pagination");
 
             addButton.setOnAction(e -> {
                 int productId = product.getId();
@@ -229,7 +237,7 @@ public class Cashier extends Application {
 
         HBox filterSection = new HBox();
         filterSection.setAlignment(Pos.CENTER_LEFT);
-        filterBox.setPadding(new Insets(0, 10, 5, 55));
+        filterBox.setPadding(new Insets(0, 10, 0, 55));
 
 
         // Tạo danh sách các button filter
@@ -271,12 +279,11 @@ public class Cashier extends Application {
         }
         filterSection.getChildren().addAll(filterBox);
 
-        // Thay thế ComboBox bằng HBox chứa các button filter
         Button prevButton = new Button("<-");
-        prevButton.getStyleClass().add("category-button");
+        prevButton.getStyleClass().add("button-pagination");
         Button nextButton = new Button("->");
-        nextButton.getStyleClass().add("category-button");
-        pageLabel.setStyle("-fx-text-fill: #4AD4DD;-fx-font-weight: bold; -fx-font-size: 14; ");
+        nextButton.getStyleClass().add("button-pagination");
+        pageLabel.getStyleClass().add("text-pagination");
 
         prevButton.setOnAction(e -> {
             if (currentPage > 1) {
@@ -322,7 +329,7 @@ public class Cashier extends Application {
         VBox buyNowContainer = new VBox();
         buyNowContainer.setAlignment(Pos.CENTER);
         Button buyNowButton = new Button("Buy Now");
-        buyNowButton.getStyleClass().add("category-button");
+        buyNowButton.getStyleClass().add("button-pagination");
         buyNowButton.setStyle("-fx-text-alignment: center; ");
 
 
@@ -343,6 +350,7 @@ public class Cashier extends Application {
         outerVbox.setMaxWidth(500);
         outerVbox.setPrefWidth(500);
         table.getChildren().addAll(productTable, paginationBox);
+        table.setStyle("-fx-background-color: white;");
         contentSection.getChildren().addAll(table, outerVbox);
 
         // Tạo VBox chính để đặt các phần thành từng lớp
@@ -636,7 +644,7 @@ public class Cashier extends Application {
         quantityValue.setStyle("-fx-text-fill: #4AD4DD; -fx-font-size: 16px; -fx-font-weight: bold;");
 
         Button decrementButton = new Button("-");
-        decrementButton.getStyleClass().add("category-button");  // Thêm style class mặc định cho nút
+        decrementButton.getStyleClass().add("button-pagination");  // Thêm style class mặc định cho nút
         ;
         decrementButton.setOnAction(e -> {
             int currentValue = Integer.parseInt(quantityValue.getText());
@@ -646,7 +654,7 @@ public class Cashier extends Application {
         });
 
         Button incrementButton = new Button("+");
-        incrementButton.getStyleClass().add("category-button");  // Thêm style class mặc đ��nh cho nút
+        incrementButton.getStyleClass().add("button-pagination");  // Thêm style class mặc đ��nh cho nút
         incrementButton.setOnAction(e -> {
             int currentValue = Integer.parseInt(quantityValue.getText());
             quantityValue.setText(String.valueOf(currentValue + 1));
@@ -672,7 +680,7 @@ public class Cashier extends Application {
         Button skipButton = new Button("Skip");
         skipButton.setStyle("-fx-background-color: lightgray;");
         Button doneButton = new Button("Done");
-        doneButton.getStyleClass().add("category-button");  // Thêm style class mặc định cho nút
+        doneButton.getStyleClass().add("button-pagination");  // Thêm style class mặc định cho nút
         ;
         buttonBox.getChildren().addAll(skipButton, doneButton);
         buttonBox.setSpacing(10);
@@ -773,7 +781,7 @@ public class Cashier extends Application {
             Button decreaseButton = new Button();
             decreaseButton.getStyleClass().add("decrease-button"); // Đảm bảo đã thêm class CSS
             Label decreaseLabel = new Label("\u2212");
-            decreaseLabel.setStyle("-fx-text-fill: #4AD4DD;"); // Đổi màu chữ sang xanh
+            decreaseLabel.setStyle("-fx-text-fill: #ffffff;"); // Đổi màu chữ sang xanh
             decreaseButton.setGraphic(decreaseLabel);
             decreaseButton.setOnAction(e -> {
                 if (quantity[0] > 1) {
@@ -790,7 +798,7 @@ public class Cashier extends Application {
             Button increaseButton = new Button();
             increaseButton.getStyleClass().add("increase-button"); // Đảm bảo đã thêm class CSS
             Label increaseLabel = new Label("\u002B");
-            increaseLabel.setStyle("-fx-text-fill: #4AD4DD;"); // Đổi màu chữ sang xanh
+            increaseLabel.setStyle("-fx-text-fill: #ffffff;"); // Đổi màu chữ sang xanh
             increaseButton.setGraphic(increaseLabel);
             increaseButton.setOnAction(e -> {
                 int currentStock = cm.getOne(idStore, entry.getKey()).getStock();

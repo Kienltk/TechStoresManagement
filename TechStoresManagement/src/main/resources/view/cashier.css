@@ -1,17 +1,77 @@
 .category-button {
-    -fx-background-color: #4AD4DD;  /* Màu nền xanh 4AD4DD khi được chọn */
-    -fx-text-fill: white;
+    -fx-background-color: #ffffff;  /* Màu nền xanh 4AD4DD khi được chọn */
+    -fx-text-fill: #4AD4DD;
     -fx-border-radius: 5px;
-    -fx-background-radius: 15px;
+    -fx-background-radius: 5px;
     -fx-border-color: #4AD4DD;
     -fx-border-width: 2px;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
 }
 .category-button.selected {
-    -fx-background-color: white;
-    -fx-text-fill: #4AD4DD;         /* Màu chữ trắng khi được chọn */
+    -fx-background-color: #4AD4DD;
+    -fx-text-fill: #ffffff;         /* Màu chữ trắng khi được chọn */
     -fx-border-color: #4AD4DD;      /* Đổi viền cùng màu với nền */
+}
+.table-view {
+    -fx-border-color: #ffffff !important; /* Loại bỏ viền bao ngoài */
+    -fx-border-width: 1 !important; /* Đặt độ rộng viền bằng 0 */
+    -fx-pref-width: 800;
+    -fx-fixed-cell-size:49;
+    -fx-pref-height: 626;
+    -fx-max-height: 626;
+}
+
+.column-header {
+    -fx-border-color: transparent !important;
+    -fx-background-color: #ffffff !important;
+    -fx-font-size: 14px; /* tùy chỉnh kích thước chữ */
+}
+
+
+
+.table-view .column-header .label {
+    -fx-alignment: center-left; /* Căn trái cho tiêu đề */
+    -fx-padding: 0 0 0 0px; /* Điều chỉnh khoảng cách bên trái nếu cần */
+}
+.table-view #last-column .column-header .label {
+    -fx-alignment: center; /* Căn giữa tiêu đề */
+}
+
+
+
+.table-view .table-row-cell {
+    -fx-font-size: 12;
+    -fx-font-weight: bold !important;
+    -fx-background-color: transparent ;
+}
+
+.column {
+    -fx-border-color: #4AD4DD; /* Đặt màu viền giữa các ô cột là màu xanh */
+    -fx-border-width: 1 0 0 0; /* Đặt độ rộng viền giữa các ô cột */
+    -fx-alignment: CENTER_LEFT; /* Căn giữa tiêu đ�� */
+    -fx-padding: 0 0 0 10px; /* Điều chỉnh khoảng cách bên trái nếu cần */
+}
+
+.column .table-header-cell {
+
+    -fx-padding: 10; /* Padding cho tiêu đề */
+}
+.button-pagination{
+    -fx-background-color: #4AD4DD;
+    -fx-text-fill: #ffffff;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-border-color: #4AD4DD;
+    -fx-border-width: 2px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+.text-pagination{
+    -fx-text-fill: #4AD4DD;
+    -fx-background-color: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 14;
 }
 /* Kiểu cho thanh tìm kiếm */
 .search-field {
@@ -69,5 +129,7 @@
     -fx-text-fill: #4AD4DD; /* Màu chữ xanh */
     -fx-padding: 0 35px; /* Tạo khoảng cách giữa chữ và nền */
 }
-
+.table-view .table-row-cell:selected {
+    -fx-background-color: rgba(74, 212, 221, 0.63);
+}
 

@@ -1,15 +1,14 @@
 package model;
 
 import dao.JDBCConnect;
-import entity.ImportInvoice;
-import entity.ProductInvoice;
-import entity.ProductReceipt;
+import entity.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -341,6 +340,104 @@ public class ImportInvoiceModel {
         }
 
         return isUpdated;
+    }
+
+    public static Product getOne(int productId) {
+        Product product = null;
+        String query = "SELECT p.id, p.product_name, p.purchase_price, p.sale_price, p.brand, p.img_address, ps.quantity " +
+                "FROM products p JOIN products_store ps ON p.id = ps.id_product " +
+                "WHERE p.id = ?";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, productId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                product = new Product(rs.getInt("id"), rs.getString("img_address"),
+                        rs.getString("product_name"), rs.getString("brand"),
+                        rs.getInt("quantity"), rs.getDouble("sale_price"),
+                        rs.getDouble("purchase_price"), "category_placeholder");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return product;
+    }
+    private Product getProduct(ResultSet rs) throws SQLException {
+        String image = rs.getString("img_address");
+        int productId = rs.getInt("id");
+        String productName = rs.getString("product_name");
+        String brand = rs.getString("brand");
+        double price = rs.getDouble("purchase_price");
+
+
+        return new Product(productId, image, productName, brand, price);
+    }
+
+    // Generic method to handle result from prepared statements
+    private ArrayList<Product> getProducts(ArrayList<Product> list, PreparedStatement ps) throws SQLException {
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Product product = getProduct(rs);
+                list.add(product);
+            }
+        }
+        return list;
+    }
+    public ArrayList<Product> getAll() {
+        return getAllFromidStore(); // Default to store ID 1 if none provided
+    }
+    public ArrayList<Product> getAllFromidStore() {
+        ArrayList<Product> list = new ArrayList<>();
+        String sql = "SELECT products.img_address, products.id, products.product_name, products.brand, " +
+                "products_store.quantity, products.purchase_price FROM products " +
+                "JOIN products_store ON products.id = products_store.id_product " +
+                "JOIN stores ON products_store.id_store = stores.id ";
+
+        try (Connection con = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            return getProducts(list, ps);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+    public static ArrayList<Warehouse> getAllWarehouses() {
+        ArrayList<Warehouse> warehouses = new ArrayList<>();
+        String query = "SELECT id, name FROM warehouses";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                warehouses.add(new Warehouse(rs.getInt("id"), rs.getString("name")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return warehouses;
+    }
+
+    public static ArrayList<Store> getAllStores() {
+        ArrayList<Store> stores = new ArrayList<>();
+        String query = "SELECT id, name FROM stores";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                stores.add(new Store(rs.getInt("id"), rs.getString("name")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return stores;
     }
 
 }

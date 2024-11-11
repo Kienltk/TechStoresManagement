@@ -119,7 +119,7 @@ public class ProductView extends VBox {
         salePriceColumn.setCellValueFactory(cellData -> cellData.getValue().salePriceProperty().asObject());
 
         // Option Column with Edit and Delete buttons
-        TableColumn<Product, Void> optionColumn = new TableColumn<>("        Option");
+        TableColumn<Product, Void> optionColumn = new TableColumn<>("          Option");
         optionColumn.setMinWidth(145);
         optionColumn.getStyleClass().add("column");
         optionColumn.setCellFactory(col -> new TableCell<>() {

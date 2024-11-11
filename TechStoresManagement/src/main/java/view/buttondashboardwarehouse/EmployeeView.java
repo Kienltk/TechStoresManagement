@@ -114,7 +114,7 @@ public class EmployeeView extends VBox {
         fullNameCol.setCellValueFactory(data -> data.getValue().firstNameProperty().concat(" ").concat(data.getValue().lastNameProperty()));
 
         TableColumn<Employee, String> genderCol = new TableColumn<>("Gender");
-        genderCol.setMinWidth(100);
+        genderCol.setMinWidth(140);
         genderCol.getStyleClass().add("column");
         genderCol.setCellValueFactory(data -> {
             boolean isMale = data.getValue().isGender();
@@ -136,12 +136,12 @@ public class EmployeeView extends VBox {
         phoneCol.setCellValueFactory(data -> data.getValue().phoneNumberProperty());
 
         TableColumn<Employee, String> roleCol = new TableColumn<>("Role");
-        roleCol.setMinWidth(220);
+        roleCol.setMinWidth(250);
         roleCol.getStyleClass().add("column");
         roleCol.setCellValueFactory(data -> data.getValue().roleProperty());
 
         TableColumn<Employee, String> workplaceCol = new TableColumn<>("Workplace");
-        workplaceCol.setMinWidth(220);
+        workplaceCol.setMinWidth(250);
         workplaceCol.getStyleClass().add("column");
         workplaceCol.setCellValueFactory(data -> data.getValue().workplaceProperty());
 
@@ -150,9 +150,9 @@ public class EmployeeView extends VBox {
         salaryCol.getStyleClass().add("column");
         salaryCol.setCellValueFactory(data -> data.getValue().salaryProperty().asObject());
 
-        TableColumn<Employee, String> actionCol = new TableColumn<>("        Action");
+        TableColumn<Employee, String> actionCol = new TableColumn<>("Action");
         actionCol.getStyleClass().add("column");
-        actionCol.setMinWidth(200);
+        actionCol.setMinWidth(100);
 
         actionCol.setCellFactory(col -> new TableCell<Employee, String>() {
             private final Button viewButton = new Button();

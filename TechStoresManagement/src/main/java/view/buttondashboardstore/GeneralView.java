@@ -96,7 +96,10 @@ public class GeneralView extends VBox {
         rankComboBox = new ComboBox<>();
         rankComboBox.getItems().addAll("Highest", "Minimum");
         rankComboBox.setValue("Highest");
-
+        yearComboBox.getStyleClass().add("combo-box-account");
+        monthComboBox.getStyleClass().add("combo-box-account");
+        criteriaComboBox.getStyleClass().add("combo-box-account");
+        rankComboBox.getStyleClass().add("combo-box-account");
         rankComboBox.setOnAction(event -> handleCriteriaPieChange());
 
         criteriaComboBox.setOnAction(event -> handleCriteriaChange());
@@ -109,7 +112,7 @@ public class GeneralView extends VBox {
         vbox.setAlignment(Pos.CENTER);
 
         HBox comboBox = new HBox(30);
-        comboBox.getChildren().addAll(new Label("Choose Criteria:"), criteriaComboBox, monthComboBox, yearComboBox, rankComboBox);
+        comboBox.getChildren().addAll(criteriaComboBox, yearComboBox, monthComboBox, rankComboBox);
         comboBox.setAlignment(Pos.CENTER);
 
         HBox charts = new HBox(20,  createBarChart(), createPieChartStockStore());
@@ -119,6 +122,7 @@ public class GeneralView extends VBox {
 
         this.getChildren().addAll(layout);
         this.getStyleClass().add("vbox");
+        this.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
 
         controller.handleReloadDirector();
         updateData();

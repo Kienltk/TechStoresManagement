@@ -50,7 +50,7 @@ public class StoreManagementView extends VBox {
 
         HBox searchBar = new HBox(searchField);
         searchBar.setAlignment(Pos.CENTER_RIGHT);
-        searchBar.setStyle(" -fx-padding:0 635 10 10;");
+        searchBar.setStyle(" -fx-padding:0 575 10 10;");
 
         // Create warehouse button
         Button createWarehouseButton = new Button("Create StoreManager");

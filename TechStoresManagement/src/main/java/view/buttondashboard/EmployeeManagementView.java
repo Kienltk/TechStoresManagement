@@ -285,7 +285,7 @@ public class EmployeeManagementView extends VBox {
         dialog.initModality(Modality.APPLICATION_MODAL);
 
         GridPane dialogLayout = new GridPane();
-        dialogLayout.setPadding(new Insets(10));
+        dialogLayout.setPadding(new Insets(0 ,10,0,10));
         dialogLayout.setVgap(10);
         dialogLayout.setHgap(10);
 
@@ -296,7 +296,7 @@ public class EmployeeManagementView extends VBox {
         Label firstNameError = new Label();
         firstNameError.setTextFill(Color.RED);
         firstNameError.setVisible(false);
-        firstNameError.managedProperty().bind(firstNameError.visibleProperty());
+        firstNameError.setMinHeight(5); // Đặt chiều cao tối thiểu
 
         TextField lastNameField = new TextField();
         lastNameField.getStyleClass().add("text-field-account");
@@ -304,12 +304,11 @@ public class EmployeeManagementView extends VBox {
         Label lastNameError = new Label();
         lastNameError.setTextFill(Color.RED);
         lastNameError.setVisible(false);
-        lastNameError.managedProperty().bind(lastNameError.visibleProperty());
+        lastNameError.setMinHeight(5); // Đặt chiều cao tối thiểu
 
         ToggleGroup genderGroup = new ToggleGroup();
         RadioButton maleRadio = new RadioButton("Male");
         maleRadio.getStyleClass().add("radio-button-account");
-
         RadioButton femaleRadio = new RadioButton("Female");
         femaleRadio.getStyleClass().add("radio-button-account");
         maleRadio.setToggleGroup(genderGroup);
@@ -321,8 +320,9 @@ public class EmployeeManagementView extends VBox {
         Label dobError = new Label();
         dobError.setTextFill(Color.RED);
         dobError.setVisible(false);
-        dobError.managedProperty().bind(dobError.visibleProperty());
+        dobError.setMinHeight(5); // Đặt chiều cao tối thiểu
 
+        // Listener cho định dạng ngày sinh
         dobField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.length() == 2 || newValue.length() == 5) {
                 dobField.setText(newValue + "/");
@@ -336,7 +336,7 @@ public class EmployeeManagementView extends VBox {
         Label emailError = new Label();
         emailError.setTextFill(Color.RED);
         emailError.setVisible(false);
-        emailError.managedProperty().bind(emailError.visibleProperty());
+        emailError.setMinHeight(5); // Đặt chiều cao tối thiểu
 
         TextField phoneField = new TextField();
         phoneField.getStyleClass().add("text-field-account");
@@ -344,7 +344,7 @@ public class EmployeeManagementView extends VBox {
         Label phoneError = new Label();
         phoneError.setTextFill(Color.RED);
         phoneError.setVisible(false);
-        phoneError.managedProperty().bind(phoneError.visibleProperty());
+        phoneError.setMinHeight(5); // Đặt chiều cao tối thiểu
 
         TextField addressField = new TextField();
         addressField.getStyleClass().add("text-field-account");
@@ -356,7 +356,7 @@ public class EmployeeManagementView extends VBox {
         Label salaryError = new Label();
         salaryError.setTextFill(Color.RED);
         salaryError.setVisible(false);
-        salaryError.managedProperty().bind(salaryError.visibleProperty());
+        salaryError.setMinHeight(5); // Đặt chiều cao tối thiểu
 
         // Thêm listener cho từng trường để kiểm tra và hiển thị thông báo lỗi ngay khi nhập
         firstNameField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -383,7 +383,7 @@ public class EmployeeManagementView extends VBox {
             }
         });
 
-        dobField.textProperty().addListener((observable, oldValue, newValue) -> {
+        dobField.textProperty().addListener(( observable, oldValue, newValue) -> {
             if (newValue.isEmpty()) {
                 dobError.setText("Date of Birth is required.");
                 dobError.setVisible(true);
@@ -462,7 +462,7 @@ public class EmployeeManagementView extends VBox {
         roleComboBox.setOnAction(event -> {
             String selectedRole = roleComboBox.getValue() != null ? roleComboBox.getValue().getValue() : null;
 
-            if ("StoreManager Management".equals(selectedRole) || "Cashier".equals(selectedRole)) {
+            if ("Store Management".equals(selectedRole) || "Cashier".equals(selectedRole)) {
                 storeComboBox.setVisible(true);
                 warehouseComboBox.setVisible(false);
                 loadStores(storeComboBox); // Load stores
@@ -500,7 +500,7 @@ public class EmployeeManagementView extends VBox {
                 firstNameError.setText("First Name is required.");
                 firstNameError.setVisible(true);
                 valid = false;
-            } else if (!firstName.matches("[a-zA-Z]+")) {
+            } else if (!firstName.matches("[a-zA -Z]+")) {
                 firstNameError.setText("First Name must not contain numbers.");
                 firstNameError.setVisible(true);
                 valid = false;
@@ -611,7 +611,7 @@ public class EmployeeManagementView extends VBox {
         cancelButton.getStyleClass().add("button-cancel-account");
         cancelButton.setOnAction(e -> dialog.close());
 
-        // Add fields to the grid
+        // Add fields to the grid using VBox for error labels
         dialogLayout.add(new Label("First Name:"), 0, 0);
         dialogLayout.add(firstNameField, 1, 0);
         dialogLayout.add(firstNameError, 1, 1);
@@ -646,7 +646,7 @@ public class EmployeeManagementView extends VBox {
         dialogLayout.add(new Label("Role:"), 0, 15);
         dialogLayout.add(roleComboBox, 1, 15);
 
-        dialogLayout.add(new Label("StoreManager:"), 0, 16);
+        dialogLayout.add(new Label("Store Manager:"), 0, 16);
         dialogLayout.add(storeComboBox, 1, 16);
 
         dialogLayout.add(new Label("Warehouse:"), 0, 17);
@@ -655,11 +655,392 @@ public class EmployeeManagementView extends VBox {
         dialogLayout.add(submitButton, 0, 18);
         dialogLayout.add(cancelButton, 1, 18);
 
-        Scene dialogScene = new Scene(dialogLayout, 400, 630);
+        Scene dialogScene = new Scene(dialogLayout, 400, 730);
         dialogScene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
         dialog.setScene(dialogScene);
         dialog.show();
     }
+//    private void openAddEmployeeDialog() {
+//        Stage dialog = new Stage();
+//        dialog.setTitle("Add Employee");
+//        dialog.initModality(Modality.APPLICATION_MODAL);
+//
+//        GridPane dialogLayout = new GridPane();
+//        dialogLayout.setPadding(new Insets(10));
+//        dialogLayout.setVgap(10);
+//        dialogLayout.setHgap(10);
+//
+//        // Khai báo các trường nhập liệu
+//        TextField firstNameField = new TextField();
+//        firstNameField.getStyleClass().add("text-field-account");
+//        firstNameField.setPromptText("First Name");
+//        Label firstNameError = new Label();
+//        firstNameError.setTextFill(Color.RED);
+//        firstNameError.setVisible(false);
+//        firstNameError.managedProperty().bind(firstNameError.visibleProperty());
+//
+//        TextField lastNameField = new TextField();
+//        lastNameField.getStyleClass().add("text-field-account");
+//        lastNameField.setPromptText("Last Name");
+//        Label lastNameError = new Label();
+//        lastNameError.setTextFill(Color.RED);
+//        lastNameError.setVisible(false);
+//        lastNameError.managedProperty().bind(lastNameError.visibleProperty());
+//
+//        ToggleGroup genderGroup = new ToggleGroup();
+//        RadioButton maleRadio = new RadioButton("Male");
+//        maleRadio.getStyleClass().add("radio-button-account");
+//
+//        RadioButton femaleRadio = new RadioButton("Female");
+//        femaleRadio.getStyleClass().add("radio-button-account");
+//        maleRadio.setToggleGroup(genderGroup);
+//        femaleRadio.setToggleGroup(genderGroup);
+//
+//        TextField dobField = new TextField();
+//        dobField.getStyleClass().add("text-field-account");
+//        dobField.setPromptText("DD/MM/YYYY");
+//        Label dobError = new Label();
+//        dobError.setTextFill(Color.RED);
+//        dobError.setVisible(false);
+//        dobError.managedProperty().bind(dobError.visibleProperty());
+//
+//        dobField.textProperty().addListener((observable, oldValue, newValue) -> {
+//            if (newValue.length() == 2 || newValue.length() == 5) {
+//                dobField.setText(newValue + "/");
+//                dobField.positionCaret(newValue.length() + 1);
+//            }
+//        });
+//
+//        TextField emailField = new TextField();
+//        emailField.getStyleClass().add("text-field-account");
+//        emailField.setPromptText("Email");
+//        Label emailError = new Label();
+//        emailError.setTextFill(Color.RED);
+//        emailError.setVisible(false);
+//        emailError.managedProperty().bind(emailError.visibleProperty());
+//
+//        TextField phoneField = new TextField();
+//        phoneField.getStyleClass().add("text-field-account");
+//        phoneField.setPromptText("Phone Number");
+//        Label phoneError = new Label();
+//        phoneError.setTextFill(Color.RED);
+//        phoneError.setVisible(false);
+//        phoneError.managedProperty().bind(phoneError.visibleProperty());
+//
+//        TextField addressField = new TextField();
+//        addressField.getStyleClass().add("text-field-account");
+//        addressField.setPromptText("Address");
+//
+//        TextField salaryField = new TextField();
+//        salaryField.getStyleClass().add("text-field-account");
+//        salaryField.setPromptText("Salary");
+//        Label salaryError = new Label();
+//        salaryError.setTextFill(Color.RED);
+//        salaryError.setVisible(false);
+//        salaryError.managedProperty().bind(salaryError.visibleProperty());
+//
+//        // Thêm listener cho từng trường để kiểm tra và hiển thị thông báo lỗi ngay khi nhập
+//        firstNameField.textProperty().addListener((observable, oldValue, newValue) -> {
+//            if (newValue.isEmpty()) {
+//                firstNameError.setText("First Name is required.");
+//                firstNameError.setVisible(true);
+//            } else if (!newValue.matches("[a-zA-Z]+")) {
+//                firstNameError.setText("First Name must not contain numbers.");
+//                firstNameError.setVisible(true);
+//            } else {
+//                firstNameError.setVisible(false);
+//            }
+//        });
+//
+//        lastNameField.textProperty().addListener((observable, oldValue, newValue) -> {
+//            if (newValue.isEmpty()) {
+//                lastNameError.setText("Last Name is required.");
+//                lastNameError.setVisible(true);
+//            } else if (!newValue.matches("[a-zA-Z]+")) {
+//                lastNameError.setText("Last Name must not contain numbers.");
+//                lastNameError.setVisible(true);
+//            } else {
+//                lastNameError.setVisible(false);
+//            }
+//        });
+//
+//        dobField.textProperty().addListener((observable, oldValue, newValue) -> {
+//            if (newValue.isEmpty()) {
+//                dobError.setText("Date of Birth is required.");
+//                dobError.setVisible(true);
+//            } else {
+//                try {
+//                    LocalDate dob = LocalDate.parse(newValue, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+//                    if (Period.between(dob, LocalDate.now()).getYears() < 18) {
+//                        dobError.setText("You must be at least 18 years old.");
+//                        dobError.setVisible(true);
+//                    } else {
+//                        dobError.setVisible(false);
+//                    }
+//                } catch (DateTimeParseException ex) {
+//                    dobError.setText("Invalid date format. Use DD/MM/YYYY.");
+//                    dobError.setVisible(true);
+//                }
+//            }
+//        });
+//
+//        emailField.textProperty().addListener((observable, oldValue, newValue) -> {
+//            if (newValue.isEmpty()) {
+//                emailError.setText("Email is required.");
+//                emailError.setVisible(true);
+//            } else if (!newValue.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+//                emailError.setText("Invalid email format.");
+//                emailError.setVisible(true);
+//            } else {
+//                emailError.setVisible(false);
+//            }
+//        });
+//
+//        phoneField.textProperty().addListener((observable, oldValue, newValue) -> {
+//            if (newValue.isEmpty()) {
+//                phoneError.setText("Phone Number is required.");
+//                phoneError.setVisible(true);
+//            } else if (!newValue.matches("\\d+")) {
+//                phoneError.setText("Phone Number must be numeric.");
+//                phoneError.setVisible(true);
+//            } else {
+//                phoneError.setVisible(false);
+//            }
+//        });
+//
+//        salaryField.textProperty().addListener((observable, oldValue, newValue) -> {
+//            if (newValue.isEmpty()) {
+//                salaryError.setText("Salary is required.");
+//                salaryError.setVisible(true);
+//            } else {
+//                try {
+//                    Double.parseDouble(newValue);
+//                    salaryError.setVisible(false);
+//                } catch (NumberFormatException ex) {
+//                    salaryError.setText("Salary must be a valid number.");
+//                    salaryError.setVisible(true);
+//                }
+//            }
+//        });
+//
+//        ComboBox<Pair<Integer, String>> roleComboBox = new ComboBox<>();
+//        roleComboBox.getStyleClass().add("combo-box-account");
+//        ComboBox<Pair<Integer, String>> storeComboBox = new ComboBox<>();
+//        storeComboBox.getStyleClass().add("combo-box-account");
+//        ComboBox<Pair<Integer, String>> warehouseComboBox = new ComboBox<>();
+//        warehouseComboBox.getStyleClass().add("combo-box-account");
+//
+//        // Load roles từ cơ sở dữ liệu
+//        loadRoles(roleComboBox);
+//
+//        // Thiết lập ComboBox store và warehouse không hiển thị ban đầu
+//        storeComboBox.setVisible(false);
+//        warehouseComboBox.setVisible(false);
+//        storeComboBox.managedProperty().bind(storeComboBox.visibleProperty());
+//        warehouseComboBox.managedProperty().bind(warehouseComboBox.visibleProperty());
+//
+//        // Thay đổi hiển thị của ComboBox dựa trên vai trò đã chọn
+//        roleComboBox.setOnAction(event -> {
+//            String selectedRole = roleComboBox.getValue() != null ? roleComboBox.getValue().getValue() : null;
+//
+//            if ("Store Management".equals(selectedRole) || "Cashier".equals(selectedRole)) {
+//                storeComboBox.setVisible(true);
+//                warehouseComboBox.setVisible(false);
+//                loadStores(storeComboBox); // Load stores
+//            } else if ("Warehouse Management".equals(selectedRole)) {
+//                storeComboBox.setVisible(false);
+//                warehouseComboBox.setVisible(true);
+//                loadWarehouses(warehouseComboBox); // Load warehouses
+//            } else {
+//                storeComboBox.setVisible(false);
+//                warehouseComboBox.setVisible(false);
+//            }
+//        });
+//
+//        Button submitButton = new Button("Submit");
+//        submitButton.getStyleClass().add("button-account");
+//        submitButton.setOnAction(e -> {
+//            firstNameError.setVisible(false);
+//            lastNameError.setVisible(false);
+//            dobError.setVisible(false);
+//            emailError.setVisible(false);
+//            phoneError.setVisible(false);
+//            salaryError.setVisible(false);
+//
+//            String firstName = firstNameField.getText();
+//            String lastName = lastNameField.getText();
+//            String dobText = dobField.getText();
+//            String email = emailField.getText();
+//            String phone = phoneField.getText();
+//            String salaryText = salaryField.getText();
+//
+//            boolean valid = true;
+//
+//            // Validate first name
+//            if (firstName.isEmpty()) {
+//                firstNameError.setText("First Name is required.");
+//                firstNameError.setVisible(true);
+//                valid = false;
+//            } else if (!firstName.matches("[a-zA-Z]+")) {
+//                firstNameError.setText("First Name must not contain numbers.");
+//                firstNameError.setVisible(true);
+//                valid = false;
+//            }
+//
+//            // Validate last name
+//            if (lastName.isEmpty()) {
+//                lastNameError.setText("Last Name is required.");
+//                lastNameError.setVisible(true);
+//                valid = false;
+//            } else if (!lastName.matches("[a-zA-Z]+")) {
+//                lastNameError.setText("Last Name must not contain numbers.");
+//                lastNameError.setVisible(true);
+//                valid = false;
+//            }
+//
+//            // Validate Date of Birth
+//            if (dobText.isEmpty()) {
+//                dobError.setText("Date of Birth is required.");
+//                dobError.setVisible(true);
+//                valid = false;
+//            } else {
+//                try {
+//                    LocalDate dob = LocalDate.parse(dobText, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+//                    if (Period.between(dob, LocalDate.now()).getYears() < 18) {
+//                        dobError.setText("You must be at least 18 years old.");
+//                        dobError.setVisible(true);
+//                        valid = false;
+//                    }
+//                } catch (DateTimeParseException ex) {
+//                    dobError.setText("Invalid date format. Use DD/MM/YYYY.");
+//                    dobError.setVisible(true);
+//                    valid = false;
+//                }
+//            }
+//
+//            // Validate email format
+//            if (email.isEmpty()) {
+//                emailError.setText("Email is required.");
+//                emailError.setVisible(true);
+//                valid = false;
+//            } else if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+//                emailError.setText("Invalid email format.");
+//                emailError.setVisible(true);
+//                valid = false;
+//            }
+//
+//            // Validate phone number
+//            if (phone.isEmpty()) {
+//                phoneError.setText("Phone Number is required.");
+//                phoneError.setVisible(true);
+//                valid = false;
+//            } else if (!phone.matches("\\d+")) {
+//                phoneError.setText("Phone Number must be numeric.");
+//                phoneError.setVisible(true);
+//                valid = false;
+//            }
+//
+//            // Validate salary
+//            if (salaryText.isEmpty()) {
+//                salaryError.setText("Salary is required.");
+//                salaryError.setVisible(true);
+//                valid = false;
+//            } else {
+//                try {
+//                    Double.parseDouble(salaryText);
+//                } catch (NumberFormatException ex) {
+//                    salaryError.setText("Salary must be a valid number.");
+//                    salaryError.setVisible(true);
+//                    valid = false;
+//                }
+//            }
+//
+//            if (!valid) return;
+//
+//            Employee newEmployee = new Employee();
+//            newEmployee.setFirstName(firstName);
+//            newEmployee.setLastName(lastName);
+//            LocalDate dob = LocalDate.parse(dobText, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+//            newEmployee.setDob(java.sql.Date.valueOf(dob));
+//            newEmployee.setEmail(email);
+//            newEmployee.setPhoneNumber(phone);
+//            newEmployee.setAddress(addressField.getText());
+//            newEmployee.setSalary(Double.parseDouble(salaryText));
+//            newEmployee.setGender(maleRadio.isSelected());
+//
+//            if (roleComboBox.getValue() != null) {
+//                newEmployee.setIdRole(roleComboBox.getValue().getKey());
+//            }
+//
+//            int selectedStoreId = storeComboBox.getValue() != null ? storeComboBox.getValue().getKey() : 0;
+//            int selectedWarehouseId = warehouseComboBox.getValue() != null ? warehouseComboBox.getValue().getKey() : 0;
+//
+//            newEmployee.setIdStore(selectedStoreId);
+//            newEmployee.setIdWarehouse(selectedWarehouseId);
+//
+//            try {
+//                employeeModel.insertEmployee(newEmployee);
+//                showSuccess("Employee added successfully.");
+//                loadEmployees();
+//                dialog.close();
+//            } catch (Exception ex) {
+//                showError("Failed to add employee: " + ex.getMessage());
+//            }
+//        });
+//
+//        Button cancelButton = new Button("Cancel");
+//        cancelButton.getStyleClass().add("button-cancel-account");
+//        cancelButton.setOnAction(e -> dialog.close());
+//
+//        // Add fields to the grid
+//        dialogLayout.add(new Label("First Name:"), 0, 0);
+//        dialogLayout.add(firstNameField, 1, 0);
+//        dialogLayout.add(firstNameError, 1, 1);
+//
+//        dialogLayout.add(new Label("Last Name:"), 0, 2);
+//        dialogLayout.add(lastNameField, 1, 2);
+//        dialogLayout.add(lastNameError, 1, 3);
+//
+//        dialogLayout.add(new Label("Gender:"), 0, 4);
+//        dialogLayout.add(maleRadio, 1, 4);
+//        dialogLayout.add(femaleRadio, 1, 5);
+//
+//        dialogLayout.add(new Label("Date of Birth:"), 0, 6);
+//        dialogLayout.add(dobField, 1, 6);
+//        dialogLayout.add(dobError, 1, 7);
+//
+//        dialogLayout.add(new Label("Email:"), 0, 8);
+//        dialogLayout.add(emailField, 1, 8);
+//        dialogLayout.add(emailError, 1, 9);
+//
+//        dialogLayout.add(new Label("Phone Number:"), 0, 10);
+//        dialogLayout.add(phoneField, 1, 10);
+//        dialogLayout.add(phoneError, 1, 11);
+//
+//        dialogLayout.add(new Label("Address:"), 0, 12);
+//        dialogLayout.add(addressField, 1, 12);
+//
+//        dialogLayout.add(new Label("Salary:"), 0, 13);
+//        dialogLayout.add(salaryField, 1, 13);
+//        dialogLayout.add(salaryError, 1, 14);
+//
+//        dialogLayout.add(new Label("Role:"), 0, 15);
+//        dialogLayout.add(roleComboBox, 1, 15);
+//
+//        dialogLayout.add(new Label("StoreManager:"), 0, 16);
+//        dialogLayout.add(storeComboBox, 1, 16);
+//
+//        dialogLayout.add(new Label("Warehouse:"), 0, 17);
+//        dialogLayout.add(warehouseComboBox, 1, 17);
+//
+//        dialogLayout.add(submitButton, 0, 18);
+//        dialogLayout.add(cancelButton, 1, 18);
+//
+//        Scene dialogScene = new Scene(dialogLayout, 400, 650);
+//        dialogScene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
+//        dialog.setScene(dialogScene);
+//        dialog.show();
+//    }
 
     private void openViewEmployeeDialog(Employee employee) {
         Stage dialog = new Stage();
@@ -831,7 +1212,7 @@ public class EmployeeManagementView extends VBox {
         // Thay đổi ComboBox hiển thị theo vai trò
         roleComboBox.setOnAction(event -> {
             String selectedRole = roleComboBox.getValue() != null ? roleComboBox.getValue().getValue() : null;
-            if ("StoreManager Management".equals(selectedRole)) {
+            if ("Store Management".equals(selectedRole)) {
                 storeComboBox.setVisible(true);
                 warehouseComboBox.setVisible(false);
                 loadStores(storeComboBox); // Load stores

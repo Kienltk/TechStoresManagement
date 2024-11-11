@@ -2,26 +2,33 @@ package view.buttondashboard;
 
 import controller.ImportInvoiceController;
 import entity.ImportInvoice;
+import entity.Product;
 import entity.ProductInvoice;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import model.CashierModel;
 import model.ImportInvoiceModel;
+import view.stage.CreateImportDirector;
 
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class ImportProductView extends VBox {
 
@@ -50,7 +57,7 @@ public class ImportProductView extends VBox {
 
         searchBox.getChildren().addAll(searchField);
         searchBox.setAlignment(Pos.CENTER_LEFT);
-        searchBox.setStyle("-fx-padding: 0 0 10 10;");
+        searchBox.setStyle("-fx-padding: 0 565 10 10;");
 
         Button addButton = new Button("Create Import Invoice");
         addButton.getStyleClass().add("button-pagination");
@@ -110,28 +117,27 @@ public class ImportProductView extends VBox {
 
     private void configureImportInvoiceTable() {
         TableColumn<ImportInvoice, Integer> sttCol = new TableColumn<>("ID");
-        sttCol.setPrefWidth(50); // Chiều rộng cột ID
-        sttCol.setStyle("-fx-alignment: center");
+        sttCol.setPrefWidth(122); // Chiều rộng cột ID
         sttCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(importInvoiceTable.getItems().indexOf(cellData.getValue()) + 1).asObject());
         sttCol.getStyleClass().add("column");
 
         TableColumn<ImportInvoice, String> invoiceName = new TableColumn<>("Invoice Name");
-        invoiceName.setPrefWidth(200); // Chiều rộng cột Customer Name
+        invoiceName.setPrefWidth(250); // Chiều rộng cột Customer Name
         invoiceName.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getInvoiceName()));
         invoiceName.getStyleClass().add("column");
 
         TableColumn<ImportInvoice, Double> totalCol = new TableColumn<>("Total Invoice");
-        totalCol.setPrefWidth(150); // Chiều rộng cột Total Bill
+        totalCol.setPrefWidth(250); // Chiều rộng cột Total Bill
         totalCol.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getTotal()).asObject());
         totalCol.getStyleClass().add("column");
 
         TableColumn<ImportInvoice, String> statusCol = new TableColumn<>("Status");
-        statusCol.setPrefWidth(200); // Chiều rộng cột Customer Name
+        statusCol.setPrefWidth(250); // Chiều rộng cột Customer Name
         statusCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getStatus()));
         statusCol.getStyleClass().add("column");
 
-        TableColumn<ImportInvoice, Void> acctionCol = new TableColumn<>("Action");
-        acctionCol.setPrefWidth(100); // Chiều rộng cột View
+        TableColumn<ImportInvoice, Void> acctionCol = new TableColumn<>("   Action");
+        acctionCol.setPrefWidth(175); // Chiều rộng cột View
         acctionCol.getStyleClass().add("column");
         acctionCol.setCellFactory(col -> new TableCell<ImportInvoice, Void>() {
             private final Button viewButton = new Button();
@@ -141,8 +147,8 @@ public class ImportProductView extends VBox {
             {
                 // Tạo ImageView cho các icon
                 ImageView viewIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/view.png")));
-                ImageView receivedIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/edit.png")));
-                ImageView cancelIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/delete.png")));
+                ImageView receivedIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/import.png")));
+                ImageView cancelIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/cancel.png")));
 
                 // Đặt kích thước ban đầu cho icon
                 setIconSize(viewIcon, 20);
@@ -411,8 +417,11 @@ public class ImportProductView extends VBox {
     }
 
     private void openCreateImportInvoiceDialog () {
-
+        CreateImportDirector create = new CreateImportDirector();
+        Stage stage = new Stage();
+        create.start(stage);
     }
+
 }
 
 

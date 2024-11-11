@@ -54,25 +54,33 @@ public class GeneralView extends VBox {
         rankComboBox = new ComboBox<>();
         rankComboBox.getItems().addAll("Highest", "Minimum");
         rankComboBox.setValue("Highest");
-
+        rankComboBox.getStyleClass().add("combo-box-account");
         rankComboBox.setOnAction(event -> handleCriteriaChange());
 
         // Sắp xếp tiêu đề, các ô thông tin và nút Reload
         VBox vbox = new VBox(20, title, infoBox);
         vbox.setPadding(new Insets(20));
         vbox.setAlignment(Pos.CENTER);
+        vbox.setMinWidth(1000);
 
         HBox comboBox = new HBox(30);
-        comboBox.getChildren().addAll(new Label("Choose Criteria:"), rankComboBox);
+        comboBox.getChildren().addAll(rankComboBox);
         comboBox.setAlignment(Pos.CENTER);
+        comboBox.setMinWidth(1000);
 
         HBox charts = new HBox(20, createPieChartStockWarehouse());
+        charts.setMinWidth(1000);
 
         VBox layout = new VBox(20);
         layout.getChildren().addAll(vbox, comboBox, charts);
+        layout.setAlignment(Pos.CENTER);
+        layout.setMinWidth(1000);
 
         this.getChildren().addAll(layout);
+        this.setAlignment(Pos.CENTER);
+        this.setMinWidth(1000);
         this.getStyleClass().add("vbox");
+        this.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
 
         controller.handleReloadDWarehouse(idWarehouse);
         updateData();
@@ -115,7 +123,7 @@ public class GeneralView extends VBox {
 
         // Khởi tạo layout
         rootStockProduct = new BorderPane();
-
+        rootStockProduct.setMinWidth(1000);
         // Tạo tiêu đề cho biểu đồ
         Label chartTitle = new Label("Stock Product");
         chartTitle.setFont(Font.font("SanSerif", FontWeight.BOLD, 15)); // Cài đặt font cho tiêu đề
@@ -147,29 +155,37 @@ public class GeneralView extends VBox {
         pieChartStockProduct.setData(details); // Gán dữ liệu cho biểu đồ
 
         // Đặt biểu đồ vào giữa layout
-        rootStockProduct.setCenter(pieChartStockProduct);
+        rootStockProduct.setLeft(pieChartStockProduct);
 
         labelStockProduct = new Label(); // Khởi tạo label để hiển thị thông tin
-        labelStockProduct.setFont(Font.font("SanSerif", FontWeight.BOLD, 15)); // Cài đặt font cho label
+        labelStockProduct.setFont(Font.font("SanSerif", FontWeight.BOLD, 15));
+        labelStockProduct.setStyle("-fx-text-fill: #4AD4DD; -fx-font-weight: bold ; -fx-font-size: 20 ; ");// Cài đặt font cho label
 
         // Thêm sự kiện cho từng phần của biểu đồ
         pieChartStockProduct.getData().forEach(data -> {
             // Sự kiện cho khi chuột vào vùng của phần dữ liệu
             data.getNode().addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
                 double percentage = (data.getPieValue() / totalValue) * 100; // Tính tỷ lệ phần trăm
-                labelStockProduct.setText(data.getName() + " Revenue: " + (int) data.getPieValue() +
-                        "\nPercentage: " + String.format("%.2f", percentage) + "%"); // Cập nhật thông tin cho label
+                labelStockProduct.setText("Name : "+data.getName() +
+                        "\n\n\nRevenue : " + (int) data.getPieValue() +
+                        "\n\n\nPercentage : " + String.format("%.2f", percentage) + "%"); // Cập nhật thông tin cho label
             });
 
             // Sự kiện cho khi chuột rời khỏi vùng của phần dữ liệu
             data.getNode().addEventHandler(MouseEvent.MOUSE_EXITED, e -> {
-                labelStockProduct.setText(""); // Xóa nội dung của label khi chuột rời khỏi vùng
+                labelStockProduct.setText("Name : "+
+                        "\n\n\nRevenue : " +
+                        "\n\n\nPercentage : "); // Xóa nội dung của label khi chuột rời khỏi vùng
             });
         });
 
-        rootStockProduct.setBottom(labelStockProduct); // Đặt label vào dưới cùng layout
-        BorderPane.setMargin(labelStockProduct, new Insets(0, 0, 10, 120));
-
+        VBox v = new VBox();
+        v.getChildren().addAll(labelStockProduct);
+        v.setMinWidth(350);
+        v.setMaxHeight(350);
+        v.setAlignment(Pos.CENTER_LEFT);
+        v.setStyle("-fx-border-color: #ffffff; -fx-border-width: 3px; -fx-border-radius: 5px;-fx-background-color: white;-fx-padding: 20 ;");
+        rootStockProduct.setRight(v); // Đặt label vào dưới cùng layout
         return rootStockProduct; // Trả về layout chứa biểu đồ
     }
 
@@ -211,13 +227,16 @@ public class GeneralView extends VBox {
             // Sự kiện cho khi chuột vào vùng của phần dữ liệu
             data.getNode().addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
                 double percentage = (data.getPieValue() / totalValue) * 100; // Tính tỷ lệ phần trăm
-                labelStockProduct.setText(data.getName() + " Revenue: " + (int) data.getPieValue() +
-                        "\nPercentage: " + String.format("%.2f", percentage) + "%"); // Cập nhật thông tin cho label
+                labelStockProduct.setText("Name : "+data.getName() +
+                        "\n\n\nRevenue : " + (int) data.getPieValue() +
+                        "\n\n\nPercentage : " + String.format("%.2f", percentage) + "%"); // Cập nhật thông tin cho label
             });
 
             // Sự kiện cho khi chuột rời khỏi vùng của phần dữ liệu
             data.getNode().addEventHandler(MouseEvent.MOUSE_EXITED, e -> {
-                labelStockProduct.setText(""); // Xóa nội dung của label khi chuột rời khỏi vùng
+                labelStockProduct.setText("Name : "+
+                        "\n\n\nRevenue : " +
+                        "\n\n\nPercentage : "); // Xóa nội dung của label khi chuột rời khỏi vùng
             });
         });
     }

@@ -1,21 +1,24 @@
 package controller;
 
 import javafx.animation.PauseTransition;
+import javafx.scene.control.Label;
 import javafx.util.Duration;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import view.Director;
 import view.Login;
 import view.buttondashboard.*;
 import view.stage.LogoutFailed;
 import view.stage.LogoutSuccess;
 
+
 import java.util.Collection;
 
 public class DashBoardController {
-
+   Director director=new Director();
     @FXML
     private AnchorPane mainContent; // Khung chính để hiển thị nội dung
 
@@ -38,6 +41,8 @@ public class DashBoardController {
     private HBox hboxImport;
     @FXML
     private HBox hboxHistory;
+    @FXML
+    private Label employeeNameLabel1;
 
 
 
@@ -156,6 +161,7 @@ public class DashBoardController {
     @FXML
     public void initialize() {
         // Gọi showGeneral() để mặc định tab General được active
+        employeeNameLabel1.setText(director.getEmployeeName());
         showGeneral();
     }
 }
