@@ -459,21 +459,22 @@ public class EmployeeManagementView extends VBox {
         warehouseComboBox.managedProperty().bind(warehouseComboBox.visibleProperty());
 
         // Thay đổi hiển thị của ComboBox dựa trên vai trò đã chọn
+        loadStores(storeComboBox);
+        loadWarehouses(warehouseComboBox);
         roleComboBox.setOnAction(event -> {
             String selectedRole = roleComboBox.getValue() != null ? roleComboBox.getValue().getValue() : null;
 
             if ("Store Management".equals(selectedRole) || "Cashier".equals(selectedRole)) {
                 storeComboBox.setVisible(true);
                 warehouseComboBox.setVisible(false);
-                loadStores(storeComboBox); // Load stores
             } else if ("Warehouse Management".equals(selectedRole)) {
                 storeComboBox.setVisible(false);
                 warehouseComboBox.setVisible(true);
-                loadWarehouses(warehouseComboBox); // Load warehouses
             } else {
                 storeComboBox.setVisible(false);
                 warehouseComboBox.setVisible(false);
             }
+
         });
 
         Button submitButton = new Button("Submit");

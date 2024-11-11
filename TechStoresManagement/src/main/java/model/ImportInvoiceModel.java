@@ -342,6 +342,159 @@ public class ImportInvoiceModel {
         return isUpdated;
     }
 
+    public boolean updateProductQuantity(String invoiceName) {
+        String sql = "SELECT " +
+                "    CASE " +
+                "        WHEN iw.name IS NOT NULL THEN 'warehouse' " +
+                "        WHEN ims.name IS NOT NULL THEN 'store' " +
+                "        ELSE 'unknown' " +
+                "    END AS invoice_type " +
+                "FROM import_warehouse iw " +
+                "LEFT JOIN import_store ims ON iw.name = ims.name " +
+                "WHERE iw.name = ? " +
+                "UNION " +
+                "SELECT " +
+                "    CASE " +
+                "        WHEN iw.name IS NOT NULL THEN 'warehouse' " +
+                "        WHEN ims.name IS NOT NULL THEN 'store' " +
+                "        ELSE 'unknown' " +
+                "    END AS invoice_type " +
+                "FROM import_store ims " +
+                "LEFT JOIN import_warehouse iw ON ims.name = iw.name " +
+                "WHERE ims.name = ?;";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, invoiceName);
+            statement.setString(2, invoiceName);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    String invoiceType = rs.getString("invoice_type");
+
+                    if ("warehouse".equals(invoiceType)) {
+                        return updateWarehouseProductQuantities(invoiceName);
+                    } else if ("store".equals(invoiceType)) {
+                        return updateStoreProductQuantities(invoiceName);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Database connection error: " + e.getMessage());
+        }
+
+        return false;
+    }
+
+    private boolean updateWarehouseProductQuantities(String invoiceName) {
+        String selectSql = "SELECT id_product, quantity FROM import_warehouse_details " +
+                "WHERE id_import = (SELECT id FROM import_warehouse WHERE name = ?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(selectSql)) {
+            statement.setString(1, invoiceName);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    int productId = rs.getInt("id_product");
+                    int quantity = rs.getInt("quantity");
+
+                    // Kiểm tra sản phẩm đã tồn tại trong kho hay chưa
+                    String checkSql = "SELECT quantity FROM products_warehouse WHERE id_product = ? " +
+                            "AND id_warehouse = (SELECT id_warehouse FROM import_warehouse WHERE name = ?)";
+
+                    try (PreparedStatement checkStatement = connection.prepareStatement(checkSql)) {
+                        checkStatement.setInt(1, productId);
+                        checkStatement.setString(2, invoiceName);
+
+                        try (ResultSet checkRs = checkStatement.executeQuery()) {
+                            if (checkRs.next()) {
+                                // Sản phẩm đã tồn tại, cập nhật số lượng
+                                int currentQuantity = checkRs.getInt("quantity");
+                                String updateSql = "UPDATE products_warehouse SET quantity = ? WHERE id_product = ? " +
+                                        "AND id_warehouse = (SELECT id_warehouse FROM import_warehouse WHERE name = ?)";
+                                try (PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
+                                    updateStatement.setInt(1, currentQuantity + quantity);
+                                    updateStatement.setInt(2, productId);
+                                    updateStatement.setString(3, invoiceName);
+                                    updateStatement.executeUpdate();
+                                }
+                            } else {
+                                // Sản phẩm chưa tồn tại, thực hiện chèn mới
+                                String insertSql = "INSERT INTO products_warehouse (id_product, id_warehouse, quantity) " +
+                                        "VALUES (?, (SELECT id_warehouse FROM import_warehouse WHERE name = ?), ?)";
+                                try (PreparedStatement insertStatement = connection.prepareStatement(insertSql)) {
+                                    insertStatement.setInt(1, productId);
+                                    insertStatement.setString(2, invoiceName);
+                                    insertStatement.setInt(3, quantity);
+                                    insertStatement.executeUpdate();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            System.out.println("Database connection error: " + e.getMessage());
+        }
+
+        return false;
+    }
+
+    private boolean updateStoreProductQuantities(String invoiceName) {
+        String selectSql = "SELECT id_product, quantity FROM import_store_details " +
+                "WHERE id_import = (SELECT id FROM import_store WHERE name = ?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(selectSql)) {
+            statement.setString(1, invoiceName);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    int productId = rs.getInt("id_product");
+                    int quantity = rs.getInt("quantity");
+
+                    // Kiểm tra sản phẩm đã tồn tại trong cửa hàng hay chưa
+                    String checkSql = "SELECT quantity FROM products_store WHERE id_product = ? " +
+                            "AND id_store = (SELECT id_store FROM import_store WHERE name = ?)";
+
+                    try (PreparedStatement checkStatement = connection.prepareStatement(checkSql)) {
+                        checkStatement.setInt(1, productId);
+                        checkStatement.setString(2, invoiceName);
+
+                        try (ResultSet checkRs = checkStatement.executeQuery()) {
+                            if (checkRs.next()) {
+                                // Sản phẩm đã tồn tại, cập nhật số lượng
+                                int currentQuantity = checkRs.getInt("quantity");
+                                String updateSql = "UPDATE products_store SET quantity = ? WHERE id_product = ? " +
+                                        "AND id_store = (SELECT id_store FROM import_store WHERE name = ?)";
+                                try (PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
+                                    updateStatement.setInt(1, currentQuantity + quantity);
+                                    updateStatement.setInt(2, productId);
+                                    updateStatement.setString(3, invoiceName);
+                                    updateStatement.executeUpdate();
+                                }
+                            } else {
+                                // Sản phẩm chưa tồn tại, thực hiện chèn mới
+                                String insertSql = "INSERT INTO products_store (id_product, id_store, quantity) " +
+                                        "VALUES (?, (SELECT id_store FROM import_store WHERE name = ?), ?)";
+                                try (PreparedStatement insertStatement = connection.prepareStatement(insertSql)) {
+                                    insertStatement.setInt(1, productId);
+                                    insertStatement.setString(2, invoiceName);
+                                    insertStatement.setInt(3, quantity);
+                                    insertStatement.executeUpdate();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            System.out.println("Database connection error: " + e.getMessage());
+        }
+
+        return false;
+    }
+
     public static Product getOne(int productId) {
         Product product = null;
         String query = "SELECT p.id, p.product_name, p.purchase_price, p.sale_price, p.brand, p.img_address, ps.quantity " +

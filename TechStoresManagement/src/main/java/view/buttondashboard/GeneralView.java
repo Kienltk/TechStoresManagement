@@ -112,7 +112,7 @@ public class GeneralView extends VBox {
 
         VBox layout = new VBox(20);
         layout.getChildren().addAll(vbox,comboBox, charts);
-
+        this.setMaxHeight(766);
         this.getChildren().addAll(layout);
         this.getStyleClass().add("vbox");
         this.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());

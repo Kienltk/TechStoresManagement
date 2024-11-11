@@ -141,35 +141,35 @@ public class ImportProductView extends VBox {
         acctionCol.getStyleClass().add("column");
         acctionCol.setCellFactory(col -> new TableCell<ImportInvoice, Void>() {
             private final Button viewButton = new Button();
-            private final Button receivedButton = new Button();
             private final Button cancelButton = new Button();
+            private final Button submitButton = new Button();
 
             {
                 // Tạo ImageView cho các icon
                 ImageView viewIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/view.png")));
-                ImageView receivedIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/import.png")));
                 ImageView cancelIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/cancel.png")));
+                ImageView submitIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/import.png")));
 
                 // Đặt kích thước ban đầu cho icon
                 setIconSize(viewIcon, 20);
-                setIconSize(receivedIcon, 20);
                 setIconSize(cancelIcon, 20);
+                setIconSize(submitIcon, 20);
 
                 // Thêm icon vào nút
                 viewButton.setGraphic(viewIcon);
-                receivedButton.setGraphic(receivedIcon);
                 cancelButton.setGraphic(cancelIcon);
+                submitButton.setGraphic(submitIcon);
 
                 // Đặt style cho nút
                 String defaultStyle = "-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 6;";
                 viewButton.setStyle(defaultStyle);
-                receivedButton.setStyle(defaultStyle);
                 cancelButton.setStyle(defaultStyle);
+                submitButton.setStyle(defaultStyle);
 
                 // Thêm sự kiện phóng to khi hover và giảm padding
                 addHoverEffect(viewButton, viewIcon);
-                addHoverEffect(receivedButton, receivedIcon);
                 addHoverEffect(cancelButton, cancelIcon);
+                addHoverEffect(submitButton, submitIcon);
             }
 
 
@@ -182,23 +182,18 @@ public class ImportProductView extends VBox {
                     ImportInvoice invoice = getTableView().getItems().get(getIndex());
                     if ("Requested".equals(invoice.getStatus())) {
                         // Hiển thị tất cả các nút
-                        HBox buttons = new HBox(viewButton, cancelButton);
+                        HBox buttons = new HBox(viewButton, submitButton, cancelButton);
                         buttons.setStyle("-fx-alignment: CENTER_LEFT; -fx-spacing: 10;");
                         setGraphic(buttons);
+
+                        submitButton.setOnAction(e -> {
+                            // Logic nhận hóa đơn
+                            submitInvoice(invoice);
+                        });
 
                         cancelButton.setOnAction(e -> {
                             // Logic hủy hóa đơn
                             cancelInvoice(invoice);
-                        });
-                    } else if ("Processing".equals(invoice.getStatus())) {
-                        // Hiển thị nút "View" và "Received"
-                        HBox buttons = new HBox(viewButton, receivedButton);
-                        buttons.setStyle("-fx-alignment: CENTER_LEFT; -fx-spacing: 10;");
-                        setGraphic(buttons);
-
-                        receivedButton.setOnAction(e -> {
-                            // Logic nhận hóa đơn
-                            receivedInvoice(invoice);
                         });
                     } else {
                         // Chỉ hiển thị nút "View" khi không phải "Requested" hoặc "Processing"
@@ -230,19 +225,6 @@ public class ImportProductView extends VBox {
                 });
             }
 
-            private void receivedInvoice(ImportInvoice invoice) {
-                String status = "Imported";
-                if (controller.updateImportStatus(invoice.getInvoiceName(), status)) {
-                    invoice.setStatus(status);
-                    // Gọi hàm cập nhật cơ sở dữ liệu hoặc thực hiện hành đ��ng phù h��p
-                    System.out.println("Hóa đơn đã được nhận: " + invoice.getInvoiceName());
-                    loadImportInvoicesWithPagination();
-                } else {
-                    System.out.println("Không thể nhận hóa đơn: " + invoice.getInvoiceName());
-                }
-
-            }
-
             // Phương thức xử lý khi hủy hóa đơn
             private void cancelInvoice(ImportInvoice invoice) {
                 String status = "Cancelled";
@@ -252,6 +234,17 @@ public class ImportProductView extends VBox {
                     loadImportInvoicesWithPagination();
                 } else {
                     System.out.println("Không thể hủy hóa đơn: " + invoice.getInvoiceName());
+                }
+            }
+
+            private void submitInvoice(ImportInvoice invoice) {
+                String status = "Processing";
+                if (controller.updateImportStatus(invoice.getInvoiceName(), status)) {
+                    invoice.setStatus(status);
+                    System.out.println("Hóa đơn đã xác nhận: " + invoice.getInvoiceName());
+                    loadImportInvoicesWithPagination();
+                } else {
+                    System.out.println("Không thể xác nận hóa đơn: " + invoice.getInvoiceName());
                 }
             }
         });

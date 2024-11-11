@@ -148,8 +148,8 @@ public class ImportView extends VBox {
             {
                 // Tạo ImageView cho các icon
                 ImageView viewIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/view.png")));
-                ImageView receivedIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/edit.png")));
-                ImageView cancelIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/delete.png")));
+                ImageView receivedIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/import.png")));
+                ImageView cancelIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/cancel.png")));
 
                 // Đặt kích thước ban đầu cho icon
                 setIconSize(viewIcon, 20);
@@ -233,7 +233,7 @@ public class ImportView extends VBox {
 
             private void receivedInvoice(ImportInvoice invoice) {
                 String status = "Imported";
-                if (controller.updateImportStatus(invoice.getInvoiceName(), status)) {
+                if (controller.updateImportStatus(invoice.getInvoiceName(), status) && controller.updateProductQuantity(invoice.getInvoiceName())) {
                     invoice.setStatus(status);
                     // Gọi hàm cập nhật cơ sở dữ liệu hoặc thực hiện hành đ��ng phù h��p
                     System.out.println("Hóa đơn đã được nhận: " + invoice.getInvoiceName());

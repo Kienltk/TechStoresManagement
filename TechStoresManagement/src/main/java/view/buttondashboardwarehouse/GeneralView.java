@@ -45,6 +45,8 @@ public class GeneralView extends VBox {
 
         StackPane stockPane = createInfoPane(stockLabel);
 
+
+
         // Sắp xếp các ô thông tin trên cùng một hàng, cách đều nhau 50px
         HBox infoBox = new HBox(50, stockPane);
         infoBox.setPadding(new Insets(20));
@@ -61,24 +63,25 @@ public class GeneralView extends VBox {
         VBox vbox = new VBox(20, title, infoBox);
         vbox.setPadding(new Insets(20));
         vbox.setAlignment(Pos.CENTER);
-        vbox.setMinWidth(1000);
+        vbox.setMinWidth(980);
 
         HBox comboBox = new HBox(30);
         comboBox.getChildren().addAll(rankComboBox);
         comboBox.setAlignment(Pos.CENTER);
-        comboBox.setMinWidth(1000);
+        comboBox.setMinWidth(980);
 
         HBox charts = new HBox(20, createPieChartStockWarehouse());
-        charts.setMinWidth(1000);
+        charts.setMinWidth(980);
 
         VBox layout = new VBox(20);
         layout.getChildren().addAll(vbox, comboBox, charts);
         layout.setAlignment(Pos.CENTER);
-        layout.setMinWidth(1000);
+        layout.setMinWidth(980);
 
         this.getChildren().addAll(layout);
         this.setAlignment(Pos.CENTER);
-        this.setMinWidth(1000);
+        this.setMinWidth(980);
+        this.setMaxHeight(766);
         this.getStyleClass().add("vbox");
         this.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
 
@@ -123,11 +126,14 @@ public class GeneralView extends VBox {
 
         // Khởi tạo layout
         rootStockProduct = new BorderPane();
-        rootStockProduct.setMinWidth(1000);
+        rootStockProduct.setMinWidth(980);
         // Tạo tiêu đề cho biểu đồ
         Label chartTitle = new Label("Stock Product");
+        HBox box = new HBox();
+        box.getChildren().addAll(chartTitle);
+        box.setAlignment(Pos.CENTER);
         chartTitle.setFont(Font.font("SanSerif", FontWeight.BOLD, 15)); // Cài đặt font cho tiêu đề
-        rootStockProduct.setTop(chartTitle); // Đặt tiêu đề vào trên cùng layout
+        rootStockProduct.setTop(box); // Đặt tiêu đề vào trên cùng layout
 
         // Kiểm tra xem turnoverStoreData có dữ liệu hay không
         if (stockProductData.isEmpty()) {

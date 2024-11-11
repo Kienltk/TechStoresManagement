@@ -91,4 +91,8 @@ public class ImportInvoiceController {
     public boolean updateImportStatus (String invoiceName, String status) {
         return model.updateImportStatus(invoiceName, status);
     }
+
+    public boolean updateProductQuantity (String invoiceName) {
+        return model.updateProductQuantity(invoiceName);
+    }
 }
