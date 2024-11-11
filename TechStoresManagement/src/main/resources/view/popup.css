@@ -112,7 +112,6 @@
 }
 
 .label-popup {
-    -fx-font-size: 14;
     -fx-text-fill: #000000;
     -fx-font-weight: bold;
     -fx-padding: 0 20;

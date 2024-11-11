@@ -613,44 +613,71 @@ public class EmployeeManagementView extends VBox {
         cancelButton.setOnAction(e -> dialog.close());
 
         // Add fields to the grid using VBox for error labels
-        dialogLayout.add(new Label("First Name:"), 0, 0);
+// Khai báo các biến Label
+        Label firstNameLabel = new Label("First Name:");
+        Label lastNameLabel = new Label("Last Name:");
+        Label genderLabel = new Label("Gender:");
+        Label dobLabel = new Label("Date of Birth:");
+        Label emailLabel = new Label("Email:");
+        Label phoneLabel = new Label("Phone Number:");
+        Label addressLabel = new Label("Address:");
+        Label salaryLabel = new Label("Salary:");
+        Label roleLabel = new Label("Role:");
+        Label storeManagerLabel = new Label("Store Manager:");
+        Label warehouseLabel = new Label("Warehouse:");
+
+// Thêm class CSS cho các Label
+        firstNameLabel.getStyleClass().add("label-popup");
+        lastNameLabel.getStyleClass().add("label-popup");
+        genderLabel.getStyleClass().add("label-popup");
+        dobLabel.getStyleClass().add("label-popup");
+        emailLabel.getStyleClass().add("label-popup");
+        phoneLabel.getStyleClass().add("label-popup");
+        addressLabel.getStyleClass().add("label-popup");
+        salaryLabel.getStyleClass().add("label-popup");
+        roleLabel.getStyleClass().add("label-popup");
+        storeManagerLabel.getStyleClass().add("label-popup");
+        warehouseLabel.getStyleClass().add("label-popup");
+
+// Thêm các Label vào dialogLayout
+        dialogLayout.add(firstNameLabel, 0, 0);
         dialogLayout.add(firstNameField, 1, 0);
         dialogLayout.add(firstNameError, 1, 1);
 
-        dialogLayout.add(new Label("Last Name:"), 0, 2);
+        dialogLayout.add(lastNameLabel, 0, 2);
         dialogLayout.add(lastNameField, 1, 2);
         dialogLayout.add(lastNameError, 1, 3);
 
-        dialogLayout.add(new Label("Gender:"), 0, 4);
+        dialogLayout.add(genderLabel, 0, 4);
         dialogLayout.add(maleRadio, 1, 4);
         dialogLayout.add(femaleRadio, 1, 5);
 
-        dialogLayout.add(new Label("Date of Birth:"), 0, 6);
+        dialogLayout.add(dobLabel, 0, 6);
         dialogLayout.add(dobField, 1, 6);
         dialogLayout.add(dobError, 1, 7);
 
-        dialogLayout.add(new Label("Email:"), 0, 8);
+        dialogLayout.add(emailLabel, 0, 8);
         dialogLayout.add(emailField, 1, 8);
         dialogLayout.add(emailError, 1, 9);
 
-        dialogLayout.add(new Label("Phone Number:"), 0, 10);
+        dialogLayout.add(phoneLabel, 0, 10);
         dialogLayout.add(phoneField, 1, 10);
         dialogLayout.add(phoneError, 1, 11);
 
-        dialogLayout.add(new Label("Address:"), 0, 12);
+        dialogLayout.add(addressLabel, 0, 12);
         dialogLayout.add(addressField, 1, 12);
 
-        dialogLayout.add(new Label("Salary:"), 0, 13);
+        dialogLayout.add(salaryLabel, 0, 13);
         dialogLayout.add(salaryField, 1, 13);
         dialogLayout.add(salaryError, 1, 14);
 
-        dialogLayout.add(new Label("Role:"), 0, 15);
+        dialogLayout.add(roleLabel, 0, 15);
         dialogLayout.add(roleComboBox, 1, 15);
 
-        dialogLayout.add(new Label("Store Manager:"), 0, 16);
+        dialogLayout.add(storeManagerLabel, 0, 16);
         dialogLayout.add(storeComboBox, 1, 16);
 
-        dialogLayout.add(new Label("Warehouse:"), 0, 17);
+        dialogLayout.add(warehouseLabel, 0, 17);
         dialogLayout.add(warehouseComboBox, 1, 17);
 
         dialogLayout.add(submitButton, 0, 18);
@@ -907,38 +934,65 @@ public class EmployeeManagementView extends VBox {
         cancelButton.setOnAction(e -> dialog.close());
 
         // Add fields to the grid
-        dialogLayout.add(new Label("First Name:"), 0, 0);
+// Khai báo các biến Label
+        Label firstNameLabel = new Label("First Name:");
+        Label lastNameLabel = new Label("Last Name:");
+        Label genderLabel = new Label("Gender:");
+        Label dobLabel = new Label("Date of Birth:");
+        Label emailLabel = new Label("Email:");
+        Label phoneLabel = new Label("Phone Number:");
+        Label addressLabel = new Label("Address:");
+        Label salaryLabel = new Label("Salary:");
+        Label roleLabel = new Label("Role:");
+        Label storeManagerLabel = new Label("Store Manager:");
+        Label warehouseLabel = new Label("Warehouse:");
+
+// Thêm class CSS cho các Label
+        firstNameLabel.getStyleClass().add("label-popup");
+        lastNameLabel.getStyleClass().add("label-popup");
+        genderLabel.getStyleClass().add("label-popup");
+        dobLabel.getStyleClass().add("label-popup");
+        emailLabel.getStyleClass().add("label-popup");
+        phoneLabel.getStyleClass().add("label-popup");
+        addressLabel.getStyleClass().add("label-popup");
+        salaryLabel.getStyleClass().add("label-popup");
+        roleLabel.getStyleClass().add("label-popup");
+        storeManagerLabel.getStyleClass().add("label-popup");
+        warehouseLabel.getStyleClass().add("label-popup");
+
+// Thêm các Label vào dialogLayout
+        dialogLayout.add(firstNameLabel, 0, 0);
         dialogLayout.add(firstNameField, 1, 0);
 
-        dialogLayout.add(new Label("Last Name:"), 0, 1);
+        dialogLayout.add(lastNameLabel, 0, 1);
         dialogLayout.add(lastNameField, 1, 1);
 
-        dialogLayout.add(new Label("Gender:"), 0, 2);
+        dialogLayout.add(genderLabel, 0, 2);
         dialogLayout.add(maleRadio, 1, 2);
         dialogLayout.add(femaleRadio, 1, 3);
 
-        dialogLayout.add(new Label("Date of Birth:"), 0, 4);
+        dialogLayout.add(dobLabel, 0, 4);
         dialogLayout.add(dobPicker, 1, 4);
 
-        dialogLayout.add(new Label("Email:"), 0, 5);
+        dialogLayout.add(emailLabel, 0, 5);
         dialogLayout.add(emailField, 1, 5);
 
-        dialogLayout.add(new Label("Phone Number:"), 0, 6);
+        dialogLayout.add(phoneLabel, 0, 6);
         dialogLayout.add(phoneField, 1, 6);
 
-        dialogLayout.add(new Label("Address:"), 0, 7);
+        dialogLayout.add(addressLabel, 0, 7);
         dialogLayout.add(addressField, 1, 7);
 
-        dialogLayout.add(new Label("Salary:"), 0, 8);
+        dialogLayout.add(salaryLabel, 0, 8);
         dialogLayout.add(salaryField, 1, 8);
 
-        dialogLayout.add(new Label("Role:"), 0, 9);
+        dialogLayout.add(roleLabel, 0, 9);
         dialogLayout.add(roleComboBox, 1, 9);
 
-        dialogLayout.add(new Label("StoreManager:"), 0, 10);
+        dialogLayout.add(storeManagerLabel, 0, 10);
         dialogLayout.add(storeComboBox, 1, 10);
 
-        dialogLayout.add(new Label("Warehouse:"), 0, 11);
+        dialogLayout.add(warehouseLabel, 0, 11);
         dialogLayout.add(warehouseComboBox, 1, 11);
 
         dialogLayout.add(submitButton, 0, 12);

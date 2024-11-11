@@ -371,7 +371,6 @@ public class ImportProductView extends VBox {
         // Configure columns for the product table
         TableColumn<ProductInvoice, Integer> productSttCol = new TableColumn<>("ID");
         productSttCol.setPrefWidth(50); // Chiều rộng cột ID
-        productSttCol.setStyle("-fx-alignment: center");
         productSttCol.getStyleClass().add("column");
         productSttCol.setCellValueFactory(cellData -> cellData.getValue().idProductProperty().asObject());
 
@@ -386,7 +385,7 @@ public class ImportProductView extends VBox {
         brandCol.setCellValueFactory(cellData -> cellData.getValue().brandProperty());
 
         TableColumn<ProductInvoice, Double> purchasePriceCol = new TableColumn<>("Purchase price");
-        purchasePriceCol.setPrefWidth(100); // Chiều rộng cột Purchase Price
+        purchasePriceCol.setPrefWidth(150); // Chiều rộng cột Purchase Price
         purchasePriceCol.getStyleClass().add("column");
         purchasePriceCol.setCellValueFactory(cellData -> cellData.getValue().purchasePriceProperty().asObject());
 
@@ -396,17 +395,17 @@ public class ImportProductView extends VBox {
         salePriceCol.setCellValueFactory(cellData -> cellData.getValue().salePriceProperty().asObject());
 
         TableColumn<ProductInvoice, Integer> quantityCol = new TableColumn<>("Quantity");
-        quantityCol.setPrefWidth(80); // Chiều rộng cột Quantity
+        quantityCol.setPrefWidth(120); // Chiều rộng cột Quantity
         quantityCol.getStyleClass().add("column");
         quantityCol.setCellValueFactory(cellData -> cellData.getValue().quantityProperty().asObject());
 
         TableColumn<ProductInvoice, Double> totalAmountCol = new TableColumn<>("Total amount");
-        totalAmountCol.setPrefWidth(120); // Chiều rộng cột Total Amount
+        totalAmountCol.setPrefWidth(125); // Chiều rộng cột Total Amount
         totalAmountCol.getStyleClass().add("column");
         totalAmountCol.setCellValueFactory(cellData -> cellData.getValue().totalAmountProperty().asObject());
 
         productTable.getColumns().addAll(productSttCol, productNameCol, brandCol, purchasePriceCol, salePriceCol, quantityCol, totalAmountCol);
-        productTable.setStyle("-fx-pref-height: 380; -fx-pref-width :580");
+        productTable.setStyle("-fx-pref-height: 380; -fx-max-width :800");
     }
 
     private void openCreateImportInvoiceDialog () {
