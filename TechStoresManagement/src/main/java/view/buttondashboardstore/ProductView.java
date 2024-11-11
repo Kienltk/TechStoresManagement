@@ -1,6 +1,7 @@
 package view.buttondashboardstore;
 
 import controller.DirectorController;
+import controller.Session;
 import entity.Product;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -16,6 +17,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import model.DirectorModel;
@@ -33,6 +35,8 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class ProductView extends VBox {
+    private final int idStore = Session.getIdStore();
+
     ObservableList<Product> productList = FXCollections.observableArrayList();
     ObservableList<Product> filteredList = FXCollections.observableArrayList();
     DirectorModel dm = new DirectorModel();
@@ -46,7 +50,6 @@ public class ProductView extends VBox {
     private int currentPage = 0; // Trang hiện tại
 
     TableView<Product> productTable = new TableView<>();
-
     public ProductView() {
         // Title Label
         Label titleLabel = new Label("Product Management");
@@ -122,32 +125,38 @@ public class ProductView extends VBox {
         salePriceColumn.setCellValueFactory(cellData -> cellData.getValue().salePriceProperty().asObject());
 
         // Option Column with Edit and Delete buttons
-        TableColumn<Product, Void> optionColumn = new TableColumn<>("          Option");
+        TableColumn<Product, Void> optionColumn = new TableColumn<>("        Option");
         optionColumn.setMinWidth(145);
         optionColumn.getStyleClass().add("column");
         optionColumn.setCellFactory(col -> new TableCell<>() {
             private final Button editButton = new Button();
+            private final Button viewButton = new Button();
             private final Button deleteButton = new Button();
 
             {
                 // Tạo ImageView cho các icon
+                ImageView viewIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/view.png")));
                 ImageView editIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/edit.png")));
                 ImageView deleteIcon = new ImageView(new Image(getClass().getResourceAsStream("/images/delete.png")));
 
                 // Đặt kích thước ban đầu cho icon
+                setIconSize(viewIcon, 20);
                 setIconSize(editIcon, 20);
                 setIconSize(deleteIcon, 20);
 
                 // Thêm icon vào nút
+                viewButton.setGraphic(viewIcon);
                 editButton.setGraphic(editIcon);
                 deleteButton.setGraphic(deleteIcon);
 
                 // Đặt style cho nút
                 String defaultStyle = "-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 6;";
+                viewButton.setStyle(defaultStyle);
                 editButton.setStyle(defaultStyle);
                 deleteButton.setStyle(defaultStyle);
 
                 // Thêm sự kiện phóng to khi hover và giảm padding
+                addHoverEffect(viewButton, viewIcon);
                 addHoverEffect(editButton, editIcon);
                 addHoverEffect(deleteButton, deleteIcon);
             }
@@ -158,15 +167,15 @@ public class ProductView extends VBox {
                 if (empty) {
                     setGraphic(null);
                 } else {
+                    Product selectedProduct = getTableView().getItems().get(getIndex());
+                    viewButton.setOnAction(e -> openProductView(selectedProduct));
                     // Handle the edit button click event
                     editButton.setOnAction(event -> {
-                        Product selectedProduct = getTableView().getItems().get(getIndex());
                         showProductEditor(selectedProduct);
                     });
 
                     // Handle the delete button click event
                     deleteButton.setOnAction(event -> {
-                        Product selectedProduct = getTableView().getItems().get(getIndex());
 
                         if (!dm.ifDependencies(selectedProduct.getId())) {
                             // Confirmation alert
@@ -210,7 +219,7 @@ public class ProductView extends VBox {
                         }
                     });
 
-                    HBox optionBox = new HBox(editButton, deleteButton);
+                    HBox optionBox = new HBox(viewButton, editButton, deleteButton);
                     optionBox.setAlignment(Pos.CENTER);
                     optionBox.setSpacing(10);
                     setGraphic(optionBox);
@@ -444,7 +453,7 @@ public class ProductView extends VBox {
             if (!flag) return;
 
             // Create a new product (assuming Product constructor takes these parameters)
-            Product newProduct = new Product(id, imgAddress, name, brand, purchasePrice, salePrice);  // Assuming stock is initially 0
+            Product newProduct = new Product(id, imgAddress, name, brand, purchasePrice, salePrice);
 
             // Add the new product to the model (implement dm.addProduct() in your DirectorModel)
             dm.add(newProduct);
@@ -784,4 +793,91 @@ public class ProductView extends VBox {
             return false; // Handle exception (e.g., file not found)
         }
     }
+
+    private void openProductView(Product product) {
+        Stage dialog = new Stage();
+        dialog.setTitle("View Product");
+        dialog.initModality(Modality.APPLICATION_MODAL);
+
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(10));
+        grid.setVgap(10);
+        grid.setHgap(10);
+
+        // Create Labels with the variable data
+        Label productNameLabel = new Label("Product Name:");
+        Label productNameData = new Label(product.getName());
+        productNameLabel.getStyleClass().add("label-popup");
+        productNameData.getStyleClass().add("data-popup");
+
+        Label brandLabel = new Label("Brand:");
+        Label brandData = new Label(product.getBrand());
+        brandLabel.getStyleClass().add("label-popup");
+        brandData.getStyleClass().add("data-popup");
+
+        Label purchasePriceLabel = new Label("Purchase Price:");
+        Label purchasePriceData = new Label(String.valueOf(product.getPurchasePrice()));
+        purchasePriceLabel.getStyleClass().add("label-popup");
+        purchasePriceData.getStyleClass().add("data-popup");
+
+        Label salePriceLabel = new Label("Sale Price:");
+        Label salePriceData = new Label(String.valueOf(product.getSalePrice()));
+        salePriceLabel.getStyleClass().add("label-popup");
+        salePriceData.getStyleClass().add("data-popup");
+
+        Label stockLabel = new Label("Stock (total):");
+        Label stockData = new Label(String.valueOf(dm.getTotalStock(product.getId())));
+        stockLabel.getStyleClass().add("label-popup");
+        stockData.getStyleClass().add("data-popup");
+
+        // Add labels and data to the grid
+        grid.add(productNameLabel, 0, 0);
+        grid.add(productNameData, 1, 0);
+
+        grid.add(brandLabel, 0, 1);
+        grid.add(brandData, 1, 1);
+
+        grid.add(purchasePriceLabel, 0, 2);
+        grid.add(purchasePriceData, 1, 2);
+
+        grid.add(salePriceLabel, 0, 3);
+        grid.add(salePriceData, 1, 3);
+
+        grid.add(stockLabel, 0, 4);
+        grid.add(stockData, 1, 4);
+
+        // Image
+        ImageView imageView = new ImageView();
+        Image originalImage;
+
+        if ((getClass().getResourceAsStream("/view/images/" + product.getImage()) != null)) {
+            originalImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/view/images/" + product.getImage())));
+            imageView.setImage(originalImage);
+        } else {
+            originalImage = null;
+        }
+        imageView.setFitWidth(200);
+        imageView.setFitHeight(200);
+        VBox imageBox = new VBox(imageView);
+        imageBox.setAlignment(Pos.CENTER);
+        imageBox.setPadding(new Insets(10));
+
+        // Close button
+        Button closeButton = new Button("Close");
+        closeButton.setAlignment(Pos.CENTER_RIGHT);
+        closeButton.getStyleClass().add("button-pagination");
+        closeButton.setOnAction(e -> dialog.close());
+
+        // Add the grid and button to the VBox
+        VBox vbox = new VBox(grid, imageBox, closeButton);
+        vbox.setSpacing(10);
+        vbox.setPadding(new Insets(15));
+
+        Scene dialogScene = new Scene(vbox);
+        dialogScene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
+        dialogScene.getStylesheets().add(getClass().getResource("/view/director.css").toExternalForm());
+        dialog.setScene(dialogScene);
+        dialog.show();
+    }
+
 }

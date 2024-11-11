@@ -106,6 +106,8 @@ public class GeneralView extends VBox {
         comboBox.getChildren().addAll(criteriaComboBox, yearComboBox, monthComboBox);
         comboBox.setAlignment(Pos.CENTER);
 
+        controller.handleReloadDirector();
+
         HBox charts = new HBox(20,  createBarChart(), createPieChartTurnoverStore());
 
         VBox layout = new VBox(20);
@@ -383,13 +385,16 @@ public class GeneralView extends VBox {
 
         if (pieChartTurnoverStore == null) {
             labelTurnoverStore = new Label();
-            labelTurnoverStore.setText("Không có dữ liệu");
+            labelTurnoverStore.setText("Not Data");
             return;
         }
 
+        pieChartTurnoverStore.getData().clear();
+
+
         if (turnoverStoreData.isEmpty()) {
             pieChartTurnoverStore.setData(FXCollections.observableArrayList()); // Xóa dữ liệu biểu đồ
-            labelTurnoverStore.setText("Không có dữ liệu"); // Cập nhật thông báo
+            labelTurnoverStore.setText("Not Data"); // Cập nhật thông báo
             return; // Kết thúc phương thức nếu không có dữ liệu
         } else {
             labelTurnoverStore.setText(""); // Nếu có dữ liệu, xóa thông báo
