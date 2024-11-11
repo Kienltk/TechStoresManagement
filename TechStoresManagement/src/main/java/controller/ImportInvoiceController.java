@@ -4,7 +4,10 @@ import entity.ImportInvoice;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableView;
+import model.CashierModel;
 import model.ImportInvoiceModel;
+
+import java.util.Map;
 
 public class ImportInvoiceController {
     private ImportInvoiceModel model;
@@ -95,4 +98,5 @@ public class ImportInvoiceController {
     public boolean updateProductQuantity (String invoiceName) {
         return model.updateProductQuantity(invoiceName);
     }
+
 }

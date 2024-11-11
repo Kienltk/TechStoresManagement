@@ -46,6 +46,7 @@ public class ImportProductView extends VBox {
         Label titleLabel = new Label("Import Invoice");
         titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-padding: 0;");
 
+
         HBox searchBox = new HBox();
         searchField = new TextField();
         searchField.setPromptText("Search");
@@ -106,6 +107,8 @@ public class ImportProductView extends VBox {
 
         this.getChildren().addAll(titleLabel, topControls, mainLayout, paginationBox);
         this.getStyleClass().add("vbox");
+
+        loadImportInvoicesWithPagination();
     }
     // Hàm load receipts có phân trang
     private void loadImportInvoicesWithPagination() {

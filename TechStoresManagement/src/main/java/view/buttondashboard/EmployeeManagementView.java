@@ -623,7 +623,7 @@ public class EmployeeManagementView extends VBox {
         Label addressLabel = new Label("Address:");
         Label salaryLabel = new Label("Salary:");
         Label roleLabel = new Label("Role:");
-        Label storeManagerLabel = new Label("Store Manager:");
+        Label storeManagerLabel = new Label("Store:");
         Label warehouseLabel = new Label("Warehouse:");
 
 // Thêm class CSS cho các Label
@@ -944,7 +944,7 @@ public class EmployeeManagementView extends VBox {
         Label addressLabel = new Label("Address:");
         Label salaryLabel = new Label("Salary:");
         Label roleLabel = new Label("Role:");
-        Label storeManagerLabel = new Label("Store Manager:");
+        Label storeManagerLabel = new Label("Store:");
         Label warehouseLabel = new Label("Warehouse:");
 
 // Thêm class CSS cho các Label

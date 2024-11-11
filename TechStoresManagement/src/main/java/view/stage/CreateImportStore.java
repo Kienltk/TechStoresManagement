@@ -1,5 +1,6 @@
 package view.stage;
 
+import controller.Session;
 import entity.Product;
 import entity.Store;
 import entity.Warehouse;
@@ -18,6 +19,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import model.ImportInvoiceModel;
+import view.buttondashboardstore.ImportView;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -25,11 +27,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class CreateImportDirector extends Application {
-
+public class CreateImportStore extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+    private final int idStore = Session.getIdStore();
 
     private final ListView<HBox> orderListView = new ListView<>();
     private final Label totalLabel = new Label("Total:                               $0.00");
@@ -44,7 +46,8 @@ public class CreateImportDirector extends Application {
     private final TableView<Product> productTable = new TableView<>();
 
     private String selectedWarehouseName;
-    private String selectedStoreName;
+
+    private Runnable onCloseCallback;
 
     @Override
     public void start(Stage primaryStage) {
@@ -57,13 +60,7 @@ public class CreateImportDirector extends Application {
         warehouseComboBox.setItems(warehouseList);
         warehouseComboBox.setPromptText("Select Warehouse");
 
-        // Tạo ComboBox cho Store
-        ComboBox<Store> storeComboBox = new ComboBox<>();
-        ObservableList<Store> storeList = FXCollections.observableArrayList(ImportInvoiceModel.getAllStores());
-        storeComboBox.setItems(storeList);
-        storeComboBox.setPromptText("Select Store");
 
-        storeComboBox.getStyleClass().add("combo-box-account");
         warehouseComboBox.getStyleClass().add("combo-box-account");
 
         DatePicker datePicker = new DatePicker();
@@ -85,7 +82,7 @@ public class CreateImportDirector extends Application {
 
         HBox top = new HBox(30);
         top.setAlignment(Pos.CENTER_LEFT);
-        top.getChildren().addAll(inputField, warehouseComboBox, storeComboBox, datePicker);
+        top.getChildren().addAll(inputField, warehouseComboBox, datePicker);
         top.setPadding(new Insets(0, 10, 10, 10));
 
         HBox contentSection = new HBox(10);
@@ -220,25 +217,22 @@ public class CreateImportDirector extends Application {
             }
         });
 
-        storeComboBox.setOnAction(event -> {
-            Store selectedStore = storeComboBox.getSelectionModel().getSelectedItem();
-            if (selectedStore != null) {
-                selectedStoreName = selectedStore.getName();
-            }
-        });
-
-
         buyNowButton.setOnAction(e -> {
             if (!cartItems.isEmpty()) {
-                if (ImportInvoiceModel.createImportInvoiceStore(inputField.getText(), selectedWarehouseName, selectedStoreName, totalSalePrice, selectedDate.toString(), cartItems) == -1) {
+                if (ImportInvoiceModel.createImportInvoiceStore(inputField.getText(), selectedWarehouseName, cm.getStoreNameById(idStore), totalSalePrice, selectedDate.toString(), cartItems) == -1) {
                     System.out.println("Error");
                 } else {
                     System.out.println("Submit");
+                    primaryStage.setOnCloseRequest(event -> {
+                        if (onCloseCallback != null) {
+                            onCloseCallback.run(); // Gọi callback khi cửa sổ đóng
+                        }
+                    });
                     primaryStage.close();
+
                 }
             }
         });
-
 
         buyNowContainer.getChildren().add(buyNowButton);
 
@@ -509,5 +503,4 @@ public class CreateImportDirector extends Application {
         alert.setContentText("The product " + productName + " is out of stock.");
         alert.showAndWait();
     }
-
 }

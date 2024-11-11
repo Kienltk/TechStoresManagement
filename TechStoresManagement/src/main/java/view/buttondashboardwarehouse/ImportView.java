@@ -16,6 +16,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.ImportInvoiceModel;
+import view.stage.CreateImportStore;
 
 import java.time.format.DateTimeFormatter;
 
@@ -97,6 +98,8 @@ public class ImportView extends VBox {
 
         this.getChildren().addAll(titleLabel, topControls, mainLayout, paginationBox);
         this.getStyleClass().add("vbox");
+
+        loadImportInvoicesWithPagination();
     }
     // Hàm load receipts có phân trang
     private void loadImportInvoicesWithPagination() {
@@ -407,7 +410,9 @@ public class ImportView extends VBox {
     }
 
     private void openCreateImportInvoiceDialog () {
-
+        CreateImportStore create = new CreateImportStore();
+        Stage stage = new Stage();
+        create.start(stage);
     }
 
 

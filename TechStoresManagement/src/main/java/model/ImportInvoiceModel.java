@@ -5,12 +5,10 @@ import entity.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ImportInvoiceModel {
     private final Connection connection;
@@ -592,5 +590,147 @@ public class ImportInvoiceModel {
 
         return stores;
     }
+
+    public static int createImportInvoiceWarehouse(String nameInvoice, String warehouseName, double total, String requestedDate, Map<Integer, Integer> cartItems) {
+        // Câu lệnh SQL sửa đổi để lấy id của nhân viên
+        String query = "INSERT INTO import_warehouse (id_warehouse, name, total, created_at, requested_date, actual_import_date, status_id) " +
+                "VALUES ((SELECT id FROM warehouses WHERE name = ?), ?, ?, NOW(), ?, null, 1)";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setString(1, warehouseName);
+            stmt.setString(2, nameInvoice);
+            stmt.setDouble(3, total);
+            stmt.setString(4, requestedDate);
+
+            // Thực thi truy vấn
+            stmt.executeUpdate();
+
+            // Lấy id của hóa đơn vừa tạo
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                int importInvoiceId = rs.getInt(1);
+                saveProductsToImportInvoiceWarehouse(importInvoiceId, cartItems);
+                return importInvoiceId;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1; // Trả về -1 nếu có lỗi xảy ra
+    }
+
+    public static void saveProductsToImportInvoiceWarehouse(int importInvoiceId, Map<Integer, Integer> cartItems) {
+        String query = "INSERT INTO import_warehouse_details (id_import, id_product, quantity, total) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
+                int productId = entry.getKey();
+                int quantity = entry.getValue();
+                Product product = getOne(productId);
+
+                if (product != null) {
+                    double totalAmount = product.getSalePrice() * quantity;
+
+                    stmt.setInt(1, importInvoiceId);
+                    stmt.setInt(2, productId);
+                    stmt.setInt(3, quantity);
+                    stmt.setDouble(4, totalAmount);
+                    stmt.addBatch();
+                }
+            }
+            stmt.executeBatch();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static int createImportInvoiceStore(String nameInvoice, String warehouseName, String storeName, double total, String requestedDate, Map<Integer, Integer> cartItems) {
+        // Câu lệnh SQL sửa đổi để lấy id của nhân viên
+        String query = "INSERT INTO import_store (name, id_store, id_warehouse, total, created_at, requested_date, actual_import_date, status_id) " +
+                "VALUES (?, (SELECT id FROM stores WHERE name = ?), (SELECT id FROM warehouses WHERE name = ?), ?, NOW(), ?, null, 1)";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setString(1, nameInvoice);
+            stmt.setString(2, storeName);
+            stmt.setString(3, warehouseName);
+            stmt.setDouble(4, total);
+            stmt.setString(5, requestedDate);
+
+            // Thực thi truy vấn
+            stmt.executeUpdate();
+
+            // Lấy id của hóa đơn vừa tạo
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                int importInvoiceId = rs.getInt(1);
+                saveProductsToImportInvoiceStore(importInvoiceId, cartItems);
+                return importInvoiceId;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1; // Trả về -1 nếu có lỗi xảy ra
+    }
+
+    public static void saveProductsToImportInvoiceStore(int importInvoiceId, Map<Integer, Integer> cartItems) {
+        String query = "INSERT INTO import_store_details (id_import, id_product, quantity, total) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
+                int productId = entry.getKey();
+                int quantity = entry.getValue();
+                Product product = getOne(productId);
+
+                if (product != null) {
+                    double totalAmount = product.getSalePrice() * quantity;
+
+                    stmt.setInt(1, importInvoiceId);
+                    stmt.setInt(2, productId);
+                    stmt.setInt(3, quantity);
+                    stmt.setDouble(4, totalAmount);
+                    stmt.addBatch();
+                }
+            }
+            stmt.executeBatch();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getWarehouseNameById(int warehouseId) {
+        String sql = "SELECT name FROM warehouses WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, warehouseId);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("name");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error retrieving warehouse name: " + e.getMessage());
+        }
+        return null; // Trả về null nếu không tìm thấy hoặc xảy ra lỗi
+    }
+
+    public String getStoreNameById(int storeId) {
+        String sql = "SELECT name FROM stores WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, storeId);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("name");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error retrieving store name: " + e.getMessage());
+        }
+        return null; // Trả về null nếu không tìm thấy hoặc xảy ra lỗi
+    }
+
 
 }
