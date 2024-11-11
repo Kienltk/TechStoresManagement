@@ -169,4 +169,23 @@ public class DirectorModel implements ICommon<Product> {
         }
         return false;
     }
+
+    public int getTotalStock(int productId) {
+        String sql = "SELECT (SUM(products_store.quantity) / 3 + SUM(products_warehouse.quantity) / 2) as sum " +
+                "FROM products_warehouse " +
+                "JOIN products ON products_warehouse.id_product = products.id " +
+                "JOIN products_store ON products.id = products_store.id_product " +
+                "WHERE products.id = ?;";
+        try (Connection con = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("sum");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }
