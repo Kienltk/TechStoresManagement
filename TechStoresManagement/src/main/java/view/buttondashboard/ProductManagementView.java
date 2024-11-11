@@ -69,22 +69,6 @@ public class ProductManagementView extends VBox {
 
         newProductButton.setOnAction(event -> showNewProductForm());
 
-        // Search Bar
-        TextField searchField = new TextField();
-        searchField.setPromptText("Search Item");
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            isFiltered = !newValue.isEmpty(); // Cập nhật trạng thái lọc
-            filterList(newValue);
-        });
-        searchField.getStyleClass().add("search-box");
-
-        HBox searchBar = new HBox(searchField);
-        searchBar.setAlignment(Pos.CENTER_RIGHT);
-        searchBar.setStyle(" -fx-padding:0 620 10 10;");
-
-        HBox topControls = new HBox(10);
-        topControls.setStyle("-fx-min-width: 1000");
-        topControls.getChildren().addAll( searchBar,newProductButton);
 
         // TableView for Product Data
 
@@ -255,6 +239,26 @@ public class ProductManagementView extends VBox {
         productList.setAll(dm.getAll());
         loadPageData();
 
+        // Search Bar
+        TextField searchField = new TextField();
+        searchField.setPromptText("Search Item");
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.isEmpty()) {
+                filterList(newValue);
+            } else {
+                isFiltered = !newValue.isEmpty();
+                filterList(newValue);
+            }
+        });
+        searchField.getStyleClass().add("search-box");
+
+        HBox searchBar = new HBox(searchField);
+        searchBar.setAlignment(Pos.CENTER_RIGHT);
+        searchBar.setStyle(" -fx-padding:0 620 10 10;");
+
+        HBox topControls = new HBox(10);
+        topControls.setStyle("-fx-min-width: 1000");
+        topControls.getChildren().addAll( searchBar,newProductButton);
         // Update the pagination buttons to reflect the filtered list
         Button prevButton = new Button("<-");
         prevButton.getStyleClass().add("button-pagination");

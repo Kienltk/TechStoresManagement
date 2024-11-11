@@ -50,42 +50,75 @@ public class CreateImportDirector extends Application {
     public void start(Stage primaryStage) {
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(10, 50, 10, 50));
+// Tạo ComboBox chính để chọn giữa Store và Warehouse
+        ComboBox<String> selectionComboBox = new ComboBox<>();
+        selectionComboBox.getItems().addAll("Select Store", "Select Warehouse");
+        selectionComboBox.getStyleClass().add("combo-box-account");
+        selectionComboBox.setPromptText("Select Roll");
 
-        // Tạo ComboBox cho Warehouse
+// Tạo ComboBox cho Warehouse
         ComboBox<Warehouse> warehouseComboBox = new ComboBox<>();
         ObservableList<Warehouse> warehouseList = FXCollections.observableArrayList(ImportInvoiceModel.getAllWarehouses());
         warehouseComboBox.setItems(warehouseList);
+        warehouseComboBox.getStyleClass().add("combo-box-account");
         warehouseComboBox.setPromptText("Select Warehouse");
 
-        // Tạo ComboBox cho Store
+// Tạo ComboBox cho Store
         ComboBox<Store> storeComboBox = new ComboBox<>();
         ObservableList<Store> storeList = FXCollections.observableArrayList(ImportInvoiceModel.getAllStores());
         storeComboBox.setItems(storeList);
+        storeComboBox.getStyleClass().add("combo-box-account");
         storeComboBox.setPromptText("Select Store");
 
-        storeComboBox.getStyleClass().add("combo-box-account");
-        warehouseComboBox.getStyleClass().add("combo-box-account");
-
+// Tạo DatePicker
         DatePicker datePicker = new DatePicker();
         datePicker.getStyleClass().add("text-field-account");
 
-        // Biến để lưu ngày đã chọn
+// Biến để lưu ngày đã chọn
         AtomicReference<LocalDate> selectedDate = new AtomicReference<>();
 
-        // Xử lý sự kiện khi người dùng chọn ngày
+// Xử lý sự kiện khi người dùng chọn ngày
         datePicker.setOnAction(event -> {
             selectedDate.set(datePicker.getValue()); // Lấy giá trị ngày đã chọn
-            System.out.println("Selected date: " + selectedDate); // In ra ngày đã chọn
+            System.out.println("Selected date: " + selectedDate.get()); // In ra ngày đã chọn
         });
-        // Khai báo các trường nhập liệu
+
+// Khai báo các trường nhập liệu
         TextField inputField = new TextField();
         inputField.getStyleClass().add("text-field-account");
         inputField.setMinHeight(45);
         inputField.setPromptText("Name");
 
+// Ẩn các phần tử ban đầu
+        warehouseComboBox.setVisible(false);
+        storeComboBox.setVisible(false);
+        datePicker.setVisible(false);
+        inputField.setVisible(false);
+
+// Xử lý sự kiện khi người dùng chọn Store hoặc Warehouse
+        selectionComboBox.setOnAction(event -> {
+            String selectedOption = selectionComboBox.getValue();
+            if ("Select Store".equals(selectedOption)) {
+                storeComboBox.setVisible(false);
+                warehouseComboBox.setVisible(true);
+                datePicker.setVisible(true);
+                inputField.setVisible(true);
+            } else if ("Select Warehouse".equals(selectedOption)) {
+                storeComboBox.setVisible(true);
+                warehouseComboBox.setVisible(true);
+                datePicker.setVisible(true);
+                inputField.setVisible(true);
+            } else {
+                // Nếu không chọn gì, ẩn tất cả
+                storeComboBox.setVisible(false);
+                warehouseComboBox.setVisible(false);
+                datePicker.setVisible(false);
+                inputField.setVisible(false);
+            }
+        });
         HBox top = new HBox(30);
         top.setAlignment(Pos.CENTER_LEFT);
-        top.getChildren().addAll(inputField, warehouseComboBox, storeComboBox, datePicker);
+        top.getChildren().addAll(selectionComboBox,inputField, datePicker,warehouseComboBox, storeComboBox );
         top.setPadding(new Insets(0, 10, 10, 10));
 
         HBox contentSection = new HBox(10);

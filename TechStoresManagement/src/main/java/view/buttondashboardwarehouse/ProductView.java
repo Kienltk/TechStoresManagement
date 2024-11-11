@@ -64,8 +64,12 @@ public class ProductView extends VBox {
         TextField searchField = new TextField();
         searchField.setPromptText("Search Item");
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            isFiltered = !newValue.isEmpty(); // Cập nhật trạng thái lọc
-            filterList(newValue);
+            if (newValue.isEmpty()) {
+                filterList(newValue);
+            } else {
+                isFiltered = !newValue.isEmpty();
+                filterList(newValue);
+            }
         });
         searchField.getStyleClass().add("search-box");
 

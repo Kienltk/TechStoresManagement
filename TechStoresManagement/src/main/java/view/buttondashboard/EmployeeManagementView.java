@@ -20,6 +20,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import model.EmployeeModel;
+import view.stage.DeletionFailed;
+import view.stage.DeletionSuccess;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -449,11 +451,15 @@ public class EmployeeManagementView extends VBox {
         ComboBox<Pair<Integer, String>> warehouseComboBox = new ComboBox<>();
         warehouseComboBox.getStyleClass().add("combo-box-account");
 
+        Label storeManagerLabel = new Label("Store:");
+        Label warehouseLabel = new Label("Warehouse:");
         // Load roles từ cơ sở dữ liệu
         loadRoles(roleComboBox);
 
-        // Thiết lập ComboBox store và warehouse không hiển thị ban đầu
+        // Ẩn các Label và ComboBox cho Store và Warehouse ban đầu
+        storeManagerLabel.setVisible(false);
         storeComboBox.setVisible(false);
+        warehouseLabel.setVisible(false);
         warehouseComboBox.setVisible(false);
         storeComboBox.managedProperty().bind(storeComboBox.visibleProperty());
         warehouseComboBox.managedProperty().bind(warehouseComboBox.visibleProperty());
@@ -465,16 +471,21 @@ public class EmployeeManagementView extends VBox {
             String selectedRole = roleComboBox.getValue() != null ? roleComboBox.getValue().getValue() : null;
 
             if ("Store Management".equals(selectedRole) || "Cashier".equals(selectedRole)) {
+                storeManagerLabel.setVisible(true);
                 storeComboBox.setVisible(true);
+                warehouseLabel.setVisible(false);
                 warehouseComboBox.setVisible(false);
             } else if ("Warehouse Management".equals(selectedRole)) {
+                storeManagerLabel.setVisible(false);
                 storeComboBox.setVisible(false);
+                warehouseLabel.setVisible(true);
                 warehouseComboBox.setVisible(true);
             } else {
+                storeManagerLabel.setVisible(false);
                 storeComboBox.setVisible(false);
+                warehouseLabel.setVisible(false);
                 warehouseComboBox.setVisible(false);
             }
-
         });
 
         Button submitButton = new Button("Submit");
@@ -623,8 +634,6 @@ public class EmployeeManagementView extends VBox {
         Label addressLabel = new Label("Address:");
         Label salaryLabel = new Label("Salary:");
         Label roleLabel = new Label("Role:");
-        Label storeManagerLabel = new Label("Store:");
-        Label warehouseLabel = new Label("Warehouse:");
 
 // Thêm class CSS cho các Label
         firstNameLabel.getStyleClass().add("label-popup");
@@ -652,38 +661,38 @@ public class EmployeeManagementView extends VBox {
         dialogLayout.add(maleRadio, 1, 4);
         dialogLayout.add(femaleRadio, 1, 5);
 
-        dialogLayout.add(dobLabel, 0, 6);
-        dialogLayout.add(dobField, 1, 6);
-        dialogLayout.add(dobError, 1, 7);
+        dialogLayout.add(dobLabel, 0, 7);
+        dialogLayout.add(dobField, 1, 7);
+        dialogLayout.add(dobError, 1, 8);
 
-        dialogLayout.add(emailLabel, 0, 8);
-        dialogLayout.add(emailField, 1, 8);
-        dialogLayout.add(emailError, 1, 9);
+        dialogLayout.add(emailLabel, 0, 9);
+        dialogLayout.add(emailField, 1, 9);
+        dialogLayout.add(emailError, 1, 10);
 
-        dialogLayout.add(phoneLabel, 0, 10);
-        dialogLayout.add(phoneField, 1, 10);
-        dialogLayout.add(phoneError, 1, 11);
+        dialogLayout.add(phoneLabel, 0, 11);
+        dialogLayout.add(phoneField, 1, 11);
+        dialogLayout.add(phoneError, 1, 12);
 
-        dialogLayout.add(addressLabel, 0, 12);
-        dialogLayout.add(addressField, 1, 12);
+        dialogLayout.add(addressLabel, 0, 13);
+        dialogLayout.add(addressField, 1, 13);
 
-        dialogLayout.add(salaryLabel, 0, 13);
-        dialogLayout.add(salaryField, 1, 13);
-        dialogLayout.add(salaryError, 1, 14);
+        dialogLayout.add(salaryLabel, 0, 15);
+        dialogLayout.add(salaryField, 1, 15);
+        dialogLayout.add(salaryError, 1, 16);
 
-        dialogLayout.add(roleLabel, 0, 15);
-        dialogLayout.add(roleComboBox, 1, 15);
+        dialogLayout.add(roleLabel, 0, 17);
+        dialogLayout.add(roleComboBox, 1, 17);
 
-        dialogLayout.add(storeManagerLabel, 0, 16);
-        dialogLayout.add(storeComboBox, 1, 16);
+        dialogLayout.add(storeManagerLabel, 0, 19);
+        dialogLayout.add(storeComboBox, 1, 19);
 
-        dialogLayout.add(warehouseLabel, 0, 17);
-        dialogLayout.add(warehouseComboBox, 1, 17);
+        dialogLayout.add(warehouseLabel, 0, 19);
+        dialogLayout.add(warehouseComboBox, 1, 19);
 
-        dialogLayout.add(submitButton, 0, 18);
-        dialogLayout.add(cancelButton, 1, 18);
+        dialogLayout.add(submitButton, 0, 20);
+        dialogLayout.add(cancelButton, 1, 20);
 
-        Scene dialogScene = new Scene(dialogLayout, 400, 730);
+        Scene dialogScene = new Scene(dialogLayout, 500, 720);
         dialogScene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
         dialog.setScene(dialogScene);
         dialog.show();
@@ -851,32 +860,70 @@ public class EmployeeManagementView extends VBox {
         ComboBox<Pair<Integer, String>> warehouseComboBox = new ComboBox<>();
         warehouseComboBox.getStyleClass().add("combo-box-account");
 
+        // Add fields to the grid
+// Khai báo các biến Label
+        Label firstNameLabel = new Label("First Name:");
+        Label lastNameLabel = new Label("Last Name:");
+        Label genderLabel = new Label("Gender:");
+        Label dobLabel = new Label("Date of Birth:");
+        Label emailLabel = new Label("Email:");
+        Label phoneLabel = new Label("Phone Number:");
+        Label addressLabel = new Label("Address:");
+        Label salaryLabel = new Label("Salary:");
+        Label roleLabel = new Label("Role:");
+        Label storeManagerLabel = new Label("Store:");
+        Label warehouseLabel = new Label("Warehouse:");
+
+// Thêm class CSS cho các Label
+        firstNameLabel.getStyleClass().add("label-popup");
+        lastNameLabel.getStyleClass().add("label-popup");
+        genderLabel.getStyleClass().add("label-popup");
+        dobLabel.getStyleClass().add("label-popup");
+        emailLabel.getStyleClass().add("label-popup");
+        phoneLabel.getStyleClass().add("label-popup");
+        addressLabel.getStyleClass().add("label-popup");
+        salaryLabel.getStyleClass().add("label-popup");
+        roleLabel.getStyleClass().add("label-popup");
+        storeManagerLabel.getStyleClass().add("label-popup");
+        warehouseLabel.getStyleClass().add("label-popup");
+
         // Load roles from the database
         loadRoles(roleComboBox);
 
         // Set selected role
         roleComboBox.setValue(new Pair<>(employee.getIdRole(), employee.getRole()));
-
+        // Ẩn các Label và ComboBox cho Store và Warehouse ban đầu
+        storeManagerLabel.setVisible(false);
+        storeComboBox.setVisible(false);
+        warehouseLabel.setVisible(false);
+        warehouseComboBox.setVisible(false);
+        storeComboBox.setValue(null); // Hoặc một Pair hợp lệ nếu có
         // Thay đổi ComboBox hiển thị theo vai trò
         roleComboBox.setOnAction(event -> {
             String selectedRole = roleComboBox.getValue() != null ? roleComboBox.getValue().getValue() : null;
-            if ("Store Management".equals(selectedRole)) {
+            if ("Store Management".equals(selectedRole)|| "Cashier".equals(selectedRole)) {
+                storeManagerLabel.setVisible(true);
                 storeComboBox.setVisible(true);
+                warehouseLabel.setVisible(false);
                 warehouseComboBox.setVisible(false);
-                loadStores(storeComboBox); // Load stores
                 storeComboBox.setValue(new Pair<>(employee.getIdStore(), employeeModel.getStoreNameById(employee.getIdStore())));
+                loadStores(storeComboBox); // Load stores
             } else if ("Warehouse Management".equals(selectedRole)) {
+                storeManagerLabel.setVisible(false);
                 storeComboBox.setVisible(false);
+                warehouseLabel.setVisible(true);
                 warehouseComboBox.setVisible(true);
-                loadWarehouses(warehouseComboBox); // Load warehouses
                 warehouseComboBox.setValue(new Pair<>(employee.getIdWarehouse(), employeeModel.getWarehouseNameById(employee.getIdWarehouse())));
+                loadWarehouses(warehouseComboBox); // Load warehouses
             } else {
+                storeManagerLabel.setVisible(false);
                 storeComboBox.setVisible(false);
+                warehouseLabel.setVisible(false);
                 warehouseComboBox.setVisible(false);
             }
         });
 
-        // Kích hoạt lần đầu
+// Kích hoạt lần đầu
         roleComboBox.fireEvent(new ActionEvent());
 
         Button submitButton = new Button("Submit");
@@ -933,33 +980,6 @@ public class EmployeeManagementView extends VBox {
         cancelButton.getStyleClass().add("button-cancel-account");
         cancelButton.setOnAction(e -> dialog.close());
 
-        // Add fields to the grid
-// Khai báo các biến Label
-        Label firstNameLabel = new Label("First Name:");
-        Label lastNameLabel = new Label("Last Name:");
-        Label genderLabel = new Label("Gender:");
-        Label dobLabel = new Label("Date of Birth:");
-        Label emailLabel = new Label("Email:");
-        Label phoneLabel = new Label("Phone Number:");
-        Label addressLabel = new Label("Address:");
-        Label salaryLabel = new Label("Salary:");
-        Label roleLabel = new Label("Role:");
-        Label storeManagerLabel = new Label("Store:");
-        Label warehouseLabel = new Label("Warehouse:");
-
-// Thêm class CSS cho các Label
-        firstNameLabel.getStyleClass().add("label-popup");
-        lastNameLabel.getStyleClass().add("label-popup");
-        genderLabel.getStyleClass().add("label-popup");
-        dobLabel.getStyleClass().add("label-popup");
-        emailLabel.getStyleClass().add("label-popup");
-        phoneLabel.getStyleClass().add("label-popup");
-        addressLabel.getStyleClass().add("label-popup");
-        salaryLabel.getStyleClass().add("label-popup");
-        roleLabel.getStyleClass().add("label-popup");
-        storeManagerLabel.getStyleClass().add("label-popup");
-        warehouseLabel.getStyleClass().add("label-popup");
-
 // Thêm các Label vào dialogLayout
         dialogLayout.add(firstNameLabel, 0, 0);
         dialogLayout.add(firstNameField, 1, 0);
@@ -992,13 +1012,13 @@ public class EmployeeManagementView extends VBox {
         dialogLayout.add(storeManagerLabel, 0, 10);
         dialogLayout.add(storeComboBox, 1, 10);
 
-        dialogLayout.add(warehouseLabel, 0, 11);
-        dialogLayout.add(warehouseComboBox, 1, 11);
+        dialogLayout.add(warehouseLabel, 0, 10);
+        dialogLayout.add(warehouseComboBox, 1, 10);
 
-        dialogLayout.add(submitButton, 0, 12);
-        dialogLayout.add(cancelButton, 1, 12);
+        dialogLayout.add(submitButton, 0, 11);
+        dialogLayout.add(cancelButton, 1, 11);
 
-        Scene dialogScene = new Scene(dialogLayout, 400, 630);
+        Scene dialogScene = new Scene(dialogLayout, 500, 560);
         dialogScene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
         dialog.setScene(dialogScene);
         dialog.show();
@@ -1009,10 +1029,16 @@ public class EmployeeManagementView extends VBox {
         try {
             if (employeeModel.hasAccount(employee.getId())) {
                 showError("Cannot delete employee with an account.");
+                Stage stage = new Stage();
+                DeletionFailed message = new DeletionFailed();
+                message.start(stage);
             } else {
                 employeeModel.deleteEmployee(employee.getId());
                 employeeList.remove(employee);
                 showSuccess("Employee deleted successfully.");
+                Stage stage = new Stage();
+                DeletionSuccess message = new DeletionSuccess();
+                message.start(stage);
                 loadEmployees();
             }
         } catch (SQLException e) {
@@ -1106,22 +1132,21 @@ public class EmployeeManagementView extends VBox {
                 protected void updateItem(Pair<Integer, String> item, boolean empty) {
                     super.updateItem(item, empty);
                     if (empty || item == null) {
-                        setText(null);
+                        setText("Select Stores");
                     } else {
-                        setText(item.getValue()); // Chỉ hiển thị tên cửa hàng
+                        setText(item.getValue()); // Hiển thị tên cửa hàng
                     }
                 }
             });
 
-            // Đảm bảo giá trị đã chọn cũng hiển thị đúng
             storeComboBox.setButtonCell(new ListCell<Pair<Integer, String>>() {
                 @Override
                 protected void updateItem(Pair<Integer, String> item, boolean empty) {
                     super.updateItem(item, empty);
                     if (empty || item == null) {
-                        setText(null);
+                        setText("Select Stores");
                     } else {
-                        setText(item.getValue()); // Chỉ hiển thị tên cửa hàng
+                        setText(item.getValue()); // Hiển thị tên cửa hàng
                     }
                 }
             });
