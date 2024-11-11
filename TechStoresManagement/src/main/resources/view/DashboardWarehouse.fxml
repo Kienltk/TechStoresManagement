@@ -113,8 +113,8 @@
                         <Insets left="5.0" />
                     </padding>
                 </HBox>
-                <Label fx:id="employeeNameLabel" layoutX="78.0" layoutY="76.0" prefHeight="21.0" prefWidth="91.0" text="Employye Name" />
-                <Label fx:id="titleLabel7" layoutX="58.0" layoutY="47.0" prefHeight="18.0" prefWidth="129.0" style="-fx-text-fill: black;" text="Warehouse Manager" textFill="#a2bee8">
+                <Label fx:id="employeeNameLabel" layoutX="93.0" layoutY="73.0" prefHeight="21.0" prefWidth="91.0" style="-fx-font-size: 13px; -fx-font-weight: bold;" text="Employye Name" />
+                <Label fx:id="titleLabel7" layoutX="70.0" layoutY="48.0" prefHeight="25.0" prefWidth="158.0" style="-fx-text-fill: black;-fx-font-size: 16px; -fx-font-weight: bold;" text="Warehouse Manager" textFill="#a2bee8">
                     <font>
                         <Font name="Cambria" size="14.0" />
                     </font>
