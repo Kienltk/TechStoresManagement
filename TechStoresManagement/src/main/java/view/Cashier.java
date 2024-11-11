@@ -396,24 +396,30 @@ public class Cashier extends Application {
 
 // Khách hàng
         Label customerLabel = new Label("Customer:");
+        customerLabel.setPadding(new Insets(0 ,10,0,0));
         customerLabel.getStyleClass().add("label-popup");
         TextField customerPhoneInput = new TextField();
+        customerPhoneInput.setMaxWidth(150);
         customerPhoneInput.getStyleClass().add("text-field-account");
         customerPhoneInput.setPromptText("Enter customer phone number");
 
 // ListView để hiển thị tên khách hàng
         ListView<Customer> customerListView = new ListView<>();
         customerListView.setPrefHeight(50); // Đặt chiều cao cho ListView
+        customerListView.getStyleClass().add("list-view");
+
 
 // Label để hiển thị tên khách hàng đã chọn
         Label customerNameLabel = new Label();
         customerNameLabel.setVisible(false); // Bắt đầu ẩn label
         customerNameLabel.setManaged(false); // Không quản lý không gian hiển thị
+        customerNameLabel.setStyle("-fx-font-weight: bold ; -fx-font-size: 20 ; -fx-text-fill: #4ad4dd;-fx-padding: 10;");
 
 // Nút để đổi lại chọn khách hàng
         Button changeCustomerButton = new Button("Change");
         changeCustomerButton.setVisible(false); // Bắt đầu ẩn nút
         changeCustomerButton.setManaged(false); // Không quản lý không gian hiển thị
+        changeCustomerButton.getStyleClass().add("button-account");
 
 // Khi nhập số điện thoại, tìm kiếm khách hàng từ database
         customerListView.setVisible(!customerListView.getItems().isEmpty());
@@ -493,6 +499,7 @@ public class Cashier extends Application {
         paymentLabel.getStyleClass().add("label-popup");
         TextField paymentInput = new TextField();
         paymentInput.getStyleClass().add("text-field-account");
+        paymentInput.setMaxWidth(200);
         paymentInput.setPromptText("Enter customer payment");
 
 // Label cảnh báo nếu tiền trả ít hơn tổng tiền

@@ -191,6 +191,7 @@ public class GeneralView extends VBox {
 
         barChart.getData().addAll(seriesTurnover, seriesCapital, seriesProfit);
         barChart.setTitle("Financial Data by Month");
+        barChart.setStyle("-fx-font-size: 15;-fx-font-weight: bold;");
 
         return barChart;
     }
@@ -318,10 +319,10 @@ public class GeneralView extends VBox {
 
         // Khởi tạo layout
         rootTurnoverStore = new BorderPane();
-
+        rootTurnoverStore.setPadding(new Insets(5, 10, 10, 20));
         // Tạo tiêu đề cho biểu đồ
         Label chartTitle = new Label("Turnover Data by StoreManager");
-        chartTitle.setFont(Font.font("SanSerif", FontWeight.BOLD, 15)); // Cài đặt font cho tiêu đề
+        chartTitle.setFont(Font.font("SanSerif", FontWeight.BOLD, 20)); // Cài đặt font cho tiêu đề
         rootTurnoverStore.setTop(chartTitle); // Đặt tiêu đề vào trên cùng layout
 
         // Kiểm tra xem turnoverStoreData có dữ liệu hay không
@@ -371,7 +372,8 @@ public class GeneralView extends VBox {
         });
 
         rootTurnoverStore.setBottom(labelTurnoverStore); // Đặt label vào dưới cùng layout
-        BorderPane.setMargin(labelTurnoverStore, new Insets(0, 0, 10, 120));
+
+        BorderPane.setMargin(labelTurnoverStore, new Insets(10, 0, 10, 140));
 
         return rootTurnoverStore; // Trả về layout chứa biểu đồ
     }

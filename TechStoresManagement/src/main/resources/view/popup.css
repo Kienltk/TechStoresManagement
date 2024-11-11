@@ -171,3 +171,18 @@
 .radio-group-account {
     -fx-spacing: 10; /* Khoảng cách giữa các RadioButton */
 }
+.list-view {
+    -fx-background-color: #ffffff; /* Màu nền của ListView */
+    -fx-border-color: #4ad4dd; /* Màu viền của ListView */
+    -fx-border-width: 2px; /* Độ dày viền */
+}
+
+.list-view .list-cell {
+    -fx-background-color: transparent; /* Màu nền của các ô trong ListView */
+    -fx-text-fill: #1b96c0; /* Màu chữ */
+}
+
+.list-view .list-cell:hover {
+    -fx-background-color: rgba(43, 205, 225, 0.71); /* Màu nền khi hover */
+    -fx-text-fill: white;
+}

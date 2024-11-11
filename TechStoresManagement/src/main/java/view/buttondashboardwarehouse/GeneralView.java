@@ -155,7 +155,7 @@ public class GeneralView extends VBox {
         pieChartStockProduct.setData(details); // Gán dữ liệu cho biểu đồ
 
         // Đặt biểu đồ vào giữa layout
-        rootStockProduct.setLeft(pieChartStockProduct);
+        rootStockProduct.setCenter(pieChartStockProduct);
 
         labelStockProduct = new Label(); // Khởi tạo label để hiển thị thông tin
         labelStockProduct.setFont(Font.font("SanSerif", FontWeight.BOLD, 15));
@@ -167,15 +167,13 @@ public class GeneralView extends VBox {
             data.getNode().addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
                 double percentage = (data.getPieValue() / totalValue) * 100; // Tính tỷ lệ phần trăm
                 labelStockProduct.setText("Name : "+data.getName() +
-                        "\n\n\nRevenue : " + (int) data.getPieValue() +
-                        "\n\n\nPercentage : " + String.format("%.2f", percentage) + "%"); // Cập nhật thông tin cho label
+                        "                             Revenue : " + (int) data.getPieValue() +
+                        "                             Percentage : " + String.format("%.2f", percentage) + "%"); // Cập nhật thông tin cho label
             });
 
             // Sự kiện cho khi chuột rời khỏi vùng của phần dữ liệu
             data.getNode().addEventHandler(MouseEvent.MOUSE_EXITED, e -> {
-                labelStockProduct.setText("Name : "+
-                        "\n\n\nRevenue : " +
-                        "\n\n\nPercentage : "); // Xóa nội dung của label khi chuột rời khỏi vùng
+                labelStockProduct.setText(""); // Xóa nội dung của label khi chuột rời khỏi vùng
             });
         });
 
@@ -185,7 +183,7 @@ public class GeneralView extends VBox {
         v.setMaxHeight(350);
         v.setAlignment(Pos.CENTER_LEFT);
         v.setStyle("-fx-border-color: #ffffff; -fx-border-width: 3px; -fx-border-radius: 5px;-fx-background-color: white;-fx-padding: 20 ;");
-        rootStockProduct.setRight(v); // Đặt label vào dưới cùng layout
+        rootStockProduct.setBottom(v); // Đặt label vào dưới cùng layout
         return rootStockProduct; // Trả về layout chứa biểu đồ
     }
 
@@ -228,15 +226,13 @@ public class GeneralView extends VBox {
             data.getNode().addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
                 double percentage = (data.getPieValue() / totalValue) * 100; // Tính tỷ lệ phần trăm
                 labelStockProduct.setText("Name : "+data.getName() +
-                        "\n\n\nRevenue : " + (int) data.getPieValue() +
-                        "\n\n\nPercentage : " + String.format("%.2f", percentage) + "%"); // Cập nhật thông tin cho label
+                        "                             Revenue : " + (int) data.getPieValue() +
+                        "                             Percentage : " + String.format("%.2f", percentage) + "%"); // Cập nhật thông tin cho label
             });
 
             // Sự kiện cho khi chuột rời khỏi vùng của phần dữ liệu
             data.getNode().addEventHandler(MouseEvent.MOUSE_EXITED, e -> {
-                labelStockProduct.setText("Name : "+
-                        "\n\n\nRevenue : " +
-                        "\n\n\nPercentage : "); // Xóa nội dung của label khi chuột rời khỏi vùng
+                labelStockProduct.setText(""); // Xóa nội dung của label khi chuột rời khỏi vùng
             });
         });
     }
