@@ -387,7 +387,7 @@ public class ImportView extends VBox {
 
         // Create a table for products in the receipt
         TableView<ProductInvoice> productTable = new TableView<>();
-        configureProductTable(productTable, invoice.getId());
+        configureProductTable(productTable, invoice.getInvoiceName());
 
         // Close button
         Button closeButton = new Button("Close");
@@ -406,10 +406,10 @@ public class ImportView extends VBox {
     }
 
 
-    public void configureProductTable(TableView<ProductInvoice> productTable, int idInvoice) {
+    public void configureProductTable(TableView<ProductInvoice> productTable, String invoiceName) {
 
         ImportInvoiceModel model = new ImportInvoiceModel();
-        ObservableList<ProductInvoice> products = model.getProductInvoice(idInvoice);
+        ObservableList<ProductInvoice> products = model.getProductInvoiceByInvoiceName(invoiceName);
         productTable.setItems(products);
 
         // Configure columns for the product table

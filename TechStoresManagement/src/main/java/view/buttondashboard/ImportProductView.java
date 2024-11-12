@@ -25,6 +25,7 @@ import model.CashierModel;
 import model.ImportInvoiceModel;
 import view.stage.CreateImportDirector;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -287,7 +288,11 @@ public class ImportProductView extends VBox {
         Label requestedDateLabel = new Label("Requested Date:");
         Label requestedDateData = new Label(formattedRequestedDate);
 
-        String formattedActualImportDate = invoice.getActualImportDate().format(formatter);
+        LocalDateTime actualImportDate = invoice.getActualImportDate();
+
+        String formattedActualImportDate = (actualImportDate != null)
+                ? actualImportDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                : "Not entered";
         Label actualImportDateLabel = new Label("Actual Import Date:");
         Label actualImportDateData = new Label(formattedActualImportDate);
 
@@ -346,7 +351,7 @@ public class ImportProductView extends VBox {
 
         // Create a table for products in the receipt
         TableView<ProductInvoice> productTable = new TableView<>();
-        configureProductTable(productTable, invoice.getId());
+        configureProductTable(productTable, invoice.getInvoiceName());
 
         // Close button
         Button closeButton = new Button("Close");
@@ -365,10 +370,10 @@ public class ImportProductView extends VBox {
     }
 
 
-    public void configureProductTable(TableView<ProductInvoice> productTable, int idInvoice) {
+    public void configureProductTable(TableView<ProductInvoice> productTable, String invoiceName) {
 
         ImportInvoiceModel model = new ImportInvoiceModel();
-        ObservableList<ProductInvoice> products = model.getProductInvoice(idInvoice);
+        ObservableList<ProductInvoice> products = model.getProductInvoiceByInvoiceName(invoiceName);
         productTable.setItems(products);
 
         // Configure columns for the product table

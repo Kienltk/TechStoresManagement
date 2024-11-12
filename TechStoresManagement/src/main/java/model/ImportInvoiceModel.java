@@ -194,15 +194,25 @@ public class ImportInvoiceModel {
         return ImportInvoices;
     }
 
-    public ObservableList<ProductInvoice> getProductInvoice(int idInvoice) {
+    public ObservableList<ProductInvoice> getProductInvoiceByInvoiceName(String invoiceName) {
         ObservableList<ProductInvoice> productInvoices = FXCollections.observableArrayList();
-        String sql = "SELECT iwd.id_product, p.product_name, p.brand, p.purchase_price, p.sale_price, iwd.quantity, iwd.total " +
+        String sql = "SELECT p.product_name, p.brand, p.purchase_price, p.sale_price, " +
+                "iw.id AS import_id, iwd.id_product, iwd.quantity, iwd.total " +
                 "FROM import_warehouse_details iwd " +
                 "JOIN products p ON iwd.id_product = p.id " +
-                "WHERE iwd.id_import = ?";
+                "JOIN import_warehouse iw ON iwd.id_import = iw.id " +
+                "WHERE iw.name = ? " +
+                "UNION ALL " +
+                "SELECT p.product_name, p.brand, p.purchase_price, p.sale_price, " +
+                "isd.id_import AS import_id, isd.id_product, isd.quantity, isd.total " +
+                "FROM import_store_details isd " +
+                "JOIN products p ON isd.id_product = p.id " +
+                "JOIN import_store ims ON isd.id_import = ims.id " +
+                "WHERE ims.name = ?";// Cả hai bảng đều được truy vấn theo tên hóa đơn
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idInvoice);
+            statement.setString(1, invoiceName); // Set tên hóa đơn đầu tiên cho warehouse
+            statement.setString(2, invoiceName); // Set tên hóa đơn cho store
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -223,6 +233,7 @@ public class ImportInvoiceModel {
 
         return productInvoices;
     }
+
 
     public String getStoreManager(String storeName) {
         String sql = "SELECT CONCAT(e.first_name, ' ', e.last_name) AS manager_name " +

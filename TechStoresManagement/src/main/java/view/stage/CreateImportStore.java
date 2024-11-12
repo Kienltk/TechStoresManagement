@@ -47,8 +47,6 @@ public class CreateImportStore extends Application {
 
     private String selectedWarehouseName;
 
-    private Runnable onCloseCallback;
-
     @Override
     public void start(Stage primaryStage) {
         BorderPane root = new BorderPane();
@@ -223,11 +221,6 @@ public class CreateImportStore extends Application {
                     System.out.println("Error");
                 } else {
                     System.out.println("Submit");
-                    primaryStage.setOnCloseRequest(event -> {
-                        if (onCloseCallback != null) {
-                            onCloseCallback.run(); // Gọi callback khi cửa sổ đóng
-                        }
-                    });
                     primaryStage.close();
 
                 }

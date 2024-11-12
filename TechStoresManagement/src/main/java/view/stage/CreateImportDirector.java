@@ -99,12 +99,12 @@ public class CreateImportDirector extends Application {
         selectionComboBox.setOnAction(event -> {
             String selectedOption = selectionComboBox.getValue();
             if ("Select Store".equals(selectedOption)) {
-                storeComboBox.setVisible(false);
+                storeComboBox.setVisible(true);
                 warehouseComboBox.setVisible(true);
                 datePicker.setVisible(true);
                 inputField.setVisible(true);
             } else if ("Select Warehouse".equals(selectedOption)) {
-                storeComboBox.setVisible(true);
+                storeComboBox.setVisible(false);
                 warehouseComboBox.setVisible(true);
                 datePicker.setVisible(true);
                 inputField.setVisible(true);
@@ -118,7 +118,7 @@ public class CreateImportDirector extends Application {
         });
         HBox top = new HBox(30);
         top.setAlignment(Pos.CENTER_LEFT);
-        top.getChildren().addAll(selectionComboBox,inputField, datePicker,warehouseComboBox, storeComboBox );
+        top.getChildren().addAll(selectionComboBox, inputField, datePicker, warehouseComboBox, storeComboBox);
         top.setPadding(new Insets(0, 10, 10, 10));
 
         HBox contentSection = new HBox(10);
@@ -263,11 +263,20 @@ public class CreateImportDirector extends Application {
 
         buyNowButton.setOnAction(e -> {
             if (!cartItems.isEmpty()) {
-                if (ImportInvoiceModel.createImportInvoiceStore(inputField.getText(), selectedWarehouseName, selectedStoreName, totalSalePrice, selectedDate.toString(), cartItems) == -1) {
-                    System.out.println("Error");
+                if (Objects.equals(selectionComboBox.getValue(), "Select Store")) {
+                    if (ImportInvoiceModel.createImportInvoiceStore(inputField.getText(), selectedWarehouseName, selectedStoreName, totalSalePrice, selectedDate.toString(), cartItems) == -1) {
+                        System.out.println("Error");
+                    } else {
+                        System.out.println("Submit");
+                        primaryStage.close();
+                    }
                 } else {
-                    System.out.println("Submit");
-                    primaryStage.close();
+                    if (ImportInvoiceModel.createImportInvoiceWarehouse(inputField.getText(), selectedWarehouseName, totalSalePrice, selectedDate.toString(), cartItems) == -1) {
+                        System.out.println("Error");
+                    } else {
+                        System.out.println("Submit");
+                        primaryStage.close();
+                    }
                 }
             }
         });
