@@ -168,24 +168,21 @@ public class CashierModel implements ICommon<Product> {
         return new ArrayList<>();
     }
 
-    public static List<Customer> searchCustomerByPhone(String phoneNumber) {
-        List<Customer> customers = new ArrayList<>();
+    public static String searchCustomerByPhone(String phoneNumber) {
+        String customerName = null;
         String query = "SELECT id, name, phone_number FROM customers WHERE phone_number LIKE ?";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, phoneNumber + "%");
             ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                int id = rs.getInt("id"); // Lấy ID
-                String name = rs.getString("name"); // Lấy tên
-                String phone = rs.getString("phone_number"); // Lấy số điện thoại
-                customers.add(new Customer(id, name, phone)); // Thêm vào danh sách
+            if (rs.next()) {
+                customerName = rs.getString("name");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return customers;
+        return customerName;
     }
 
 

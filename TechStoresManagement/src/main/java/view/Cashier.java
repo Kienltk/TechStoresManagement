@@ -385,116 +385,67 @@ public class Cashier extends Application {
         Stage stage = new Stage();
         stage.setTitle("Submit Order");
 
-// Tạo layout cho scene
+        // Tạo layout cho scene
         VBox layout = new VBox(10);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER); // Căn giữa layout
 
-// Tiêu đề
+        // Tiêu đề
         Label titleLabel = new Label("Submit Order");
-        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;"); // Định dạng tiêu đề
+        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
-// Khách hàng
-        Label customerLabel = new Label("Customer:");
-        customerLabel.setPadding(new Insets(0 ,10,0,0));
+        // Khách hàng
+        Label customerLabel = new Label("Phone number:");
+        customerLabel.setPadding(new Insets(0, 10, 0, 0));
         customerLabel.getStyleClass().add("label-popup");
+
         TextField customerPhoneInput = new TextField();
         customerPhoneInput.setMaxWidth(150);
         customerPhoneInput.getStyleClass().add("text-field-account");
         customerPhoneInput.setPromptText("Enter customer phone number");
 
-// ListView để hiển thị tên khách hàng
-        ListView<Customer> customerListView = new ListView<>();
-        customerListView.setPrefHeight(50); // Đặt chiều cao cho ListView
-        customerListView.getStyleClass().add("list-view");
+        // Ô nhập tên khách hàng nếu không tìm thấy
+        TextField customerNameInput = new TextField();
+        customerNameInput.setMaxWidth(150);
+        customerNameInput.setPromptText("Enter customer name");
+        customerNameInput.setVisible(false); // Ẩn mặc định
+        customerNameInput.setManaged(false);
 
-
-// Label để hiển thị tên khách hàng đã chọn
+        // Label để hiển thị tên khách hàng
         Label customerNameLabel = new Label();
-        customerNameLabel.setVisible(false); // Bắt đầu ẩn label
-        customerNameLabel.setManaged(false); // Không quản lý không gian hiển thị
+        customerNameLabel.setVisible(false); // Ẩn mặc định
+        customerNameLabel.setManaged(false);
         customerNameLabel.setStyle("-fx-font-weight: bold ; -fx-font-size: 20 ; -fx-text-fill: #4ad4dd;-fx-padding: 10;");
 
-// Nút để đổi lại chọn khách hàng
-        Button changeCustomerButton = new Button("Change");
-        changeCustomerButton.setVisible(false); // Bắt đầu ẩn nút
-        changeCustomerButton.setManaged(false); // Không quản lý không gian hiển thị
-        changeCustomerButton.getStyleClass().add("button-account");
+        Button searchButton = new Button("Search");
+        searchButton.setOnAction(e -> {
+            String phone = customerPhoneInput.getText();
+            String customerName = CashierController.searchCustomerByPhone(phone);
 
-// Khi nhập số điện thoại, tìm kiếm khách hàng từ database
-        customerListView.setVisible(!customerListView.getItems().isEmpty());
-        customerListView.setManaged(!customerListView.getItems().isEmpty());
-
-        customerPhoneInput.textProperty().addListener((observable, oldValue, newValue) -> {
-            customerListView.getItems().clear();
-            if (!newValue.isEmpty()) {
-                List<Customer> customers = CashierController.searchCustomerByPhone(newValue);
-                if (!customers.isEmpty()) {
-                    customerListView.getItems().addAll(customers);
-                }
-            }
-
-            customerListView.setVisible(!customerListView.getItems().isEmpty());
-            customerListView.setManaged(!customerListView.getItems().isEmpty());
-        });
-
-// Khi chọn khách hàng từ danh sách, hiển thị tên khách hàng
-        customerListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null && newValue.getId() != -1) {
-                // Hiển thị tên khách hàng
-                customerNameLabel.setText(newValue.getName()); // Giả định rằng Customer có phương thức getName()
-                customerNameLabel.setVisible(true); // Hiển thị label
-                customerNameLabel.setManaged(true); // Quản lý không gian hiển thị
-
-                // Ẩn input và list
-                customerPhoneInput.setVisible(false); // Ẩn ô nhập
-                customerPhoneInput.setManaged(false); // Không quản lý không gian hiển thị
-                phoneNumber = newValue.getPhoneNumber();
-
-                customerListView.setVisible(false); // Ẩn danh sách khách hàng
-                customerListView.setManaged(false); // Không quản lý không gian hiển thị
-
-                // Hiện nút đổi
-                changeCustomerButton.setVisible(true);
-                changeCustomerButton.setManaged(true); // Quản lý không gian hiển thị
+            if (customerName != null && !customerName.isEmpty()) {
+                // Khách hàng tồn tại: hiển thị tên khách hàng và ẩn ô nhập số điện thoại
+                customerPhoneInput.setVisible(false);
+                customerPhoneInput.setManaged(false);
+                customerNameLabel.setText("Customer: " + customerName);
+                customerNameLabel.setVisible(true);
+                customerNameLabel.setManaged(true);
             } else {
-                // Nếu không có lựa chọn nào, ẩn label
+                // Khách hàng không tồn tại: hiện ô nhập tên khách hàng
                 customerNameLabel.setVisible(false);
-                customerNameLabel.setManaged(false); // Không quản lý không gian hiển thị
-                changeCustomerButton.setVisible(false);
-                changeCustomerButton.setManaged(false); // Không quản lý không gian hiển thị
+                customerNameLabel.setManaged(false);
+                customerNameInput.setVisible(true);
+                customerNameInput.setManaged(true);
             }
         });
 
-// Xử lý sự kiện khi nút "Đổi" được nhấn
-        changeCustomerButton.setOnAction(event -> {
-            // Ẩn tên khách hàng và hiển thị lại ô nhập và danh sách
-            customerNameLabel.setVisible(false);
-            customerNameLabel.setManaged(false); // Không quản lý không gian hiển thị
-            changeCustomerButton.setVisible(false);
-            changeCustomerButton.setManaged(false); // Không quản lý không gian hiển thị
-
-            customerPhoneInput.setVisible(true); // Hiện lại ô nhập
-            customerPhoneInput.setManaged(true); // Quản lý không gian hiển thị
-
-            customerListView.setVisible(true); // Hiện lại danh sách khách hàng
-            customerListView.setManaged(true); // Quản lý không gian hiển thị
-            customerPhoneInput.requestFocus(); // Đặt con trỏ vào ô nhập
-        });
-
-// Nút thêm khách hàng mới
-        Button addCustomerButton = new Button("Add Customer");
-        addCustomerButton.getStyleClass().add("button-account");
-        addCustomerButton.setOnAction(e -> CashierController.showAddCustomerScreen());
-
-// Tổng tiền đơn hàng
+        // Tổng tiền đơn hàng
         Label totalPriceLabel = new Label("Total: ");
         totalPriceLabel.getStyleClass().add("label-popup");
         totalPriceLabel.setStyle("-fx-padding: 20 ;");
-        Label totalPrice = new Label("$"+ String.format("%.2f", totalSalePrice));
+        Label totalPrice = new Label("$" + String.format("%.2f", totalSalePrice));
         totalPrice.getStyleClass().add("data-popup");
 
-// Tiền khách trả
+        // Tiền khách trả
         Label paymentLabel = new Label("Customer\n payment:");
         paymentLabel.getStyleClass().add("label-popup");
         TextField paymentInput = new TextField();
@@ -502,51 +453,57 @@ public class Cashier extends Application {
         paymentInput.setMaxWidth(200);
         paymentInput.setPromptText("Enter customer payment");
 
-// Label cảnh báo nếu tiền trả ít hơn tổng tiền
+        // Label cảnh báo nếu tiền trả ít hơn tổng tiền
         Label warningLabel = new Label();
         warningLabel.setTextFill(Color.RED);
 
-// Tổng tiền trả lại
+        // Tổng tiền trả lại
         Label changeLabel = new Label();
         changeLabel.setTextFill(Color.GREEN);
 
-// Kiểm tra khi nhập tiền khách trả
         paymentInput.textProperty().addListener((observable, oldValue, newValue) -> {
             double total = totalSalePrice;
             try {
                 double payment = Double.parseDouble(newValue);
                 if (payment < total) {
                     warningLabel.setText("Insufficient amount.");
-                    changeLabel.setText(""); // Xóa thông báo trả lại
+                    changeLabel.setText("");
                 } else {
                     warningLabel.setText("");
-                    changeLabel.setText("Change: $" + String.format("%.2f", payment - total)); // Hiển thị tổng tiền trả lại
+                    changeLabel.setText("Change: $" + String.format("%.2f", payment - total));
                 }
             } catch (NumberFormatException ex) {
                 warningLabel.setText("Invalid payment amount.");
-                changeLabel.setText(""); // Xóa thông báo trả lại
+                changeLabel.setText("");
             }
         });
 
-// Nút xác nhận thanh toán
         Button submitButton = new Button("Submit");
         submitButton.getStyleClass().add("button-account");
         submitButton.setOnAction(e -> {
             double total = totalSalePrice;
-            String phone = phoneNumber;
+            String phone = customerPhoneInput.getText();
+            String customerName = customerNameLabel.isVisible() ? customerNameLabel.getText().replace("Customer: ", "") : customerNameInput.getText();
             try {
                 double payment = Double.parseDouble(paymentInput.getText());
                 if (payment >= total) {
-                    if (customerPhoneInput.getText() == null || customerPhoneInput.getText().isEmpty()) {
+                    if (phone == null || phone.isEmpty()) {
                         phone = "1234567890";
                     }
-                    CashierController.processOrder(phone, cartItems, total, employeeName, idStore);
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Payment successful!");
-                    alert.showAndWait();
+                    if  (CashierController.searchCustomerByPhone(phone) == null) {
+                        CashierModel.addNewCustomer(customerName, phone);
+                    }
+                    if (CashierController.processOrder(phone, cartItems, total, employeeName, idStore)) {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Payment successful!");
+                        alert.showAndWait();
+                    } else {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Payment failed!");
+                        alert.showAndWait();
+                    }
                     for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
                         int productId = entry.getKey();
                         int quantity = entry.getValue();
-                        CashierModel.handlePurchase(productId, quantity, idStore); // Xử lý giao dịch
+                        CashierModel.handlePurchase(productId, quantity, idStore);
                     }
 
                     cartItems.clear();
@@ -556,7 +513,7 @@ public class Cashier extends Application {
                     productTable.getItems().clear();
                     loadData();
 
-                    stage.close(); // Đóng cửa sổ sau khi hoàn tất
+                    stage.close();
                 } else {
                     warningLabel.setText("Insufficient amount.");
                 }
@@ -565,37 +522,34 @@ public class Cashier extends Application {
             }
         });
 
-// Sử dụng GridPane để sắp xếp các thành phần
+        // Sử dụng GridPane để sắp xếp các thành phần
         GridPane gridPane = new GridPane();
-        gridPane.setVgap(10); // Khoảng cách dọc
-        gridPane.setHgap(10); // Khoảng cách ngang
-        gridPane.setAlignment(Pos.CENTER_LEFT); // Căn trái grid
+        gridPane.setVgap(10);
+        gridPane.setHgap(10);
+        gridPane.setAlignment(Pos.CENTER_LEFT);
 
-// Thêm các thành phần vào grid
+        // Thêm các thành phần vào grid
         gridPane.add(customerLabel, 0, 0);
         gridPane.add(customerPhoneInput, 1, 0);
-        gridPane.add(customerListView, 0, 1, 2, 1); // Chiếm 2 cột cho ListView
-        gridPane.add(customerNameLabel, 1, 0); // Hiển thị tên khách hàng
-        gridPane.add(changeCustomerButton, 2, 0); // Nút đổi
-        gridPane.add(addCustomerButton, 0, 3, 2, 1); // Chiếm 2 cột cho nút thêm
-        gridPane.add(totalPriceLabel, 0, 4);// Chiếm 2 cột cho tổng tiền
+        gridPane.add(searchButton, 2, 0);
+        gridPane.add(customerNameInput, 1, 1); // Ô nhập tên khách hàng
+        gridPane.add(customerNameLabel, 1, 1); // Label tên khách hàng
+        gridPane.add(totalPriceLabel, 0, 4);
         gridPane.add(totalPrice, 1, 4);
         gridPane.add(paymentLabel, 0, 5);
         gridPane.add(paymentInput, 1, 5);
-        gridPane.add(warningLabel, 0, 6, 2, 1); // Chiếm 2 cột cho cảnh báo
-        gridPane.add(changeLabel, 0, 7, 2, 1); // Chiếm 2 cột cho tổng tiền trả lại
-        gridPane.add(submitButton, 0, 8, 2, 1); // Chiếm 2 cột cho nút xác nhận
+        gridPane.add(warningLabel, 0, 6, 2, 1);
+        gridPane.add(changeLabel, 0, 7, 2, 1);
+        gridPane.add(submitButton, 0, 8, 2, 1);
 
-// Thêm tiêu đề và grid vào layout
         layout.getChildren().addAll(titleLabel, gridPane);
 
-// Thiết lập layout cho scene
         Scene scene = new Scene(layout, 450, 450);
         scene.getStylesheets().add(getClass().getResource("/view/popup.css").toExternalForm());
         stage.setScene(scene);
         stage.show();
-
     }
+
 
     private void showProductDetails(Product product) {
         // Tạo một cửa sổ mới (dialog box)

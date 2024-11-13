@@ -11,7 +11,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.CashierModel;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +18,7 @@ import static model.CashierModel.getOne;
 
 public class CashierController {
     // Tìm khách hàng theo số điện thoại
-    public static List<Customer> searchCustomerByPhone(String phoneNumber) {
+    public static String searchCustomerByPhone(String phoneNumber) {
         return CashierModel.searchCustomerByPhone(phoneNumber);
     }
 
@@ -39,17 +38,19 @@ public class CashierController {
     }
 
     // Xử lý đơn hàng
-    public static void processOrder(String customerPhone, Map<Integer, Integer> cartItems, double total, String employeeName, int idStore) {
+    public static boolean processOrder(String customerPhone, Map<Integer, Integer> cartItems, double total, String employeeName, int idStore) {
         int customerId = CashierModel.getCustomerIdByPhone(customerPhone);
         if (customerId == -1) {
             System.out.println("Customer not found");
-            return;
+            return false;
         }
 
         double profit = total - getTotalPurchasePrice(cartItems);
 
         // Tạo hóa đơn
-        CashierModel.createReceipt(customerId, idStore, employeeName, total, profit, cartItems);
+        if (CashierModel.createReceipt(customerId, idStore, employeeName, total, profit, cartItems) != -1) {
+            return true;
+        }
 
         // Cập nhật số lượng sản phẩm trong kho và làm trống giỏ hàng
         for (Map.Entry<Integer, Integer> entry : cartItems.entrySet()) {
@@ -59,44 +60,9 @@ public class CashierController {
         }
 
         cartItems.clear();
+        return false;
     }
 
-    // Hiển thị màn hình thêm khách hàng mới
-    public static void showAddCustomerScreen() {
-        Stage stage = new Stage();
-        stage.setTitle("New Customer");
-
-        // Layout và các thành phần UI
-        VBox layout = new VBox(10);
-        layout.setPadding(new Insets(20));
-
-        // Tên khách hàng
-        Label nameLabel = new Label("Customer Name:");
-        TextField nameInput = new TextField();
-        nameInput.getStyleClass().add("text-field-account");
-
-        // Số điện thoại
-        Label phoneLabel = new Label("Phone Number:");
-        TextField phoneInput = new TextField();
-        phoneInput.getStyleClass().add("text-field-account");
-
-        // Nút submit để thêm khách hàng
-        Button submitButton = new Button("Submit");
-        submitButton.getStyleClass().add("button-account");
-        submitButton.setOnAction(e -> {
-            String name = nameInput.getText();
-            String phoneNumber = phoneInput.getText();
-            CashierModel.addNewCustomer(name, phoneNumber);
-            stage.close(); // Đóng cửa sổ sau khi thêm thành công
-        });
-
-        layout.getChildren().addAll(nameLabel, nameInput, phoneLabel, phoneInput, submitButton);
-
-        Scene scene = new Scene(layout, 300, 250);
-        scene.getStylesheets().add(CashierController.class.getResource("/view/popup.css").toExternalForm());
-        stage.setScene(scene);
-        stage.show();
-    }
 }
 
 
